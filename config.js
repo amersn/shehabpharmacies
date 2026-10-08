@@ -1,2 +1,3 @@
-// حط رابط الـ Web App (اللي بينتهي بـ /exec) بين العلامتين بدل الكلام اللي جوّاهم
+// رابط Web App الخاص بـ Apps Script + إعداد Firebase العام للويب
 const API='https://script.google.com/macros/s/AKfycbxxreqGU4GV-TdUxOZ-i3XPjZDbu1MPu7zog-peudfEKh6zsgQU-j03mkAh8L-wY0lz/exec';
+const SHEHAB_FIREBASE_CONFIG={apiKey:'AIzaSyAitQuUaqZ4a0662VVVl_UvbTpliBAD434',authDomain:'shehabpharamcyapp.firebaseapp.com',projectId:'shehabpharamcyapp',storageBucket:'shehabpharamcyapp.firebasestorage.app',messagingSenderId:'152350818232',appId:'1:152350818232:web:60a0f7e6fc12d5601f594d',measurementId:'G-6V1R3E6JE8',vapidKey:'BKT377hHe0AulNPb-o_1qAvH4ZNJHt2-JgqYcWRvulW3HTBpQDkU-y5nH88TvjmzOoFZrXLOFsdUjmxr6bD12a4'};
