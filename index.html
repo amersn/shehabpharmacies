@@ -30,7 +30,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const em=x=>typeof x=='string'?x:'تأكد من الاتصال بالإنترنت';
 const GS=!!(window.google&&google.script&&google.script.run);
 const call=async(a,o={})=>{const b=JSON.stringify({a,t:S.t,...o});
-if(GS)return new Promise((ok,no)=>google.script.run.withSuccessHandler(r=>{r=JSON.parse(r);r.ok?ok(r.data):no(r.err)}).withFailureHandler(()=>no(new Error('x'))).api(b));
+if(GS)return new Promise((ok,no)=>google.script.run.withSuccessHandler(r=>{r=JSON.parse(r);r.ok?ok(r.data):no(r.err)}).withFailureHandler(e=>no(new Error(e&&e.message?e.message:String(e||'فشل تنفيذ الطلب في Apps Script')))).api(b));
 if(typeof API=='undefined'||API.includes('PASTE'))throw 'رابط الخادم لسه ما اتحطش في ملف config.js';
 const r=await(await fetch(API,{method:'POST',body:b})).json();if(!r.ok)throw r.err;return r.data};
 const fmt=(t,o)=>new Date(t).toLocaleString('ar-EG',o);
