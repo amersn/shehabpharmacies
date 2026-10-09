@@ -22,7 +22,7 @@ button.g{background:#eef2fb;color:var(--b)}button:disabled{opacity:.6}
 </style></head><body><div id="app"></div><script src="config.js"></script><script>
 const LOGO='https://amersn.github.io/shehabpharmacies/logo.png';
 const LS=(()=>{try{localStorage.getItem('x');return localStorage}catch(e){return{clear(){}}}})();
-const ST={new:['جديد','#2e9e4f'],unavailable:['مش متوفر','#d32f2f'],ordered:['تم الطلب وفي الطريق','#1e5fd6'],arrived:['وصل وموجود في الصيدلية','#f57c00'],delivering:['خرج مع مندوب التوصيل','#8a50d6'],done:['تم التسليم للعميل','#b0b7c3']};
+const ST={new:['جديد','#2e9e4f'],unavailable:['مش متوفر','#d32f2f'],ordered:['تم الطلب وفي الطريق','#1e5fd6'],arrived:['موجود في الصيدلية','#f57c00'],delivering:['خرج مع مندوب التوصيل','#8a50d6'],done:['تم التسليم للعميل','#b0b7c3']};
 const RL={manager:'مدير',pharmacist:'صيدلي',assistant:'مساعد',customer:'عميل'};
 let S={t:LS.t||'',n:LS.n||'',r:LS.r||''},O=[],V='';
 const $=i=>document.getElementById(i),app=h=>{const root=$('app'),view=V||'view';if(NAV_REPLACE){history.replaceState({appScreen:h,appView:view},'','#'+view);NAV_REPLACE=false;NAV_READY=true}else if(NAV_READY){history.replaceState({appScreen:root.innerHTML,appView:location.hash.slice(1)},'',location.href);history.pushState({appScreen:h,appView:view},'','#'+view)}else{history.replaceState({appScreen:h,appView:view},'','#'+view);NAV_READY=true}root.innerHTML=h};let NAV_READY=false,NAV_REPLACE=false;onpopstate=e=>{if(e.state&&e.state.appScreen!==undefined){V=e.state.appView||'auth';$('app').innerHTML=e.state.appScreen}};
