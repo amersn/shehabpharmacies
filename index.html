@@ -38,7 +38,7 @@ const GS=!!(window.google&&google.script&&google.script.run);
 const call=async(a,o={})=>{const b=JSON.stringify({a,t:S.t,...o});
 if(GS)return new Promise((ok,no)=>google.script.run.withSuccessHandler(r=>{r=JSON.parse(r);r.ok?(bustCaches(a),ok(r.data)):no(r.err)}).withFailureHandler(e=>no(new Error(e&&e.message?e.message:String(e||'فشل تنفيذ الطلب في Apps Script')))).api(b));
 if(typeof API=='undefined'||API.includes('PASTE'))throw 'رابط الخادم لسه ما اتحطش في ملف config.js';
-let _last;for(let _i=0;_i<3;_i++){try{const r=await(await fetch(API,{method:'POST',body:b})).json();if(!r.ok)throw r.err;bustCaches(a);return r.data}catch(_x){if(typeof _x==='string')throw _x;_last=_x;await new Promise(z=>setTimeout(z,400*(_i+1)))}}throw _last};
+let _last,_killed=false;for(let _i=0;_i<3;_i++){var _ac=null,_to=null;_killed=false;try{const _opt={method:'POST',body:b};if(typeof AbortController!=='undefined'){_ac=new AbortController();_opt.signal=_ac.signal;_to=setTimeout(function(){_killed=true;try{_ac.abort()}catch(e){}},30000)}const r=await(await fetch(API,_opt)).json();if(!r.ok)throw r.err;bustCaches(a);return r.data}catch(_x){if(typeof _x==='string')throw _x;_last=_x;if(_killed)throw 'السيرفر أخد وقت طويل في الرد — حاول تاني';await new Promise(z=>setTimeout(z,400*(_i+1)))}finally{if(_to)clearTimeout(_to)}}throw _last};
 /* ---- perf: client-side memory + localStorage cache + retry ---- */
 const RC={};
 function lsGet(a){try{const s=localStorage.getItem('shc_'+a);if(!s)return null;const o=JSON.parse(s);return(o&&o.v!==undefined)?o:null}catch(e){return null}}
@@ -1052,6 +1052,10 @@ html.dark .sec-item .p{color:#bcd0ff}
 .qty-mini{display:flex;align-items:center;gap:6px;margin-top:auto}
 .qty-mini button{width:40px;min-width:40px;height:36px;padding:0;font-size:20px;border-radius:9px}
 .qty-mini input{width:100%;min-width:0;text-align:center;padding:7px 2px;margin:0;border-radius:9px}
+/* زرار «طلب المنتج» جوه qty-mini: مياخدش حجم أزرار + / − فيطلع الكلام بره المربع */
+.qty-mini button.qty-add{min-width:0;font-size:15px;padding:0 8px;height:auto;min-height:36px;line-height:1.15;white-space:normal;overflow-wrap:anywhere}
+#ol.ol-grid .qty-mini button.qty-add{font-size:12.5px;padding:0 4px;min-height:34px}
+.sec-item .qty-mini button.qty-add{font-size:13px;padding:0 5px}
 .offer-card,.offer-detail,.sec-item{position:relative}
 .offer-card>.offer-prices>.share-ico,.offer-detail>.offer-prices>.share-ico,.sec-item>.share-ico{position:absolute;top:8px;left:8px;margin:0;z-index:3;background:#fff;color:#0b2a6f}
 html.dark .offer-card>.offer-prices>.share-ico,html.dark .offer-detail>.offer-prices>.share-ico,html.dark .sec-item>.share-ico{background:#1c2744;border-color:#2c3b5f;color:#bcd0ff}
@@ -1080,6 +1084,11 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
 #ol.ol-grid .item-menu{top:6px;right:6px}
 #ol.ol-grid .item-menu .menu-toggle{width:30px;height:30px;min-width:30px;font-size:19px}
 #ol.ol-grid .offer-prices>.share-ico{top:6px;left:6px;width:32px;height:32px;min-width:32px}
+/* ===== زرار السلة الثابت على كل الشاشات ===== */
+#cartFabWrap{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:54;max-width:520px;margin:0 auto;padding:0 14px;display:flex;justify-content:flex-end;pointer-events:none;transition:bottom .18s}
+#cartFab{pointer-events:auto;position:relative;width:54px;height:54px;min-width:54px;margin:0;padding:0;border-radius:50%;font-size:24px;line-height:1;display:grid;place-items:center;background:var(--b);color:#fff;border:0;box-shadow:0 6px 18px #0b2a6f66}
+#cartFab .cart-count{background:#d32f2f;top:-4px;right:-4px;font-size:11px;height:19px;min-width:19px;line-height:19px}
+html.dark #cartFab{box-shadow:0 6px 18px #00000080}
 </style>
 <script>
 (function(){
@@ -1155,7 +1164,7 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
       var x=findCart(id),q=x?(Number(x.qty)||0):0;
       w.innerHTML='';
       if(q<1){
-        var b=document.createElement('button');b.type='button';b.className='g';b.style.flex='1';b.textContent='🛒 طلب المنتج';
+        var b=document.createElement('button');b.type='button';b.className='g qty-add';b.style.flex='1';b.textContent='🛒 طلب المنتج';
         b.addEventListener('click',function(e){e.stopPropagation();cartUpsert(id,meta,1);render();TO('تمت الإضافة للسلة ✔','ok')});
         w.appendChild(b);return;
       }
@@ -1384,6 +1393,9 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
     if(pt&&save&&save.parentNode===p)save.insertAdjacentElement('afterend',pt);
     /* علاجي الشهري تحت الأصناف المفضلة */
     if(monthly&&fav&&fav.parentNode===p)fav.insertAdjacentElement('afterend',monthly);
+    /* إدارة الأقسام تحت زرار القوائم الشهرية (للعملاء) */
+    var secAdm=G('secAdminBtn');
+    if(secAdm&&monthly&&monthly.parentNode===p)monthly.insertAdjacentElement('afterend',secAdm);
     /* عنواننا / تابعونا / اتصل بنا في الآخر قبل تحديث البرنامج */
     var upd=G('appUpdateBox');
     var beforeEnd=(upd&&upd.parentNode===p)?upd:G('pfLogout');
@@ -1451,7 +1463,7 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
   function secEditor(id){
     (async function(){
       var sec=null;
-      try{var l=await call('sectionsAdmin');sec=(l||[]).find(function(s){return String(s.id)===String(id)})||null}catch(e){}
+      if(id){try{var l=await call('sectionsAdmin');sec=(l||[]).find(function(s){return String(s.id)===String(id)})||null}catch(e){}}
       var m=document.createElement('div');m.className='m';
       m.innerHTML='<div><b>'+(id?'تعديل قسم':'قسم جديد')+'</b><label>اسم القسم</label><input id="secName" maxlength="120" placeholder="مثال: علاج تساقط الشعر" value="'+E(sec&&sec.name||'')+'"><label>صورة القسم (اختياري)</label><input id="secImg" type="file" accept="image/*"><div id="secImgPrev">'+(sec&&sec.img?('<img class="ic" src="'+E(sec.img)+'">'):'')+'</div><label>الترتيب</label><input id="secSort" type="number" value="'+(sec?(sec.sort||0):0)+'"><div class="err" id="secErr"></div><button class="g" type="button" id="secSaveBtn">💾 حفظ</button><button class="g" type="button" id="secCancel">إلغاء</button></div>';
       document.body.appendChild(m);
@@ -1460,17 +1472,19 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
       G('secImg').addEventListener('change',function(){readImg(this,function(d){img=d;G('secImgPrev').innerHTML='<img class="ic" src="'+E(img)+'">'})});
       G('secCancel').addEventListener('click',function(){m.remove()});
       G('secSaveBtn').addEventListener('click',async function(){
+        var btn=this; if(btn.disabled)return;
         var name=G('secName').value.trim(); if(!name){G('secErr').textContent='اكتب اسم القسم';return}
-        this.disabled=true;
+        btn.disabled=true;var lbl=btn.textContent;btn.textContent='⏳ جاري الحفظ…';
         try{ await call('secSave',{id:id||'',name:name,img:img,sort:Number(G('secSort').value)||0}); m.remove(); TO('تم الحفظ ✔','ok'); refreshSecAdmin() }
-        catch(e){G('secErr').textContent=EM(e);this.disabled=false}
+        catch(e){var er=G('secErr');if(er)er.textContent=EM(e)}
+        finally{ if(document.body.contains(btn)){btn.disabled=false;btn.textContent=lbl} }
       });
     })();
   }
   function secItemEditor(secId,id){
     (async function(){
       var it=null;
-      try{var l=await call('sectionsAdmin');(l||[]).forEach(function(s){if(String(s.id)===String(secId))(s.items||[]).forEach(function(x){if(String(x.id)===String(id))it=x})})}catch(e){}
+      if(id){try{var l=await call('sectionsAdmin');(l||[]).forEach(function(s){if(String(s.id)===String(secId))(s.items||[]).forEach(function(x){if(String(x.id)===String(id))it=x})})}catch(e){}}
       var m=document.createElement('div');m.className='m';
       m.innerHTML='<div><b>'+(id?'تعديل صنف':'صنف جديد')+'</b><label>اسم الصنف</label><input id="siT" maxlength="120" value="'+E(it&&it.t||'')+'"><label>تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label>السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label>السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label>صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label>الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div><button class="g" type="button" id="siSave">💾 حفظ</button><button class="g" type="button" id="siCancel">إلغاء</button></div>';
       document.body.appendChild(m);
@@ -1479,10 +1493,12 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
       G('siImg').addEventListener('change',function(){readImg(this,function(d){img=d;G('siImgPrev').innerHTML='<img class="ic" src="'+E(img)+'">'})});
       G('siCancel').addEventListener('click',function(){m.remove()});
       G('siSave').addEventListener('click',async function(){
+        var btn=this; if(btn.disabled)return;
         var t=G('siT').value.trim(); if(!t){G('siErr').textContent='اكتب اسم الصنف';return}
-        this.disabled=true;
+        btn.disabled=true;var lbl=btn.textContent;btn.textContent='⏳ جاري الحفظ…';
         try{ await call('secItemSave',{sec:secId,id:id||'',title:t,x:G('siX').value.trim(),p:G('siP').value,w:G('siW').value,ic:img,sort:Number(G('siSort').value)||0}); m.remove(); TO('تم الحفظ ✔','ok'); refreshSecAdmin() }
-        catch(e){G('siErr').textContent=EM(e);this.disabled=false}
+        catch(e){var er=G('siErr');if(er)er.textContent=EM(e)}
+        finally{ if(document.body.contains(btn)){btn.disabled=false;btn.textContent=lbl} }
       });
     })();
   }
@@ -1496,5 +1512,51 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
       applyOffLayout();
     }catch(e){} return r; };
   }
+})();
+</script>
+<script>
+/* ===== زرار السلة العائم — ثابت على كل الشاشات (من غير أي تقل على البرنامج) ===== */
+(function(){
+  try{
+    var WRAP=null,FAB=null,READY=false;
+    function build(){
+      if(WRAP)return;
+      WRAP=document.createElement('div');WRAP.id='cartFabWrap';
+      FAB=document.createElement('button');FAB.id='cartFab';FAB.type='button';
+      FAB.setAttribute('aria-label','سلة العروض');FAB.title='سلة العروض';
+      FAB.addEventListener('click',function(){try{if(typeof cartV==='function')cartV()}catch(e){}});
+      WRAP.appendChild(FAB);document.body.appendChild(WRAP);
+    }
+    function cartCount(){
+      try{var c=(typeof CART!=='undefined'&&CART)?CART:[];var n=0;for(var i=0;i<c.length;i++)n+=(Number(c[i].qty)||0);return n}catch(e){return 0}
+    }
+    function sync(){
+      if(!WRAP){if(!READY)return;build()}
+      var logged=false;try{logged=!!(typeof S!=='undefined'&&S&&S.t)}catch(e){}
+      var v='';try{v=(typeof V!=='undefined'&&V)||''}catch(e){}
+      var dup=!!document.getElementById('cartHome');
+      /* يظهر لكل مستخدم مسجّل دخول، على أي شاشة ما عدا السلة، وما يظهرش مكرر فوق الشاشة الرئيسية */
+      var show=logged&&v!=='cart'&&!dup;
+      WRAP.hidden=!show;
+      if(!show)return;
+      var n=cartCount();
+      FAB.innerHTML='🛒'+(n>0?'<span class="cart-count">'+(n>99?'99+':n)+'</span>':'');
+      FAB.setAttribute('aria-label','سلة العروض'+(n?' ('+n+' صنف)':''));
+      /* لو فيه شريط «أضف للسلة» في صفحة العرض، نرفع الزرار شوية فوقه */
+      try{WRAP.style.bottom=document.querySelector('.offer-actionbar')?'calc(env(safe-area-inset-bottom) + 128px)':''}catch(e){}
+    }
+    window.shehabCartFabSync=sync;
+    function ready(){READY=true;build();sync()}
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
+    /* أي إضافة/حذف في السلة بيحدّث الزرار مع تحديث شارة الرئيسية */
+    try{if(typeof cartBadge==='function'){var cb=cartBadge;cartBadge=function(){var r=cb.apply(this,arguments);try{sync()}catch(e){}return r}}}catch(e){}
+    /* أي تغيير شاشة بيغيّر محتوى #app — نراقبه ونحدّث الزرار (خفيف جدًا) */
+    try{
+      var ap=document.getElementById('app');
+      if(ap&&window.MutationObserver){new MutationObserver(function(){try{sync()}catch(e){}}).observe(ap,{childList:true,subtree:false})}
+    }catch(e){}
+    /* ونغطّي كذلك أي نداء لـ navSync */
+    try{if(typeof navSync==='function'){var ns=navSync;navSync=function(){var r=ns.apply(this,arguments);try{sync()}catch(e){}return r}}}catch(e){}
+  }catch(e){}
 })();
 </script>
