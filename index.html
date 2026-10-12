@@ -327,7 +327,7 @@ function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav
 function navGo(t){try{if(t==='home')homeV();else if(t==='off')offV();else if(t==='mine'){if(S.r==='customer')mineV();else listV()}else if(t==='profile')profileV()}catch(e){}navSync()}
 function navFab(){try{if(S.r==='customer')ordV();else addV()}catch(e){}navSync()}
 function navCount(){}
-function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
+function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off',secItem:'off',mydata:'profile',notifSettings:'profile'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
 window.navGo=navGo;window.navFab=navFab;window.navSync=navSync;
 try{var cbBase=cartBadge;cartBadge=function(){cbBase();navCount()}}catch(e){}
 function watchApp(){var ap=q('app');if(!ap||!window.MutationObserver)return;new MutationObserver(function(){navSync()}).observe(ap,{childList:true,subtree:false});var t=0;new MutationObserver(function(){if(t)return;t=setTimeout(function(){t=0;injectRepeat()},90)}).observe(ap,{childList:true,subtree:true})}
@@ -490,6 +490,10 @@ try{
         else if(v==='profile')profileV();
         else if(v==='notifications')notificationCenter();
         else if(v==='notify')notifV();
+        else if(v==='sec'){ try{ if(typeof window.secScreenV==='function')window.secScreenV(window.__shLastSecId||'') }catch(_e){ homeV() } }
+        else if(v==='secItem'){ try{ if(window.__shLastSecItemId&&typeof window.secItemV==='function')window.secItemV(window.__shLastSecItemId); else homeV() }catch(_e){ homeV() } }
+        else if(v==='mydata'){ try{ if(typeof window.myDataV==='function')window.myDataV(); else profileV() }catch(_e){ profileV() } }
+        else if(v==='notifSettings'){ try{ if(typeof window.notifSettingsV==='function')window.notifSettingsV(); else profileV() }catch(_e){ profileV() } }
         else if(v==='cart')cartV();
         else if(v==='monthly')monthlyV();
         else if(v==='monthlyAll')monthlyAdminV();
@@ -1042,11 +1046,17 @@ html.dark .ma-chip{background:#1c2744;color:#dbe7ff;border-color:#2c3b5f}
 html.dark .home-duo .duo.ord{background:#16264f}
 .sec-wrap{margin:16px 0 6px}
 .sec-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.sec-head h2{margin:0;font-size:19px;min-width:0}
-.sec-ico{width:22px;height:22px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-inline-end:4px}
-.sec-more{width:auto;flex:0 0 auto;padding:7px 12px;font-size:13px;margin:0}
-.sec-screen-items{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0 14px}
-.sec-screen-items .sec-item{width:auto;min-width:0;flex:1 1 auto}
+.sec-head h2{margin:0;font-size:16px;min-width:0;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sec-ico{width:20px;height:20px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-inline-end:4px}
+.sec-more{width:auto;flex:0 0 auto;padding:5px 10px;font-size:12px;margin:0;white-space:nowrap}
+.sec-screen-head{display:flex;align-items:center;gap:12px;background:var(--card,#fff);border:1.5px solid var(--line,#c9d3ea);border-radius:16px;padding:12px 14px;margin:12px 0 8px;box-shadow:0 2px 10px #0b2a6f14}
+.sec-screen-head h2{margin:0;font-size:20px;line-height:1.35;min-width:0;overflow-wrap:anywhere}
+.sec-screen-ico{width:52px;height:52px;object-fit:cover;border-radius:14px;flex:0 0 auto;display:grid;place-items:center;background:#eef3ff;color:#0b2a6f;font-size:26px}
+html.dark .sec-screen-ico{background:#1b2540;color:#bcd0ff}
+.sec-screen-items{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0 14px}
+.sec-screen-items.sec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sec-screen-items .sec-item{width:auto;min-width:0}
+.sec-screen-items.sec-grid .sec-item img.ic{height:118px}
 .sec-items{display:flex;gap:10px;overflow-x:auto;padding:8px 2px 6px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
 .sec-item{position:relative;flex:0 0 auto;width:158px;border:1px solid var(--line,#c9d3ea);border-radius:14px;padding:10px;background:var(--card,#fff);display:flex;flex-direction:column;gap:6px;scroll-snap-align:start}
 .sec-item img.ic{width:100%;height:100px;object-fit:cover;border-radius:10px;display:block}
@@ -1274,6 +1284,9 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     if(it.p)h+='<div class="p">'+E(it.p)+' <small>جنيه</small></div>';
     if(it.w)h+='<div class="offer-was">'+E(it.w)+' جنيه</div>';
     el.innerHTML=h;
+    el.style.cursor='pointer';
+    el.addEventListener('click',function(){try{secItemV(it.id)}catch(e){}});
+    el.appendChild(favHeart(it.id));
     var sh=document.createElement('button');sh.type='button';sh.className='share-ico';sh.setAttribute('aria-label','مشاركة');sh.title='مشاركة';sh.innerHTML=ICON;
     sh.addEventListener('click',function(e){e.stopPropagation();shareSecItem(it)});
     el.appendChild(sh);
@@ -1292,6 +1305,15 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     try{ if(navigator.share){ await navigator.share({title:'صيدليات شهاب',text:text,url:url}); return } }catch(e){ if(e&&e.name==='AbortError')return }
     try{ await navigator.clipboard.writeText(url); TO('تم نسخ الرابط ✔','ok') }catch(e){ try{prompt('انسخ الرابط:',url)}catch(e2){} }
   }
+  function favHeart(id){
+    var b=document.createElement('button');b.type='button';b.className='g fav-heart';
+    b.setAttribute('aria-label','إضافة إلى المفضلة');b.title='إضافة إلى المفضلة';
+    var has=false; try{ has=FAVS.map(String).indexOf(String(id))>-1 }catch(e){}
+    b.textContent=has?'♥':'♡';b.style.cssText='width:52px;font-size:24px;line-height:1;color:#cf3150;margin:0';
+    b.addEventListener('click',function(e){e.stopPropagation();try{favToggle(id,b)}catch(x){}});
+    return b;
+  }
+  async function ensureFavs(){ try{ if(!Array.isArray(FAVS)||!FAVS.length){ var l=await call('favoriteList'); FAVS=Array.isArray(l)?l.map(String):FAVS } }catch(e){} }
   var SEC_CACHE=[];
   async function loadHomeSections(){
     var box=G('homeSections'); if(!box)return;
@@ -1300,6 +1322,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     try{ list=await call('sections') }catch(e){ var b0=G('homeSections'); if(b0)b0.innerHTML=''; return }
     var box2=G('homeSections'); if(!box2)return;
     SEC_CACHE=Array.isArray(list)?list:[];
+    await ensureFavs();
     if(!SEC_CACHE.length){box2.innerHTML='';return}
     box2.innerHTML='';
     SEC_CACHE.forEach(function(sec){
@@ -1318,9 +1341,26 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     });
   }
   /* ---------- شاشة قسم واحد لما تدوس «مشاهدة المزيد» ---------- */
+  function secLayoutState(){try{return localStorage.getItem('shehab_sec_layout')==='grid'?'grid':'list'}catch(e){return 'list'}}
+  function applySecLayout(){
+    var box=G('secScreenItems'); if(!box)return;
+    var l=secLayoutState();
+    if(l==='grid')box.classList.add('sec-grid');else box.classList.remove('sec-grid');
+    var wrap=G('secLayout');
+    if(wrap){var bs=wrap.querySelectorAll('button');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].getAttribute('data-l')===l)}
+  }
+  function setSecLayout(l){try{localStorage.setItem('shehab_sec_layout',l==='grid'?'grid':'list')}catch(e){}applySecLayout()}
+  function secLayoutBar(){
+    var wrap=document.createElement('div');wrap.className='ol-layout';wrap.id='secLayout';
+    var listIcon='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="3.6" rx="1.3"/><rect x="3.5" y="10.2" width="17" height="3.6" rx="1.3"/><rect x="3.5" y="15.9" width="17" height="3.6" rx="1.3"/></svg>';
+    var gridIcon='<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3.6" y="3.6" width="7.4" height="7.4" rx="1.6"/><rect x="13" y="3.6" width="7.4" height="7.4" rx="1.6"/><rect x="3.6" y="13" width="7.4" height="7.4" rx="1.6"/><rect x="13" y="13" width="7.4" height="7.4" rx="1.6"/></svg>';
+    wrap.innerHTML='<button type="button" class="g olv" data-l="list" title="عرض رأسي" aria-label="عرض رأسي">'+listIcon+'</button><button type="button" class="g olv" data-l="grid" title="عرضين جنب بعض" aria-label="عرضين جنب بعض">'+gridIcon+'</button>';
+    wrap.addEventListener('click',function(ev){var b=ev.target&&ev.target.closest?ev.target.closest('button'):null;if(!b)return;ev.stopPropagation();setSecLayout(b.getAttribute('data-l'))});
+    return wrap;
+  }
   function secScreenV(id){
-    V='sec';
-    run('<h2>🗂️ القسم</h2><div id="secScreenBox">جاري التحميل…</div>');
+    V='sec'; try{window.__shLastSecId=String(id||'')}catch(e){}
+    run('<div id="secScreenBox">جاري التحميل…</div>');
     var sec=null;
     for(var i=0;i<SEC_CACHE.length;i++){if(String(SEC_CACHE[i].id)===String(id)){sec=SEC_CACHE[i];break}}
     renderSecScreen(sec,id);
@@ -1328,13 +1368,15 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   function renderSecScreen(sec,id){
     var box=G('secScreenBox'); if(!box)return;
     if(!sec){ box.innerHTML='<div class="card">جاري التحميل…</div>'; secScreenFetch(id); return; }
-    var h='<div class="sec-head"><h2>'+(sec.img?('<img class="sec-ico" src="'+E(sec.img)+'" alt="'+E(sec.name||'')+'">'):'🗂️')+' '+E(sec.name||'')+'</h2></div>';
+    var h='<div class="sec-screen-head">'+(sec.img?('<img class="sec-screen-ico" src="'+E(sec.img)+'" alt="'+E(sec.name||'')+'">'):'<span class="sec-screen-ico">🗂️</span>')+'<h2>'+E(sec.name||'')+'</h2></div>';
     h+='<div class="sec-screen-items" id="secScreenItems"></div>';
     h+='<button class="g" type="button" id="secScreenBack">⬅️ رجوع للرئيسية</button>';
     box.innerHTML=h;
     var items=G('secScreenItems'),arr=(sec.items||[]);
-    if(!arr.length){ items.innerHTML='<div class="card">مفيش أصناف في القسم ده لسه.</div>'; }
-    else arr.forEach(function(it){ items.appendChild(secItemCard(it,sec.id)) });
+    if(items&&items.parentNode)items.parentNode.insertBefore(secLayoutBar(),items);
+    if(!arr.length){ if(items)items.innerHTML='<div class="card">مفيش أصناف في القسم ده لسه.</div>'; }
+    else if(items)arr.forEach(function(it){ items.appendChild(secItemCard(it,sec.id)) });
+    applySecLayout();
     var bk=G('secScreenBack'); if(bk)bk.addEventListener('click',function(){homeV()});
   }
   async function secScreenFetch(id){
@@ -1345,6 +1387,55 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     }catch(e){ var b=G('secScreenBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>'; }
   }
   window.secScreenV=secScreenV;
+  /* ---------- شاشة تفاصيل صنف داخل قسم (زي شاشة العرض) ---------- */
+  function findSecItem(id){
+    for(var i=0;i<SEC_CACHE.length;i++){
+      var s=SEC_CACHE[i],its=(s&&s.items)||[];
+      for(var j=0;j<its.length;j++) if(String(its[j].id)===String(id)) return {it:its[j],sec:s};
+    }
+    return null;
+  }
+  function secItemV(id){
+    var _from=(typeof V!=='undefined')?String(V||''):'';
+    V='secItem'; try{window.__shLastSecItemId=String(id||'')}catch(e){}
+    try{window.__shSecItemFrom=(_from==='favorites')?'favorites':((_from==='sec')?'sec':'')}catch(e){}
+    run('<div id="secItemBox">جاري التحميل…</div>');
+    var f=findSecItem(id);
+    if(f){renderSecItem(f.it,f.sec);return}
+    (async function(){
+      try{ var l=await call('sections'); SEC_CACHE=Array.isArray(l)?l:[]; var g=findSecItem(id); renderSecItem(g?g.it:null,g?g.sec:null) }
+      catch(e){ var b=G('secItemBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>' }
+    })();
+  }
+  function renderSecItem(it,sec){
+    var box=G('secItemBox'); if(!box)return;
+    if(!it){ box.innerHTML='<div class="err">الصنف مش موجود.</div>'; return; }
+    var h='<div class="card offer-detail" id="secItemDetail">';
+    if(it.ic)h+='<img class="offer-photo" src="'+E(it.ic)+'" alt="'+E(it.t||'')+'">';
+    h+='<h2>'+E(it.t||'')+'</h2>';
+    h+=prices(it);
+    h+='<h3>المواصفات والتفاصيل</h3><div class="pw">'+E(it.x||'لا توجد تفاصيل إضافية')+'</div>';
+    h+='<h3>تقييم العملاء</h3><div class="rating-note">لا توجد تقييمات لهذا الصنف بعد</div>';
+    h+='</div>';
+    box.innerHTML=h;
+    var d=G('secItemDetail');
+    if(d){
+      d.appendChild(favHeart(it.id));
+      var sh=document.createElement('button');sh.type='button';sh.className='g';sh.innerHTML=ICON+' شارك';
+      sh.addEventListener('click',function(){shareSecItem(it)});
+      d.appendChild(sh);
+      d.appendChild(qtyRow(it.id,{t:it.t,p:it.p,ic:it.ic}));
+    }
+    var bk=document.createElement('button');bk.type='button';bk.className='g';bk.textContent='⬅️ رجوع';
+    bk.addEventListener('click',function(){
+      var f='';try{f=String(window.__shSecItemFrom||'')}catch(e){}
+      if(f==='favorites'){ try{favoritesV()}catch(e){homeV()} }
+      else if(f==='sec'&&sec){ secScreenV(sec.id) }
+      else { homeV() }
+    });
+    box.appendChild(bk);
+  }
+  window.secItemV=secItemV;
   var homePrev=(typeof homeV==='function')?homeV:null;
   if(homePrev){ homeV=function(){ var r=homePrev.apply(this,arguments); try{ loadHomeSections() }catch(e){} return r; }; }
 
@@ -1549,6 +1640,27 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       applyOffLayout();
     }catch(e){} return r; };
   }
+
+  /* ---------- 10) شاشة المفضلة: أضف أصناف الأقسام المفضّلة ---------- */
+  var favPrev=(typeof favoritesV==='function')?favoritesV:null;
+  if(favPrev){
+    favoritesV=async function(){
+      var r=await favPrev.apply(this,arguments);
+      try{
+        var box=G('favList'); if(!box||V!=='favorites')return r;
+        if(!SEC_CACHE.length){ try{ var l=await call('sections'); SEC_CACHE=Array.isArray(l)?l:[] }catch(e){} }
+        await ensureFavs();
+        var found=[];
+        (SEC_CACHE||[]).forEach(function(s){(s.items||[]).forEach(function(it){ if(FAVS.map(String).indexOf(String(it.id))>-1) found.push({it:it,sec:s}) })});
+        if(!found.length)return r;
+        var head=document.createElement('h3');head.style.margin='14px 0 6px';head.textContent='🗂️ أصناف الأقسام';
+        var row=document.createElement('div');row.className='sec-screen-items sec-grid';
+        found.forEach(function(f){ row.appendChild(secItemCard(f.it,f.sec.id)) });
+        box.appendChild(head); box.appendChild(row);
+      }catch(e){}
+      return r;
+    };
+  }
 })();
 </script>
 <script>
@@ -1595,5 +1707,89 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     /* ونغطّي كذلك أي نداء لـ navSync */
     try{if(typeof navSync==='function'){var ns=navSync;navSync=function(){var r=ns.apply(this,arguments);try{sync()}catch(e){}return r}}}catch(e){}
   }catch(e){}
+})();
+</script>
+<script>
+/* ===== «بياناتي» + «إعدادات الإشعارات» — تجميع زراير شاشة حسابي ===== */
+(function(){
+  'use strict';
+  function G(id){ return document.getElementById(id); }
+  function run(h){ try{ if(typeof app==='function')app(h); }catch(e){} }
+  function role(){ try{ return (typeof S!=='undefined'&&S.r)?S.r:'' }catch(e){ return '' } }
+  function isStaff(){ var r=role(); return r==='manager'||r==='pharmacist'||r==='admin'; }
+
+  var MYDATA_WRAP=null, NOTIF_WRAP=null;
+
+  /* ---------- (1) تجميع بيانات الحساب في زرار «بياناتي» ---------- */
+  function buildMyData(){
+    var p=G('profile'); if(!p||G('myDataBtn'))return;
+    var save=p.querySelector('button[onclick*="saveProfile"]'); if(!save)return;
+    var kids=Array.prototype.slice.call(p.children);
+    var start=-1,end=kids.indexOf(save);
+    for(var i=0;i<kids.length;i++){ var el=kids[i]; if(el.classList&&el.classList.contains('profile-field')&&/الاسم/.test(el.textContent||'')){start=i;break} }
+    if(start<0)start=0;
+    if(end<start)return;
+    var anchor=kids[end+1]||null;
+    var wrap=document.createElement('div');wrap.id='myDataWrap';wrap.hidden=true;
+    for(var i=start;i<=end;i++)wrap.appendChild(kids[i]);
+    MYDATA_WRAP=wrap;
+    var btn=document.createElement('button');btn.type='button';btn.className='g';btn.id='myDataBtn';btn.textContent='👤 بياناتي';
+    btn.addEventListener('click',function(){myDataV()});
+    if(anchor&&anchor.parentNode===p)p.insertBefore(btn,anchor);else p.appendChild(btn);
+    p.appendChild(wrap);
+  }
+  function myDataV(){
+    var w=G('myDataWrap')||MYDATA_WRAP;
+    if(!w){ try{profileV()}catch(e){}; return; }
+    V='mydata';
+    run('<h2>👤 بياناتي</h2><div id="myDataBox"></div><button class="g" type="button" id="myDataBack">⬅️ رجوع لحسابي</button>');
+    var box=G('myDataBox'); if(box){ w.hidden=false; box.appendChild(w); }
+    var bk=G('myDataBack'); if(bk)bk.addEventListener('click',function(){profileV()});
+  }
+
+  /* ---------- (2) تجميع إعدادات الإشعارات في زرار واحد ---------- */
+  function buildNotifSettings(){
+    var p=G('profile'); if(!p||G('notifSettingsBtn'))return;
+    function byText(txt){var a=p.querySelectorAll('button');for(var i=0;i<a.length;i++){if(String(a[i].textContent||'').indexOf(txt)>-1)return a[i]}return null}
+    var nodes=[];
+    var nOrders=G('notifOrdersBtn'); if(nOrders)nodes.push(nOrders);
+    var recs=null,bc=null,pfs=p.querySelectorAll('.profile-field');
+    for(var i=0;i<pfs.length;i++){ var t=String(pfs[i].textContent||''); if(!recs&&t.indexOf('مستلمو إشعارات الطلبات')>-1)recs=pfs[i]; if(!bc&&t.indexOf('إشعارات العروض')>-1)bc=pfs[i]; }
+    if(recs)nodes.push(recs);
+    if(bc)nodes.push(bc);
+    var snd=G('ordSound'); if(snd)nodes.push(snd);
+    var diag=G('pushDiagBtn'); if(diag)nodes.push(diag);
+    var sys=byText('إعدادات إشعارات النظام'); if(sys)nodes.push(sys);
+    if(!nodes.length)return;
+    var wrap=document.createElement('div');wrap.id='notifSettingsWrap';wrap.hidden=true;
+    nodes.forEach(function(n){ if(n&&n.parentNode)wrap.appendChild(n) });
+    NOTIF_WRAP=wrap;
+    var btn=document.createElement('button');btn.type='button';btn.className='g';btn.id='notifSettingsBtn';btn.textContent='🔔 إعدادات الإشعارات';
+    btn.addEventListener('click',function(){notifSettingsV()});
+    var ref=G('myDataBtn');
+    if(ref&&ref.parentNode===p)p.insertBefore(btn,ref.nextSibling);else p.appendChild(btn);
+    p.appendChild(wrap);
+  }
+  function notifSettingsV(){
+    var w=G('notifSettingsWrap')||NOTIF_WRAP;
+    if(!w){ try{profileV()}catch(e){}; return; }
+    V='notifSettings';
+    run('<h2>🔔 إعدادات الإشعارات</h2><div id="notifSettingsBox"></div><button class="g" type="button" id="notifBack">⬅️ رجوع لحسابي</button>');
+    var box=G('notifSettingsBox'); if(box){ w.hidden=false; box.appendChild(w); }
+    var bk=G('notifBack'); if(bk)bk.addEventListener('click',function(){profileV()});
+  }
+
+  window.myDataV=myDataV;
+  window.notifSettingsV=notifSettingsV;
+
+  var base=(typeof profileV==='function')?profileV:null;
+  if(base){
+    profileV=async function(){
+      var r=await base.apply(this,arguments);
+      try{ buildMyData(); }catch(e){}
+      try{ buildNotifSettings(); }catch(e){}
+      return r;
+    };
+  }
 })();
 </script>
