@@ -3,7 +3,7 @@
 <title>صيدليات شهاب</title><meta name="theme-color" content="#0b2a6f"><link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="صيدليات شهاب">
 <style>
 :root{--b:#0b2a6f}*{box-sizing:border-box}[hidden]{display:none!important}
-body{margin:0;font:16px/1.5 system-ui,Tahoma,sans-serif;background:#fff;color:#14213d;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body{margin:0;font:16px/1.5 Almarai,system-ui,Tahoma,sans-serif;background:#fff;color:#14213d;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 #app{max-width:520px;margin:auto;padding:16px}
 .lg{display:block;margin:0 auto 8px;height:110px}
 h2{color:var(--b);margin:8px 0 12px}
@@ -24,7 +24,7 @@ button.g{background:#eef2fb;color:var(--b)}button:disabled{opacity:.6}
 .share-ico svg{width:18px;height:18px;display:block}
 .swipe-handle{width:46px;height:5px;border-radius:3px;background:#c9d3ea;margin:0 auto 10px}
 .m>div{will-change:transform}
-</style><script>(function(){try{var d=document.documentElement;if(localStorage.getItem('shehab_dark')==='1')d.classList.add('dark');var a=localStorage.getItem('shehab_accent');if(a)d.style.setProperty('--b',a);}catch(e){}})();</script></head><body><div id="app"></div><script src="config.js"></script><script>
+</style><script>(function(){try{var d=document.documentElement;if(localStorage.getItem('shehab_dark')==='1')d.classList.add('dark');var a=localStorage.getItem('shehab_accent');if(a)d.style.setProperty('--b',a);}catch(e){}})();</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&amp;display=swap" rel="stylesheet"></head><body><div id="app"></div><script src="config.js"></script><script>
 const LOGO='https://amersn.github.io/shehabpharmacies/logo.png';
 const LS=(()=>{try{localStorage.getItem('x');return localStorage}catch(e){return{clear(){}}}})();
 const ST={new:['جديد','#2e9e4f'],unavailable:['مش متوفر','#d32f2f'],ordered:['تم الطلب وفي الطريق','#1e5fd6'],arrived:['موجود في الصيدلية','#f57c00'],delivering:['خرج مع مندوب التوصيل','#8a50d6'],done:['تم التسليم للعميل','#b0b7c3']};
@@ -327,7 +327,7 @@ function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav
 function navGo(t){try{if(t==='home')homeV();else if(t==='off')offV();else if(t==='mine'){if(S.r==='customer')mineV();else listV()}else if(t==='profile')profileV()}catch(e){}navSync()}
 function navFab(){try{if(S.r==='customer')ordV();else addV()}catch(e){}navSync()}
 function navCount(){}
-function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
+function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
 window.navGo=navGo;window.navFab=navFab;window.navSync=navSync;
 try{var cbBase=cartBadge;cartBadge=function(){cbBase();navCount()}}catch(e){}
 function watchApp(){var ap=q('app');if(!ap||!window.MutationObserver)return;new MutationObserver(function(){navSync()}).observe(ap,{childList:true,subtree:false});var t=0;new MutationObserver(function(){if(t)return;t=setTimeout(function(){t=0;injectRepeat()},90)}).observe(ap,{childList:true,subtree:true})}
@@ -1042,7 +1042,11 @@ html.dark .ma-chip{background:#1c2744;color:#dbe7ff;border-color:#2c3b5f}
 html.dark .home-duo .duo.ord{background:#16264f}
 .sec-wrap{margin:16px 0 6px}
 .sec-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.sec-head h2{margin:0;font-size:19px}
+.sec-head h2{margin:0;font-size:19px;min-width:0}
+.sec-ico{width:22px;height:22px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-inline-end:4px}
+.sec-more{width:auto;flex:0 0 auto;padding:7px 12px;font-size:13px;margin:0}
+.sec-screen-items{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0 14px}
+.sec-screen-items .sec-item{width:auto;min-width:0;flex:1 1 auto}
 .sec-items{display:flex;gap:10px;overflow-x:auto;padding:8px 2px 6px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
 .sec-item{position:relative;flex:0 0 auto;width:158px;border:1px solid var(--line,#c9d3ea);border-radius:14px;padding:10px;background:var(--card,#fff);display:flex;flex-direction:column;gap:6px;scroll-snap-align:start}
 .sec-item img.ic{width:100%;height:100px;object-fit:cover;border-radius:10px;display:block}
@@ -1288,19 +1292,24 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     try{ if(navigator.share){ await navigator.share({title:'صيدليات شهاب',text:text,url:url}); return } }catch(e){ if(e&&e.name==='AbortError')return }
     try{ await navigator.clipboard.writeText(url); TO('تم نسخ الرابط ✔','ok') }catch(e){ try{prompt('انسخ الرابط:',url)}catch(e2){} }
   }
+  var SEC_CACHE=[];
   async function loadHomeSections(){
     var box=G('homeSections'); if(!box)return;
     if(!logged()){box.innerHTML='';return}
     var list=[];
     try{ list=await call('sections') }catch(e){ var b0=G('homeSections'); if(b0)b0.innerHTML=''; return }
     var box2=G('homeSections'); if(!box2)return;
-    if(!Array.isArray(list)||!list.length){box2.innerHTML='';return}
+    SEC_CACHE=Array.isArray(list)?list:[];
+    if(!SEC_CACHE.length){box2.innerHTML='';return}
     box2.innerHTML='';
-    list.forEach(function(sec){
+    SEC_CACHE.forEach(function(sec){
       if(!sec||!sec.items||!sec.items.length)return;
       var wrap=document.createElement('div');wrap.className='sec-wrap';
       var head=document.createElement('div');head.className='sec-head';
-      head.innerHTML='<h2>🗂️ '+E(sec.name||'')+'</h2>';
+      head.innerHTML='<h2>'+(sec.img?('<img class="sec-ico" src="'+E(sec.img)+'" alt="'+E(sec.name||'')+'">'):'🗂️')+' '+E(sec.name||'')+'</h2>';
+      var more=document.createElement('button');more.type='button';more.className='g sec-more';more.textContent='مشاهدة المزيد';
+      (function(sid){more.addEventListener('click',function(){secScreenV(sid)})})(sec.id);
+      head.appendChild(more);
       wrap.appendChild(head);
       var row=document.createElement('div');row.className='sec-items';
       sec.items.forEach(function(it){row.appendChild(secItemCard(it,sec.id))});
@@ -1308,6 +1317,34 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       box2.appendChild(wrap);
     });
   }
+  /* ---------- شاشة قسم واحد لما تدوس «مشاهدة المزيد» ---------- */
+  function secScreenV(id){
+    V='sec';
+    run('<h2>🗂️ القسم</h2><div id="secScreenBox">جاري التحميل…</div>');
+    var sec=null;
+    for(var i=0;i<SEC_CACHE.length;i++){if(String(SEC_CACHE[i].id)===String(id)){sec=SEC_CACHE[i];break}}
+    renderSecScreen(sec,id);
+  }
+  function renderSecScreen(sec,id){
+    var box=G('secScreenBox'); if(!box)return;
+    if(!sec){ box.innerHTML='<div class="card">جاري التحميل…</div>'; secScreenFetch(id); return; }
+    var h='<div class="sec-head"><h2>'+(sec.img?('<img class="sec-ico" src="'+E(sec.img)+'" alt="'+E(sec.name||'')+'">'):'🗂️')+' '+E(sec.name||'')+'</h2></div>';
+    h+='<div class="sec-screen-items" id="secScreenItems"></div>';
+    h+='<button class="g" type="button" id="secScreenBack">⬅️ رجوع للرئيسية</button>';
+    box.innerHTML=h;
+    var items=G('secScreenItems'),arr=(sec.items||[]);
+    if(!arr.length){ items.innerHTML='<div class="card">مفيش أصناف في القسم ده لسه.</div>'; }
+    else arr.forEach(function(it){ items.appendChild(secItemCard(it,sec.id)) });
+    var bk=G('secScreenBack'); if(bk)bk.addEventListener('click',function(){homeV()});
+  }
+  async function secScreenFetch(id){
+    try{
+      var list=await call('sections'); SEC_CACHE=Array.isArray(list)?list:[];
+      var s=null; for(var i=0;i<SEC_CACHE.length;i++)if(String(SEC_CACHE[i].id)===String(id))s=SEC_CACHE[i];
+      renderSecScreen(s,id);
+    }catch(e){ var b=G('secScreenBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>'; }
+  }
+  window.secScreenV=secScreenV;
   var homePrev=(typeof homeV==='function')?homeV:null;
   if(homePrev){ homeV=function(){ var r=homePrev.apply(this,arguments); try{ loadHomeSections() }catch(e){} return r; }; }
 
