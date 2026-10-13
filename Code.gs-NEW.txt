@@ -17,8 +17,8 @@ otp_code (Authentication): اختار نوع Authentication مع زرار Copy c
 
 /* Firebase push setup (one time): enable Firebase Cloud Messaging API in Google Cloud for project shehabpharamcyapp. In Apps Script Project Settings, show appsscript.json and add https://www.googleapis.com/auth/firebase.messaging to its existing oauthScopes (keep every existing scope). Save and authorize by running setup once; inspect Script Properties FCM_LAST if sending fails. GitHub Pages users enable notifications from the home screen. */
 const P=PropertiesService.getScriptProperties(),SS=()=>SS._s||(SS._s=SpreadsheetApp.getActiveSpreadsheet());
-const HD={Users:['Phone','Name','Role','Hash','Status','Address','Email','TGChat'],Orders:['ID','Date','Item','Customer','CPhone','Photo','Status','ETA','By','Updated','Mode','Addr','Acct','Src','Total','Note','Files','CustomerNote'],Sessions:['Token','Phone','Created'],Offers:['ID','Title','Text','Date','Active','Icon','Price','OldPrice','Featured'],Ratings:['OfferID','Phone','Stars','Updated'],PushTokens:['Token','Phone','Role','Updated','Platform'],Inbox:['ID','Phone','Title','Body','Date','Read','Url'],Monthly:['ID','Phone','Name','Unit','Qty','Updated']};
-const sh=n=>{let s=SS().getSheetByName(n);if(!s){s=SS().insertSheet(n);s.getRange(1,1,s.getMaxRows(),s.getMaxColumns()).setNumberFormat('@');s.appendRow(HD[n])}if(n=='Offers'&&s.getRange(1,9).isBlank())s.getRange(1,9).setValue('Featured');if(n=='Inbox'&&s.getRange(1,7).isBlank())s.getRange(1,7).setValue('Url');if(n=='PushTokens'&&s.getRange(1,5).isBlank())s.getRange(1,5).setValue('Platform');if(n=='Orders'){if(s.getRange(1,15).isBlank())s.getRange(1,15).setValue('Total');if(s.getRange(1,16).isBlank())s.getRange(1,16).setValue('Note');if(s.getRange(1,17).isBlank())s.getRange(1,17).setValue('Files');if(s.getRange(1,18).isBlank())s.getRange(1,18).setValue('CustomerNote')}return s};
+const HD={Users:['Phone','Name','Role','Hash','Status','Address','Email','TGChat'],Orders:['ID','Date','Item','Customer','CPhone','Photo','Status','ETA','By','Updated','Mode','Addr','Acct','Src','Total','Note','Files','CustomerNote'],Sessions:['Token','Phone','Created'],Offers:['ID','Title','Text','Date','Active','Icon','Price','OldPrice','Featured','Start','End','Qty'],Ratings:['OfferID','Phone','Stars','Updated'],PushTokens:['Token','Phone','Role','Updated','Platform'],Inbox:['ID','Phone','Title','Body','Date','Read','Url'],Monthly:['ID','Phone','Name','Unit','Qty','Updated']};
+const sh=n=>{let s=SS().getSheetByName(n);if(!s){s=SS().insertSheet(n);s.getRange(1,1,s.getMaxRows(),s.getMaxColumns()).setNumberFormat('@');s.appendRow(HD[n])}if(n=='Offers'&&s.getRange(1,9).isBlank())s.getRange(1,9).setValue('Featured');if(n=='Offers'){['Start','End','Qty'].forEach(function(h,i){var c=10+i;if(s.getRange(1,c).isBlank())s.getRange(1,c).setValue(h)})}if(n=='SecItems'&&s.getRange(1,11).isBlank())s.getRange(1,11).setValue('Qty');if(n=='Inbox'&&s.getRange(1,7).isBlank())s.getRange(1,7).setValue('Url');if(n=='PushTokens'&&s.getRange(1,5).isBlank())s.getRange(1,5).setValue('Platform');if(n=='Orders'){if(s.getRange(1,15).isBlank())s.getRange(1,15).setValue('Total');if(s.getRange(1,16).isBlank())s.getRange(1,16).setValue('Note');if(s.getRange(1,17).isBlank())s.getRange(1,17).setValue('Files');if(s.getRange(1,18).isBlank())s.getRange(1,18).setValue('CustomerNote')}return s};
 let _RC={};const rows=n=>_RC[n]||(_RC[n]=sh(n).getDataRange().getValues().slice(1).map((r,i)=>{const o={_r:i+2};HD[n].forEach((k,j)=>o[k]=r[j]);return o}));
 const hash=s=>Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,P.getProperty('SALT')+s));
 const EMAIL_DAY='MAIL_BUDGET_'+new Date().toISOString().slice(0,10);
@@ -215,7 +215,7 @@ reset:d=>{const ph=phn(d.phone),C=CacheService.getScriptCache(),k='of_'+ph,n=+(C
   const SE=sh('Sessions');rows('Sessions').filter(x=>pkey(x.Phone)==pkey(ph)).map(x=>x._r).reverse().forEach(r=>SE.deleteRow(r));
   C.remove('ov_'+ph);C.remove(k);return 1},
 offerImg:d=>{auth(d.t);const o=rows('Offers').find(x=>String(x.ID)==String(d.id)&&x.Active!='0');return o?String(o.Icon||''):''},
-offers:d=>{const u=auth(d.t),ck='oc_'+cver('off')+'_'+pkey(u.Phone),hit=cget(ck);if(hit)return hit;const R=rows('Ratings');const out=rows('Offers').filter(o=>o.ID&&o.Active!='0').sort((a,b)=>b.Date-a.Date).map(o=>{const q=R.filter(r=>String(r.OfferID)==String(o.ID)),avg=q.length?q.reduce((z,r)=>z+(Number(r.Stars)||0),0)/q.length:0,m=q.find(r=>pkey(r.Phone)==pkey(u.Phone));return{id:o.ID,t:o.Title,x:o.Text,ic:o.Icon,p:o.Price||'',w:o.OldPrice||'',f:String(o.Featured)=='1'||o.Featured===true,avg,count:q.length,mine:m?Number(m.Stars):0}});cput(ck,out,120);return out},
+offers:d=>{const u=auth(d.t),ck='oc_'+cver('off')+'_'+pkey(u.Phone),hit=cget(ck);if(hit)return hit;const R=rows('Ratings');const out=rows('Offers').filter(o=>o.ID&&o.Active!='0').sort((a,b)=>b.Date-a.Date).map(o=>{const q=R.filter(r=>String(r.OfferID)==String(o.ID)),avg=q.length?q.reduce((z,r)=>z+(Number(r.Stars)||0),0)/q.length:0,m=q.find(r=>pkey(r.Phone)==pkey(u.Phone));return{id:o.ID,t:o.Title,x:o.Text,ic:o.Icon,p:o.Price||'',w:o.OldPrice||'',f:String(o.Featured)=='1'||o.Featured===true,avg,count:q.length,mine:m?Number(m.Stars):0,start:Number(o.Start)||0,end:Number(o.End)||0,q:_qty(o.Qty)}});cput(ck,out,120);return out},
 feature:d=>{mgr(auth(d.t));const o=rows('Offers').find(x=>x.ID==d.id&&x.Active!='0');if(!o)throw 'العرض غير موجود';sh('Offers').getRange(o._r,9).setValue(d.featured?'1':'0');return 1},
 rate:d=>{const u=auth(d.t),id=String(d.id||''),stars=Number(d.stars);if(!Number.isInteger(stars)||stars<1||stars>5)throw 'اختار تقييمًا من نجمة إلى خمس نجوم';if(!rows('Offers').some(o=>String(o.ID)==id&&o.Active!='0'))throw 'العرض غير موجود';const R=rows('Ratings'),q=R.find(r=>String(r.OfferID)==id&&pkey(r.Phone)==pkey(u.Phone));if(q)sh('Ratings').getRange(q._r,3,1,2).setValues([[stars,Date.now()]]);else append('Ratings',[id,String(u.Phone),stars,Date.now()],[2]);return 1},
 osave:d=>{mgr(auth(d.t));const ti=String(d.ti||'').trim(),tx=String(d.tx||'').trim(),price=String(d.price||'').trim(),oldPrice=String(d.oldPrice||'').trim();
@@ -489,17 +489,24 @@ API_WRITES.add('couponDel');API_WRITES.add('settingsSave');API_WRITES.add('point
    الأقسام تظهر أسفل شاشة العروض عند العميل.
    ================================================================ */
 HD.Sections=['ID','Name','Img','Sort','Active','Updated'];
-HD.SecItems=['ID','Sec','T','X','P','OP','Img','Sort','Active','Updated'];
+HD.SecItems=['ID','Sec','T','X','P','OP','Img','Sort','Active','Updated','Qty'];
 
 function _secText(v,n){return String(v==null?'':v).trim().slice(0,n)}
 function _secImgOK(v){v=String(v||'');return !v||(v.indexOf('data:image/')===0&&v.length<=45000)}
 function _secSort(a,b){return (Number(a.Sort)||0)-(Number(b.Sort)||0)}
 
+/* ===== مخزون وجدولة العروض ===== */
+function _qty(v){var s=String(v==null?'':v).trim();if(!s)return -1;var n=Math.floor(Number(s));return isFinite(n)&&n>=0?n:-1}
+function _lowStockThreshold(){var n=Math.floor(Number(_cfg('LOW_STOCK','3')));return isFinite(n)&&n>=0?n:3}
+function _offerLive(o,now){now=now||Date.now();var s=Number(o.Start)||0,e=Number(o.End)||0;if(s&&now<s)return false;if(e&&now>=e)return false;return true}
+function _stockAlert(title,q){try{var th=_lowStockThreshold();if(q>th)return;var body=q<=0?('نفد المخزون: '+title):('المخزون قرب يخلص: '+title+' — المتبقي '+q);var mgrs=rows('Users').filter(function(x){return x.Status=='active'&&(x.Role=='manager'||x.Role=='pharmacist')});storeInbox(mgrs.map(function(x){return x.Phone}),'تنبيه مخزون',body,PUSH_LINK+'?v=stats');pushToRoles(['manager','pharmacist'],'تنبيه مخزون',body,PUSH_LINK+'?v=stats')}catch(e){}}
+function _applyStock(id,delta){try{var off=rows('Offers').find(function(x){return String(x.ID)==String(id)});if(off){var q=_qty(off.Qty);if(q<0)return;var nq=Math.max(0,q-delta);sh('Offers').getRange(off._r,12).setValue(String(nq));if(nq<=_lowStockThreshold())_stockAlert(String(off.Title||''),nq);return}var it=rows('SecItems').find(function(x){return String(x.ID)==String(id)});if(it){var q2=_qty(it.Qty);if(q2<0)return;var nq2=Math.max(0,q2-delta);sh('SecItems').getRange(it._r,11).setValue(String(nq2));if(nq2<=_lowStockThreshold())_stockAlert(String(it.T||''),nq2)}}catch(e){}}
+
 /* كل الأصناف القابلة للبيع = العروض + أصناف الأقسام (لحساب سلة الطلبات وكود الخصم) */
 function sellable(){
-  var out=[];
-  try{rows('Offers').filter(function(o){return o.ID&&o.Active!='0'}).forEach(function(o){out.push({ID:o.ID,Title:o.Title,Price:o.Price,Icon:o.Icon,Text:o.Text,Sec:''})})}catch(e){}
-  try{rows('SecItems').filter(function(i){return i.ID&&i.Active!='0'}).forEach(function(i){out.push({ID:i.ID,Title:i.T,Price:i.P,Icon:i.Img,Text:i.X,Sec:String(i.Sec||'')})})}catch(e){}
+  var out=[],now=Date.now();
+  try{rows('Offers').filter(function(o){return o.ID&&o.Active!='0'&&_offerLive(o,now)}).forEach(function(o){out.push({ID:o.ID,Title:o.Title,Price:o.Price,Icon:o.Icon,Text:o.Text,Sec:'',Qty:_qty(o.Qty)})})}catch(e){}
+  try{rows('SecItems').filter(function(i){return i.ID&&i.Active!='0'}).forEach(function(i){out.push({ID:i.ID,Title:i.T,Price:i.P,Icon:i.Img,Text:i.X,Sec:String(i.Sec||''),Qty:_qty(i.Qty)})})}catch(e){}
   return out;
 }
 
@@ -511,7 +518,7 @@ A.sections=d=>{
   try{
     rows('Sections').filter(function(s){return s.ID&&s.Active!='0'}).sort(_secSort).forEach(function(s){
       var its=items.filter(function(i){return String(i.Sec)==String(s.ID)}).sort(_secSort).map(function(i){
-        return{id:String(i.ID),t:String(i.T||''),x:String(i.X||''),p:String(i.P||''),w:String(i.OP||''),ic:String(i.Img||'')}
+        return{id:String(i.ID),t:String(i.T||''),x:String(i.X||''),p:String(i.P||''),w:String(i.OP||''),ic:String(i.Img||''),q:_qty(i.Qty)}
       });
       out.push({id:String(s.ID),name:String(s.Name||''),img:String(s.Img||''),items:its});
     });
@@ -528,7 +535,7 @@ A.sectionsAdmin=d=>{
     rows('Sections').filter(function(s){return s.ID}).sort(_secSort).forEach(function(s){
       out.push({id:String(s.ID),name:String(s.Name||''),img:String(s.Img||''),sort:Number(s.Sort)||0,active:_flag(s.Active),
         items:items.filter(function(i){return String(i.Sec)==String(s.ID)}).sort(_secSort).map(function(i){
-          return{id:String(i.ID),t:String(i.T||''),x:String(i.X||''),p:String(i.P||''),w:String(i.OP||''),ic:String(i.Img||''),sort:Number(i.Sort)||0,active:_flag(i.Active)}
+          return{id:String(i.ID),t:String(i.T||''),x:String(i.X||''),p:String(i.P||''),w:String(i.OP||''),ic:String(i.Img||''),sort:Number(i.Sort)||0,active:_flag(i.Active),q:_qty(i.Qty)}
         })});
     });
   }catch(e){}
@@ -573,9 +580,10 @@ A.secItemSave=d=>{
   var x=_secText(d.x,600),p=_secText(d.p,30),w=_secText(d.w,30),sort=Math.floor(Number(d.sort)||0);
   var img=d.ic===undefined?undefined:_secText(d.ic,60000);
   if(img!==undefined&&!_secImgOK(img))throw 'صورة الصنف كبيرة أو غير صالحة';
+  var qty=_qty(d.qty),qv=(qty<0)?'':String(qty);
   var s=sh('SecItems'),row=d.id?rows('SecItems').find(function(z){return String(z.ID)==String(d.id)}):null;
-  if(row){ s.getRange(row._r,3,1,4).setValues([[t,x,p,w]]); if(img!==undefined)s.getRange(row._r,7).setValue(img); s.getRange(row._r,8).setValue(String(sort)); s.getRange(row._r,10).setValue(Date.now()); }
-  else{ append('SecItems',[Date.now().toString(36),sec,t,x,p,w,img||'',String(sort),'1',Date.now()],[1]); }
+  if(row){ s.getRange(row._r,3,1,4).setValues([[t,x,p,w]]); if(img!==undefined)s.getRange(row._r,7).setValue(img); s.getRange(row._r,8).setValue(String(sort)); s.getRange(row._r,11).setValue(qv); s.getRange(row._r,10).setValue(Date.now()); }
+  else{ append('SecItems',[Date.now().toString(36),sec,t,x,p,w,img||'',String(sort),'1',Date.now(),qv],[1]); }
   try{_RC.SecItems=null}catch(e){}
   return 1;
 };
@@ -618,3 +626,139 @@ A.offerToSec=d=>{
 API_WRITES.add('secSave');API_WRITES.add('secSetActive');API_WRITES.add('secDel');
 API_WRITES.add('secItemSave');API_WRITES.add('secItemDel');API_WRITES.add('secItemMove');
 API_WRITES.add('offerToSec');
+
+/* ======================================================================
+   المرحلة 3: جدولة العروض + كميات المخزون + لوحة الإحصائيات +
+   النسخ الاحتياطي + سجل المراجعة
+   ====================================================================== */
+HD.AuditLog=['ID','Date','Phone','Name','Role','Action','Ref','Details'];
+
+/* حفظ عرض مع تاريخ البداية/النهاية وكمية المخزون */
+A.osave=function(d){
+  mgr(auth(d.t));
+  var ti=String(d.ti||'').trim(),tx=String(d.tx||'').trim(),price=String(d.price||'').trim(),oldPrice=String(d.oldPrice||'').trim();
+  if(!ti)throw 'اكتب عنوان العرض';
+  if(price.length>30||oldPrice.length>30)throw 'السعر طويل جدًا';
+  var start=d.start?Date.parse(d.start):0,end=d.end?Date.parse(d.end):0;
+  if(d.start&&!isFinite(start))throw 'تاريخ بداية العرض غير صحيح';
+  if(d.end&&!isFinite(end))throw 'تاريخ نهاية العرض غير صحيح';
+  if(start&&end&&end<=start)throw 'تاريخ النهاية لازم يكون بعد البداية';
+  var q=_qty(d.qty),qv=(q<0)?'':String(q);
+  var o=d.id&&rows('Offers').find(function(x){return x.ID==d.id});
+  var ic=d.ic===undefined?undefined:String(d.ic||'');
+  if(ic&&(ic.indexOf('data:image/')!=0||ic.length>45000))throw 'الصورة كبيرة أو غير صالحة';
+  if(o){
+    sh('Offers').getRange(o._r,2,1,2).setValues([[ti,tx]]);
+    if(ic!==undefined)sh('Offers').getRange(o._r,6).setValue(ic);
+    sh('Offers').getRange(o._r,7,1,2).setValues([[price,oldPrice]]);
+    sh('Offers').getRange(o._r,9).setValue(d.featured?'1':'0');
+    sh('Offers').getRange(o._r,10,1,3).setValues([[start||'',end||'',qv]]);
+  }else{
+    var n=Date.now();
+    sh('Offers').appendRow([n.toString(36),ti,tx,n,'1',ic||'',price,oldPrice,d.featured?'1':'0',start||'',end||'',qv]);
+    broadcastNewOffer(ti,price);
+  }
+  try{_RC.Offers=null}catch(e){}
+  cver('off',true);
+  return 1;
+};
+
+/* الطلب من السلة: يتأكد من المخزون وينقصه */
+var _cartOrderStockPrev=A.cartOrder;
+A.cartOrder=function(d){
+  var u=auth(d.t);
+  var items=Array.isArray(d.items)?d.items:[];
+  var all=sellable();
+  items.forEach(function(v){
+    var o=all.find(function(x){return String(x.ID)==String(v.id)});
+    if(o&&o.Qty>=0&&Number(v.qty)>o.Qty)throw 'الكمية المتاحة من '+(o.Title||'الصنف')+' هى '+o.Qty+' فقط';
+  });
+  var res=_cartOrderStockPrev(d);
+  items.forEach(function(v){_applyStock(String(v.id),Number(v.qty)||0)});
+  try{cver('off',true)}catch(e){}
+  return res;
+};
+
+/* تعديل سريع لكمية المخزون */
+A.stockSet=function(d){
+  mgr(auth(d.t));
+  var id=String(d.id||''),q=Math.floor(Number(d.qty));
+  if(!isFinite(q)||q<0||q>100000)throw 'كمية غير صحيحة';
+  var off=rows('Offers').find(function(x){return String(x.ID)==id});
+  if(off){sh('Offers').getRange(off._r,12).setValue(String(q))}
+  else{var it=rows('SecItems').find(function(x){return String(x.ID)==id});if(!it)throw 'الصنف غير موجود';sh('SecItems').getRange(it._r,11).setValue(String(q))}
+  try{_RC.Offers=null;_RC.SecItems=null}catch(e){}
+  cver('off',true);
+  return {ok:1,q:q};
+};
+
+/* لوحة الإحصائيات */
+A.stats=function(d){
+  mgr(auth(d.t));
+  var now=Date.now(),day=864e5,th=_lowStockThreshold();
+  var O=rows('Orders').filter(function(o){return o.ID});
+  var byStatus={},today=0,week=0,revenue=0,done=0;
+  var d0=new Date();d0.setHours(0,0,0,0);var todayStart=d0.getTime();
+  var byDay=[];for(var i=6;i>=0;i--)byDay.push({t:todayStart-i*day,c:0});
+  var top={};
+  O.forEach(function(o){
+    var s=String(o.Status||'new');byStatus[s]=(byStatus[s]||0)+1;
+    var dt=Number(o.Date)||0;
+    if(dt>=todayStart)today++;
+    if(dt>=now-7*day)week++;
+    for(var k=0;k<byDay.length;k++){if(dt>=byDay[k].t&&dt<byDay[k].t+day){byDay[k].c++;break}}
+    if(s=='done'){var t=Number(String(o.Total||'').replace(',','.'));if(isFinite(t)){revenue+=t;done++}}
+    var key=String(o.Item||'').split('\n')[0].split(' × ')[0].trim().slice(0,45);
+    if(key)top[key]=(top[key]||0)+1;
+  });
+  var topItems=Object.keys(top).map(function(k){return{n:k,c:top[k]}}).sort(function(a,b){return b.c-a.c}).slice(0,8);
+  var customers=0;try{customers=rows('Users').filter(function(u){return String(u.Role)=='customer'}).length}catch(e){}
+  var points=0;try{points=rows('PointLog').reduce(function(z,x){var v=Number(x.Delta)||0;return z+(v>0?v:0)},0)}catch(e){}
+  var low=[],offers=0,sections=0;
+  try{rows('Offers').filter(function(o){return o.ID&&o.Active!='0'}).forEach(function(o){var q=_qty(o.Qty);if(q>=0&&q<=th)low.push({id:String(o.ID),n:String(o.Title||''),q:q})});offers=rows('Offers').filter(function(o){return o.ID&&o.Active!='0'}).length}catch(e){}
+  try{rows('SecItems').filter(function(o){return o.ID&&o.Active!='0'}).forEach(function(o){var q=_qty(o.Qty);if(q>=0&&q<=th)low.push({id:String(o.ID),n:String(o.T||''),q:q})})}catch(e){}
+  try{sections=rows('Sections').filter(function(o){return o.ID&&o.Active!='0'}).length}catch(e){}
+  return {orders:O.length,byStatus:byStatus,today:today,week:week,revenue:Number(revenue.toFixed(2)),done:done,
+    avg:done?Number((revenue/done).toFixed(2)):0,byDay:byDay,topItems:topItems,customers:customers,points:points,
+    low:low,lowThreshold:th,offers:offers,sections:sections};
+};
+
+/* النسخ الاحتياطي */
+A.backupNow=function(d){
+  mgr(auth(d.t));
+  var name='Backup '+Utilities.formatDate(new Date(),'Africa/Cairo','yyyy-MM-dd HH-mm-ss');
+  var f=DriveApp.getFileById(SS().getId()).makeCopy(name);
+  return {name:f.getName(),url:f.getUrl(),date:f.getDateCreated().getTime()};
+};
+A.backupList=function(d){
+  mgr(auth(d.t));
+  var it=DriveApp.searchFiles("title contains 'Backup ' and trashed = false"),out=[];
+  while(it.hasNext()&&out.length<25){var f=it.next();try{out.push({name:f.getName(),url:f.getUrl(),date:f.getDateCreated().getTime(),size:f.getSize()})}catch(e){}}
+  out.sort(function(a,b){return b.date-a.date});
+  return out;
+};
+
+/* سجل المراجعة */
+A.auditList=function(d){
+  mgr(auth(d.t));
+  return rows('AuditLog').sort(function(a,b){return Number(b.Date)-Number(a.Date)}).slice(0,150).map(function(x){
+    return {t:Number(x.Date)||0,ph:String(x.Phone||''),n:String(x.Name||''),r:String(x.Role||''),a:String(x.Action||''),ref:String(x.Ref||''),det:String(x.Details||'')}
+  });
+};
+
+/* تسجيل كل حركة إدارية في سجل المراجعة تلقائيًا */
+var _AUDIT=new Set(['add','corder','cartOrder','upd','repeat','cancelOrder','deleteOrder','osave','odel','feature','secSave','secSetActive','secDel','secItemSave','secItemDel','secItemMove','offerToSec','couponSaveNew','couponSetActive','couponDel','settingsSave','pointsRedeem','broadcast','saveNotificationRecipients','setEmail','inboxRead','inboxReadAll','monthlyAdd','monthlyRemove','backupNow','stockSet']);
+var _apiPrev=api;
+api=function(s){
+  var out=_apiPrev(s);
+  try{
+    var d=JSON.parse(s),r=JSON.parse(out);
+    if(d&&r&&r.ok&&_AUDIT.has(d.a)){
+      var u=auth(d.t);
+      append('AuditLog',[Utilities.getUuid(),Date.now(),String(u.Phone||''),String(u.Name||''),String(u.Role||''),String(d.a),String(d.id||d.code||d.sec||d.item||d.name||'').slice(0,60),String(d.s||d.title||'').slice(0,80)]);
+    }
+  }catch(e){}
+  return out;
+};
+
+API_WRITES.add('backupNow');API_WRITES.add('stockSet');
