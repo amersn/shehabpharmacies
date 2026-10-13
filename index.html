@@ -338,7 +338,7 @@ function heroApply(){if(!HERO||!HERO.track)return;HERO.track.style.transform='tr
 function heroNorm(){if(!HERO)return;var h=HERO.half||0;if(h>0){while(HERO.x>=h)HERO.x-=h;while(HERO.x<0)HERO.x+=h}}
 function heroSize(){var st=HERO;if(!st||!st.sc)return;var cw=Math.max(146,Math.floor((st.sc.clientWidth-10)/2));var cs=st.sc.querySelectorAll('.hero-card');for(var i=0;i<cs.length;i++)cs[i].style.flex='0 0 '+cw+'px';st.half=st.copy?st.copy.offsetWidth:0}
 function heroTick(ts){var st=HERO;if(!st)return;if(!st.track||!st.track.isConnected){HERO=null;return}var dt=st.last?Math.min(80,ts-st.last):16;st.last=ts;if(st.speed&&!st.hold&&!document.hidden&&V=='home'){st.x+=st.speed*dt;heroNorm();heroApply()}st.raf=requestAnimationFrame(heroTick)}
-function heroStart(){var sc=q('heroScroll');if(!sc)return;if(HERO&&HERO.raf)try{cancelAnimationFrame(HERO.raf)}catch(e){}var track=sc.firstElementChild;HERO={sc:sc,track:track,copy:track?track.firstElementChild:null,x:0,half:0,hold:false,dragging:false,speed:0.024,raf:0,last:0};if(sc.querySelectorAll('.hero-copy').length<2)HERO.speed=0;heroSize();heroApply();try{HERO.raf=requestAnimationFrame(heroTick)}catch(e){}
+function heroStart(){var sc=q('heroScroll');if(!sc)return;if(HERO&&HERO.raf)try{cancelAnimationFrame(HERO.raf)}catch(e){}var track=sc.firstElementChild;HERO={sc:sc,track:track,copy:track?track.firstElementChild:null,x:0,half:0,hold:false,dragging:false,speed:0.03,raf:0,last:0};if(sc.querySelectorAll('.hero-copy').length<2)HERO.speed=0;heroSize();heroApply();try{HERO.raf=requestAnimationFrame(heroTick)}catch(e){}
   if(sc.dataset.hooked)return;sc.dataset.hooked='1';
   sc.addEventListener('click',heroClick);
   sc.addEventListener('pointerdown',function(ev){if(!HERO)return;HERO.hold=true;HERO.dragging=true;HERO.sx=ev.clientX;HERO.so=HERO.x;heroMoved=0;try{sc.setPointerCapture(ev.pointerId)}catch(e){}});
@@ -346,7 +346,7 @@ function heroStart(){var sc=q('heroScroll');if(!sc)return;if(HERO&&HERO.raf)try{
   var heroEnd=function(){if(!HERO)return;HERO.dragging=false;setTimeout(function(){if(HERO)HERO.hold=false},800)};
   sc.addEventListener('pointerup',heroEnd);sc.addEventListener('pointercancel',heroEnd);sc.addEventListener('pointerleave',heroEnd);
 }
-try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(!a.length){e.innerHTML=`<div class='card'>مفيش عروض مميزة حاليًا</div>`;return}HI=(HI+a.length)%a.length;var list=a.slice(0,10),cards=list.map(heroCardHTML).join(''),two=list.length>1;e.innerHTML='<div class="hero-scroll" id="heroScroll"><div class="hero-track"><div class="hero-copy">'+cards+'</div>'+(two?'<div class="hero-copy">'+cards+'</div>':'')+'</div></div><div class="rating-note" style="text-align:center;margin:4px 0 0">اسحب العروض بصباعك — واضغط على العرض للتفاصيل</div>';heroStart()};stepHero=function(){}}catch(e){}
+try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(a.length<2)a=(typeof OF!=='undefined'&&OF&&OF.length)?OF.slice(0,10):a;if(!a.length){e.innerHTML=`<div class='card'>مفيش عروض حاليًا</div>`;return}HI=(HI+a.length)%a.length;var list=a.slice(0,10);try{window.__heroList=list}catch(e){}var cards=list.map(heroCardHTML).join(''),two=list.length>1;e.innerHTML='<div class="hero-scroll" id="heroScroll"><div class="hero-track"><div class="hero-copy">'+cards+'</div>'+(two?'<div class="hero-copy">'+cards+'</div>':'')+'</div></div><div class="rating-note" style="text-align:center;margin:4px 0 0">اسحب العروض بصباعك — واضغط على العرض للتفاصيل</div>';heroStart()};stepHero=function(){};window.heroGoto=function(i){try{if(!HERO||!HERO.sc)return;var cw=Math.max(146,Math.floor((HERO.sc.clientWidth-10)/2));HERO.x=-(i*(cw+10));heroNorm();heroApply();HERO.hold=true;setTimeout(function(){if(HERO)HERO.hold=false},2200);}catch(e){}}}catch(e){}
 var OFF_Q='';
 try{var drawOBase=drawO;drawO=function(){if(!OFF_Q){drawOBase();return}var all=OF;try{OF=all.filter(function(o){return String(o.t||'').toLowerCase().indexOf(OFF_Q)>-1||String(o.x||'').toLowerCase().indexOf(OFF_Q)>-1})}catch(e){}drawOBase();OF=all};var offVBase=offV;offV=async function(){await offVBase();var ap=q('app');var hd=ap?ap.querySelector('h2'):null;if(hd&&!q('offSearch')){OFF_Q='';var box=document.createElement('div');box.innerHTML=`<input id='offSearch' placeholder='🔍 دوّر على عرض بالاسم' autocomplete='off'>`;hd.insertAdjacentElement('afterend',box.firstChild);var inp=q('offSearch');inp.value='';inp.addEventListener('input',function(){OFF_Q=String(inp.value||'').trim().toLowerCase();try{drawO()}catch(e){}})}}}catch(e){}
 try{var pvBase=profileV;profileV=async function(){await pvBase();var p=q('profile');if(!p||q('appearanceBox'))return;var box=document.createElement('div');box.className='profile-field';box.id='appearanceBox';var colors=['#0b2a6f','#0a5ea4','#0e7c66','#33691e','#7b2ff7','#b3261e','#c2185b','#4a4f57'];box.innerHTML=`<h3 style='margin:6px 0'>🎨 إعدادات الشكل</h3><label class='theme-row'><input type='checkbox' id='darkToggle'> الوضع الليلي 🌙</label><small>لون التطبيق</small><div class='swatches'>${colors.map(function(c){return `<button type='button' class='swatch' data-c='${c}' style='background:${c}' aria-label='لون'></button>`}).join('')}</div><small>الاختيار بيتحفظ على الجهاز.</small>`;var mb=document.createElement('button');mb.type='button';mb.className='g';mb.textContent=(S&&S.r!=='customer')?'🗓️ القوائم الشهرية (العملاء)':'🗓️ علاجي الشهري';mb.addEventListener('click',function(){if(S&&S.r!=='customer')monthlyAdminV();else monthlyV()});p.appendChild(mb);p.appendChild(box);var dt=q('darkToggle');if(dt)dt.addEventListener('change',function(){setDark(dt.checked)});var sw=box.querySelectorAll('.swatch');for(var i=0;i<sw.length;i++)(function(s){s.addEventListener('click',function(){setAccent(s.getAttribute('data-c'))})})(sw[i]);themeSyncUI()}}catch(e){}
@@ -1976,15 +1976,17 @@ html.dark .search-card img.ic{background:#141c30}
     drawHero=function(){
       var r=baseHero.apply(this,arguments);
       try{
-        var a=featuredOffers(),box=G('of');
-        if(box&&a.length){
-          var dots=document.querySelector('#of .hero-dots');
-          if(!dots){ dots=document.createElement('div'); dots.className='hero-dots'; box.appendChild(dots); }
+        var box=G('of');
+        var list=(window.__heroList&&window.__heroList.length)?window.__heroList:featuredOffers();
+        var old=document.querySelector('#of .hero-dots');
+        if(box&&list.length>1){
+          var dots=old||document.createElement('div');
+          if(!old){ dots.className='hero-dots'; box.appendChild(dots); }
           var html='';
-          for(var i=0;i<a.length;i++) html+='<button type="button" class="hero-dot'+(i===HI?' on':'')+'" data-i="'+i+'" aria-label="عرض '+(i+1)+'"></button>';
+          for(var i=0;i<list.length;i++) html+='<button type="button" class="hero-dot" data-i="'+i+'" aria-label="عرض '+(i+1)+'"></button>';
           dots.innerHTML=html;
-          dots.onclick=function(ev){ var b=ev.target&&ev.target.closest?ev.target.closest('.hero-dot'):null; if(!b)return; ev.stopPropagation(); var i=Number(b.getAttribute('data-i')); if(isFinite(i)){ HI=i; try{drawHero()}catch(e){} } };
-        }
+          dots.onclick=function(ev){ var b=ev.target&&ev.target.closest?ev.target.closest('.hero-dot'):null; if(!b)return; ev.stopPropagation(); var i=Number(b.getAttribute('data-i')); if(isFinite(i)){ try{ if(typeof window.heroGoto==='function')window.heroGoto(i); else { HI=i; drawHero(); } }catch(e){} } };
+        } else if(old){ old.remove(); }
       }catch(e){}
       return r;
     };
