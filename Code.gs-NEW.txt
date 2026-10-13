@@ -359,6 +359,17 @@ function _ensureWelcome(c){
 
 A.loyaltyGet=d=>{var u=auth(d.t),c=_loyaltyCfg();return{points:_pts(u),first:_isFirstOrder(u.Phone),welcomeOn:!!c.welcomeOn,welcomePct:c.welcomePct,step:c.step,pctStep:c.pctStep,maxPct:c.maxPct}};
 
+A.loyaltyHistory=d=>{
+  var u=auth(d.t),out=[];
+  try{
+    out=rows('PointLog').filter(function(x){return pkey(x.Phone)==pkey(u.Phone)})
+      .sort(function(a,b){return Number(b.Date||0)-Number(a.Date||0)})
+      .slice(0,50)
+      .map(function(x){return {t:Number(x.Date||0),d:Number(x.Delta||0),r:String(x.Reason||'')}});
+  }catch(e){}
+  return {points:_pts(u),log:out};
+};
+
 A.pointsRedeem=d=>{
   var u=auth(d.t),c=_loyaltyCfg(),bal=_pts(u);
   var units=Math.floor(bal/c.step),maxUnits=Math.floor(c.maxPct/c.pctStep);

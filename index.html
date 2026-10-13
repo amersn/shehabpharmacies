@@ -2024,3 +2024,324 @@ html.dark .search-card img.ic{background:#141c30}
   try{applyCards()}catch(e){}
 })();
 </script>
+<style>
+/* ===== المرحلة 2: خط زمني للأوردر + سجل النقاط + زر مشاركة ===== */
+.ord-steps{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:8px;font-size:10.5px;line-height:1.4}
+.ord-step{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:20px;background:#eef2fb;color:#5b6784;white-space:nowrap}
+.ord-step i{width:7px;height:7px;border-radius:50%;background:#c2cbdd;display:inline-block}
+.ord-step.done{background:#e7f6ec;color:#1f7a3d}
+.ord-step.done i{background:#2e9e4f}
+.ord-step.on{background:#0b2a6f;color:#fff}
+.ord-step.on i{background:#fff}
+.ord-step.bad{background:#fdeaea;color:#b3261e}
+.ord-step.bad.on{background:#d32f2f;color:#fff}
+html.dark .ord-step{background:#1b2338;color:#9aa6c2}
+html.dark .ord-step.done{background:#16301f;color:#7fd39a}
+html.dark .ord-step.on{background:#4f74d8;color:#fff}
+.ord-arrow{color:#9aa6c2}
+.pt-log{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eef1f7;font-size:13px}
+.pt-log .pos{color:#1f7a3d;font-weight:700}
+.pt-log .neg{color:#b3261e;font-weight:700}
+.pt-log small{color:#8b93a6}
+html.dark .pt-log{border-color:#232d49}
+.share-img-btn{margin-top:10px}
+@media print{.ord-steps{display:none}}
+</style>
+<script>
+/* ===== المرحلة 2: نغمة لكل حالة أوردر + خط زمني + سجل نقاط + مشاركة كصورة + طباعة/تصدير CSV ===== */
+(function(){
+  'use strict';
+  function G(id){return document.getElementById(id)}
+  function T(msg,k){ try{ if(typeof toast==='function')toast(msg,k); else if(window.toast)window.toast(msg,k) }catch(e){} }
+  function H(ms){ try{ if(typeof haptic==='function')haptic(ms||8) }catch(e){} }
+
+  /* ============ (26) نغمة مختلفة لكل حالة أوردر (للموظفين) ============ */
+  var AC=null;
+  function seqFor(status){
+    return {
+      new:[[880,0,.11],[1175,.12,.12]],
+      ordered:[[660,0,.13],[880,.14,.13]],
+      arrived:[[740,0,.11],[880,.12,.11],[1046,.24,.13]],
+      delivering:[[523,0,.13],[659,.14,.13],[523,.29,.13]],
+      done:[[659,0,.10],[880,.11,.10],[1175,.22,.14]],
+      unavailable:[[330,0,.22],[247,.24,.30]]
+    }[status]||[[700,0,.14]];
+  }
+  function playStatus(status){
+    try{
+      var C=window.AudioContext||window.webkitAudioContext; if(!C)return;
+      if(!AC)AC=new C();
+      if(AC.state==='suspended'){ try{AC.resume()}catch(e){} }
+      var t0=AC.currentTime+0.01;
+      seqFor(status).forEach(function(n){
+        var o=AC.createOscillator(),g=AC.createGain();
+        o.type='sine'; o.frequency.value=n[0];
+        g.gain.setValueAtTime(0.0001,t0+n[1]);
+        g.gain.exponentialRampToValueAtTime(0.30,t0+n[1]+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,t0+n[1]+n[2]);
+        o.connect(g); g.connect(AC.destination);
+        o.start(t0+n[1]); o.stop(t0+n[1]+n[2]+0.03);
+      });
+    }catch(e){}
+  }
+  window.playStatusTone=playStatus;
+
+  var lastStat={};
+  function isStaffRole(){ try{ return (typeof S!=='undefined')&&(S.r==='manager'||S.r==='pharmacist'||S.r==='assistant') }catch(e){ return false } }
+  function watchStatuses(){
+    try{
+      if(!isStaffRole())return;
+      if(typeof O==='undefined'||!O)return;
+      O.forEach(function(o){
+        var id=String(o.id),st=String(o.s||'');
+        if(lastStat[id]!==undefined && lastStat[id]!==st)playStatus(st);
+        lastStat[id]=st;
+      });
+    }catch(e){}
+  }
+  setInterval(watchStatuses,8000);
+
+  try{
+    var baseUpd=upd;
+    upd=async function(id,b){
+      var newStatus=(G('ms')&&G('ms').value)||'';
+      var r=await baseUpd.apply(this,arguments);
+      try{ if(newStatus){ playStatus(newStatus); lastStat[String(id)]=newStatus } }catch(e){}
+      return r;
+    };
+  }catch(e){}
+
+  /* ============ (14) خط زمني لحالة الأوردر ============ */
+  var FLOW=['new','ordered','arrived','delivering','done'];
+  function stepsHTML(o){
+    var st=String(o.s||'new');
+    if(st==='unavailable')return '<div class="ord-steps"><span class="ord-step bad on">✕ '+esc((ST.unavailable||['مش متوفر'])[0])+'</span></div>';
+    var flow=FLOW.slice();
+    if(o.m!=='delivery')flow=flow.filter(function(x){return x!=='delivering'});
+    var cur=flow.indexOf(st); if(cur<0)cur=0;
+    return '<div class="ord-steps">'+flow.map(function(k,i){
+      var cls='ord-step'+(i<cur?' done':(i===cur?' on':''));
+      return '<span class="'+cls+'"><i></i>'+esc((ST[k]||[k])[0])+'</span>';
+    }).join('<span class="ord-arrow">←</span>')+'</div>';
+  }
+  try{
+    var baseMine=drawMine;
+    drawMine=function(L){
+      var r=baseMine.apply(this,arguments);
+      try{
+        var box=G('ls');
+        if(box){
+          var cards=box.querySelectorAll('.card[data-oid]');
+          for(var i=0;i<cards.length;i++){
+            var id=cards[i].getAttribute('data-oid');
+            var o=(L||[]).find? (L||[]).find(function(x){return String(x.id)===String(id)}) : null;
+            if(o&&!cards[i].querySelector('.ord-steps'))cards[i].insertAdjacentHTML('beforeend',stepsHTML(o));
+          }
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+  try{
+    var baseOpenO=openO;
+    openO=function(id){
+      var r=baseOpenO.apply(this,arguments);
+      try{
+        var oO=(typeof O!=='undefined'&&O)?O.find(function(x){return String(x.id)===String(id)}):null;
+        var md=G('md');
+        if(oO&&md&&md.firstElementChild&&!md.querySelector('.ord-steps'))md.firstElementChild.insertAdjacentHTML('afterbegin',stepsHTML(oO));
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+
+  /* ============ (19) مشاركة العرض / السلة كصورة ============ */
+  function loadImg(src){return new Promise(function(res){ if(!src)return res(null); var im=new Image(); im.crossOrigin='anonymous'; im.onload=function(){res(im)}; im.onerror=function(){res(null)}; im.src=src; });}
+  function wrapText(x,text,maxW){var words=String(text||'').split(/\s+/),line='',lines=[];for(var i=0;i<words.length;i++){var t=line?line+' '+words[i]:words[i];if(x.measureText(t).width>maxW&&line){lines.push(line);line=words[i]}else line=t}if(line)lines.push(line);return lines}
+  function roundRect(x,l,t,w,h,r){x.beginPath();x.moveTo(l+r,t);x.arcTo(l+w,t,l+w,t+h,r);x.arcTo(l+w,t+h,l,t+h,r);x.arcTo(l,t+h,l,t,r);x.arcTo(l,t,l+w,t,r);x.closePath()}
+  async function buildShareImage(title,rows,imgSrc){
+    var W=1080,Hh=1350,c=document.createElement('canvas');c.width=W;c.height=Hh;var x=c.getContext('2d');
+    var g=x.createLinearGradient(0,0,0,Hh);g.addColorStop(0,'#0b2a6f');g.addColorStop(1,'#123a8f');x.fillStyle=g;x.fillRect(0,0,W,Hh);
+    x.fillStyle='#fff';x.font='bold 46px sans-serif';x.textAlign='center';x.fillText('صيدليات شهاب',W/2,110);
+    x.font='27px sans-serif';x.fillStyle='#cdd9f5';x.fillText('خدمة عملاء سريعة · توصيل واستلام',W/2,158);
+    var logo=await loadImg(LOGO); if(logo){ try{x.drawImage(logo,W/2-70,190,140,140)}catch(e){} }
+    var cardY=360,cardH=Hh-cardY-150;
+    x.fillStyle='#ffffff';roundRect(x,70,cardY,W-140,cardH,28);x.fill();
+    var y=cardY+72;
+    x.textAlign='right';x.fillStyle='#14213d';x.font='bold 50px sans-serif';
+    wrapText(x,title,W-260).slice(0,2).forEach(function(l){x.fillText(l,W-130,y);y+=62});
+    var pic=await loadImg(imgSrc);
+    if(pic){ try{ y+=14; var ph=280; x.drawImage(pic,W-130-ph,y,ph,ph); y+=ph+24 }catch(e){} }
+    x.font='34px sans-serif';x.fillStyle='#3a4a6b';
+    rows.forEach(function(r){ x.fillText(r,W-130,y); y+=52 });
+    x.textAlign='center';x.fillStyle='#cdd9f5';x.font='26px sans-serif';
+    x.fillText('للطلب: واتساب أو من التطبيق',W/2,Hh-76);
+    return c;
+  }
+  function shareCanvas(canvas,filename,text){
+    try{
+      canvas.toBlob(async function(blob){
+        if(!blob)return;
+        var file=new File([blob],filename,{type:'image/png'});
+        try{ if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:text||''}); return } }catch(e){}
+        var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+        setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+        T('تم تنزيل صورة المشاركة ✔','ok');
+      },'image/png',0.95);
+    }catch(e){ T('تعذر إنشاء الصورة','bad') }
+  }
+  window.shareOfferImage=async function(id){
+    try{
+      var o=(typeof OF!=='undefined'&&OF)?OF.find(function(v){return String(v.id)===String(id)}):null; if(!o)return;
+      T('جاري تجهيز الصورة…');
+      var rows=[]; if(o.p)rows.push('السعر: '+o.p+' جنيه'); if(o.w)rows.push('قبل الخصم: '+o.w+' جنيه'); if(o.x)rows.push(String(o.x).slice(0,80));
+      var c=await buildShareImage(o.t||'عرض',rows,o.ic||LOGO);
+      shareCanvas(c,'shehab-offer-'+id+'.png',(o.t||'عرض')+' — صيدليات شهاب');
+    }catch(e){ T('تعذر المشاركة','bad') }
+  };
+  window.shareCartImage=async function(){
+    try{
+      if(typeof CART==='undefined'||!CART.length){ T('السلة فاضية','bad'); return }
+      T('جاري تجهيز الصورة…');
+      var rows=CART.slice(0,8).map(function(x){return '• '+(x.t||x.id)+' × '+x.qty});
+      var c=await buildShareImage('سلة طلبي',rows,CART[0]&&CART[0].ic);
+      shareCanvas(c,'shehab-cart.png','سلة طلبي من صيدليات شهاب');
+    }catch(e){ T('تعذر المشاركة','bad') }
+  };
+  try{
+    var baseOfferV=offerV;
+    offerV=function(id,fromCache){
+      var r=baseOfferV.apply(this,arguments);
+      try{
+        var d=G('app')&&G('app').querySelector('.offer-detail');
+        if(d&&!d.querySelector('.share-img-btn')){
+          var b=document.createElement('button');b.type='button';b.className='g share-img-btn';b.textContent='🖼️ شارك العرض كصورة';
+          b.addEventListener('click',function(ev){ev.stopPropagation();H();window.shareOfferImage(id)});
+          d.appendChild(b);
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+  try{
+    var baseCartV=cartV;
+    cartV=function(){
+      var r=baseCartV.apply(this,arguments);
+      try{
+        if(G('app')&&!G('shareCartBtn')){
+          var b=document.createElement('button');b.type='button';b.id='shareCartBtn';b.className='g';b.textContent='🖼️ شارك السلة كصورة';
+          b.addEventListener('click',function(ev){ev.stopPropagation();H();window.shareCartImage()});
+          var est=G('cartEstimate'); if(est)est.insertAdjacentElement('afterend',b);
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+
+  /* ============ (22) طباعة + تصدير CSV (للموظفين) ============ */
+  function csvEsc(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
+  function downloadFile(name,content,mime){
+    try{
+      var blob=new Blob([content],{type:mime||'text/plain;charset=utf-8'});
+      var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+      setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+    }catch(e){ T('تعذر التنزيل','bad') }
+  }
+  window.exportOrdersCSV=function(){
+    try{
+      var L=(typeof O!=='undefined'&&O)?O.slice():[];
+      var head=['رقم الطلب','الصنف','العميل','التليفون','الحالة','الوقت','الطريقة','العنوان','الإجمالي'];
+      var lines=[head.map(csvEsc).join(',')];
+      L.forEach(function(o){
+        var t=ST[o.s]||ST.new;
+        lines.push([o.id,o.i,o.c,o.p,t[0],o.d?new Date(o.d).toLocaleString('ar-EG'):'',o.m=='delivery'?'توصيل':'استلام من الصيدلية',o.a||'',o.total||''].map(csvEsc).join(','));
+      });
+      downloadFile('shehab-orders-'+new Date().toISOString().slice(0,10)+'.csv','\uFEFF'+lines.join('\r\n'),'text/csv;charset=utf-8');
+      T('تم تصدير الطلبات ✔','ok');
+    }catch(e){ T('تعذر التصدير','bad') }
+  };
+  window.printOrders=function(){
+    try{
+      var L=(typeof O!=='undefined'&&O)?O.slice():[];
+      var rows=L.map(function(o){var t=ST[o.s]||ST.new;return '<tr><td>'+esc(o.id)+'</td><td>'+esc(o.i)+'</td><td>'+esc(o.c)+'</td><td dir="ltr">'+esc(o.p)+'</td><td>'+esc(t[0])+'</td><td dir="ltr">'+(o.d?esc(new Date(o.d).toLocaleString('ar-EG')):'')+'</td></tr>'}).join('');
+      var w=window.open('','_blank');
+      if(!w){ T('المتصفح منع نافذة الطباعة','bad'); return }
+      w.document.write('<html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>طلبات صيدليات شهاب</title><style>body{font-family:sans-serif;padding:16px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #999;padding:6px;text-align:right}h2{text-align:center;color:#0b2a6f}</style></head><body><h2>طلبات صيدليات شهاب — '+esc(new Date().toLocaleString('ar-EG'))+'</h2><table><thead><tr><th>رقم</th><th>الصنف</th><th>العميل</th><th>التليفون</th><th>الحالة</th><th>الوقت</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');
+      w.document.close(); setTimeout(function(){try{w.print()}catch(e){}},400);
+    }catch(e){ T('تعذر الطباعة','bad') }
+  };
+  window.printOneOrder=function(id){
+    try{
+      var o=(typeof O!=='undefined'&&O)?O.find(function(x){return String(x.id)===String(id)}):null; if(!o)return;
+      var t=ST[o.s]||ST.new;
+      var w=window.open('','_blank'); if(!w){ T('المتصفح منع نافذة الطباعة','bad'); return }
+      w.document.write('<html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>بون '+esc(o.id)+'</title><style>body{font-family:sans-serif;padding:20px;max-width:420px;margin:auto}h2{text-align:center;color:#0b2a6f}div{margin:6px 0;font-size:15px}hr{border:none;border-top:1px dashed #999}</style></head><body><h2>صيدليات شهاب</h2><hr><div>رقم الطلب: <b>'+esc(o.id)+'</b></div><div>الصنف: '+esc(o.i)+'</div><div>العميل: '+esc(o.c)+'</div><div>التليفون: <span dir="ltr">'+esc(o.p)+'</span></div><div>الحالة: '+esc(t[0])+'</div><div>الطريقة: '+(o.m=='delivery'?'توصيل':'استلام من الصيدلية')+'</div>'+(o.a?'<div>العنوان: '+esc(o.a)+'</div>':'')+(o.total?'<div>الإجمالي: '+esc(o.total)+' جنيه</div>':'')+'<div>التاريخ: <span dir="ltr">'+esc(o.d?new Date(o.d).toLocaleString('ar-EG'):'')+'</span></div><hr><div style="text-align:center">شكرًا لتعاملكم معنا</div></body></html>');
+      w.document.close(); setTimeout(function(){try{w.print()}catch(e){}},400);
+    }catch(e){ T('تعذر الطباعة','bad') }
+  };
+  try{
+    var baseListV=listV;
+    listV=function(){
+      var r=baseListV.apply(this,arguments);
+      try{
+        var head=G('app')&&G('app').querySelector('.list-head');
+        if(head&&!G('ordTools')){
+          var bar=document.createElement('div');bar.id='ordTools';bar.className='row';bar.style.margin='6px 0';
+          bar.innerHTML='<button type="button" class="g" id="ordCsvBtn">📊 تصدير CSV</button><button type="button" class="g" id="ordPrintBtn">🖨️ طباعة</button>';
+          head.insertAdjacentElement('afterend',bar);
+          if(G('ordCsvBtn'))G('ordCsvBtn').addEventListener('click',window.exportOrdersCSV);
+          if(G('ordPrintBtn'))G('ordPrintBtn').addEventListener('click',window.printOrders);
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+  try{
+    var baseOpenO2=openO;
+    openO=function(id){
+      var r=baseOpenO2.apply(this,arguments);
+      try{
+        var md=G('md');
+        if(md&&md.firstElementChild&&!md.querySelector('.printOneBtn')){
+          var b=document.createElement('button');b.type='button';b.className='g printOneBtn';b.textContent='🖨️ طباعة البون';
+          b.addEventListener('click',function(){window.printOneOrder(id)});
+          md.firstElementChild.appendChild(b);
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+
+  /* ============ (16) سجل النقاط ============ */
+  function buildPointsHistory(){
+    try{
+      var box=G('profile'); if(!box||G('ptHistCard'))return;
+      if(!(typeof S!=='undefined'&&S.r==='customer'))return;
+      box.insertAdjacentHTML('beforeend','<div class="card" id="ptHistCard"><b>📜 سجل النقاط</b><div class="rating-note">اعرف كل حركات نقاطك (مكسب واستبدال).</div><button class="g" id="ptHistBtn" style="width:auto;margin-top:6px">اعرض السجل</button><div id="ptHistBox"></div></div>');
+      var b=G('ptHistBtn'); if(!b)return;
+      b.addEventListener('click',async function(){
+        b.disabled=true;b.textContent='جاري التحميل…';
+        try{
+          var d=await call('loyaltyHistory');
+          var L=(d&&d.log)||[];
+          var box2=G('ptHistBox');
+          if(!L.length)box2.innerHTML='<div class="rating-note">مفيش حركات نقاط لسه.</div>';
+          else box2.innerHTML='<div style="margin-top:6px">'+L.map(function(x){
+            var plus=Number(x.d)>=0;
+            return '<div class="pt-log"><span>'+esc(x.r||'نقاط')+'</span><span dir="ltr" class="'+(plus?'pos':'neg')+'">'+(plus?'+':'')+Number(x.d)+'</span><small dir="ltr">'+(x.t?new Date(x.t).toLocaleDateString('ar-EG'):'')+'</small></div>';
+          }).join('')+'</div>';
+          b.textContent='تحديث السجل';b.disabled=false;
+        }catch(e){ T(em(e),'bad'); b.disabled=false; b.textContent='اعرض السجل'; }
+      });
+    }catch(e){}
+  }
+  try{
+    var baseProf2=profileV;
+    profileV=async function(){
+      var r=await baseProf2.apply(this,arguments);
+      try{buildPointsHistory()}catch(e){}
+      return r;
+    };
+  }catch(e){}
+})();
+</script>
