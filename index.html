@@ -327,7 +327,7 @@ function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav
 function navGo(t){try{if(t==='home')homeV();else if(t==='off')offV();else if(t==='mine'){if(S.r==='customer')mineV();else listV()}else if(t==='profile')profileV()}catch(e){}navSync()}
 function navFab(){try{if(S.r==='customer')ordV();else addV()}catch(e){}navSync()}
 function navCount(){}
-function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off',secItem:'off',mydata:'profile',notifSettings:'profile'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
+function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off',secItem:'off',mydata:'profile',notifSettings:'profile',search:'home'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
 window.navGo=navGo;window.navFab=navFab;window.navSync=navSync;
 try{var cbBase=cartBadge;cartBadge=function(){cbBase();navCount()}}catch(e){}
 function watchApp(){var ap=q('app');if(!ap||!window.MutationObserver)return;new MutationObserver(function(){navSync()}).observe(ap,{childList:true,subtree:false});var t=0;new MutationObserver(function(){if(t)return;t=setTimeout(function(){t=0;injectRepeat()},90)}).observe(ap,{childList:true,subtree:true})}
@@ -494,6 +494,7 @@ try{
         else if(v==='secItem'){ try{ if(window.__shLastSecItemId&&typeof window.secItemV==='function')window.secItemV(window.__shLastSecItemId); else homeV() }catch(_e){ homeV() } }
         else if(v==='mydata'){ try{ if(typeof window.myDataV==='function')window.myDataV(); else profileV() }catch(_e){ profileV() } }
         else if(v==='notifSettings'){ try{ if(typeof window.notifSettingsV==='function')window.notifSettingsV(); else profileV() }catch(_e){ profileV() } }
+        else if(v==='search'){ try{ if(typeof window.searchV==='function')window.searchV(window.__shLastSearch||''); else homeV() }catch(_e){ homeV() } }
         else if(v==='cart')cartV();
         else if(v==='monthly')monthlyV();
         else if(v==='monthlyAll')monthlyAdminV();
@@ -1791,5 +1792,235 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       return r;
     };
   }
+})();
+</script>
+<style>
+/* ===== المرحلة 1: زووم الصور + سكيلتون + نقاط السلايدر + شكل الكروت ===== */
+#imgZoom{position:fixed;inset:0;z-index:10050;background:#000000e8;display:flex;align-items:center;justify-content:center;padding:14px}
+#imgZoom[hidden]{display:none}
+#imgZoom img{max-width:96vw;max-height:90vh;object-fit:contain;border-radius:12px;background:#0b1020}
+#imgZoomClose{position:absolute;top:14px;inset-inline-end:14px;width:46px;height:46px;border:0;border-radius:50%;background:#ffffff26;color:#fff;font-size:22px;line-height:1;cursor:pointer}
+img.zoomable,.offer-detail img,.sec-screen-head img,.offer-card img.ic,.sec-item img.ic{cursor:zoom-in}
+.skel{background:linear-gradient(90deg,#e7ecf7 25%,#f4f7fd 37%,#e7ecf7 63%);background-size:400% 100%;animation:skelShine 1.15s ease-in-out infinite;border-radius:10px}
+html.dark .skel{background:linear-gradient(90deg,#1a2236 25%,#232d49 37%,#1a2236 63%);background-size:400% 100%}
+@keyframes skelShine{0%{background-position:100% 0}100%{background-position:0 0}}
+.skel-line{height:13px;margin:9px 0;width:72%}
+.skel-line.short{width:42%}
+.skel-card{height:118px;margin:12px 0}
+.hero-dots{display:flex;gap:7px;justify-content:center;margin-top:10px}
+.hero-dot{width:8px;height:8px;padding:0;border:0;border-radius:50%;background:#bcc7db;cursor:pointer;transition:width .2s}
+.hero-dot.on{width:22px;border-radius:5px;background:var(--b,#0b2a6f)}
+html.dark .hero-dot{background:#3a4665}
+html.dark .hero-dot.on{background:var(--b,#4f74d8)}
+.cardshape{margin:12px 0 4px}
+.cardshape-opts{display:flex;gap:8px;margin-top:6px}
+.cardshape-btn{width:auto;flex:1 1 0;font-size:13px;padding:9px 6px}
+.cardshape-btn.on{outline:2px solid var(--b,#0b2a6f);outline-offset:1px}
+.cards-round .card{border-radius:22px}
+.cards-glass .card{background:rgba(255,255,255,.74);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);border-color:rgba(255,255,255,.65);box-shadow:0 8px 24px #0b2a6f1f}
+html.dark .cards-glass .card{background:rgba(20,28,48,.74);border-color:rgba(120,140,190,.35)}
+.search-card{display:flex;flex-direction:column;gap:4px;cursor:pointer}
+.search-card img.ic{width:100%;height:120px;object-fit:contain;border-radius:10px;background:#f4f7fd}
+html.dark .search-card img.ic{background:#141c30}
+.hero-card img{cursor:pointer}
+</style>
+<script>
+/* ===== المرحلة 1: زووم الصور + lazy-load + اهتزاز + سكيلتون + بحث + شكل الكروت + نقاط السلايدر ===== */
+(function(){
+  'use strict';
+  function G(id){return document.getElementById(id)}
+
+  /* ---------- (2) زووم الصورة (lightbox) ---------- */
+  function ensureZoom(){
+    var z=G('imgZoom'); if(z)return z;
+    z=document.createElement('div'); z.id='imgZoom'; z.hidden=true;
+    z.innerHTML='<button type="button" id="imgZoomClose" aria-label="إغلاق">✕</button><img id="imgZoomPic" alt="">';
+    document.body.appendChild(z);
+    z.addEventListener('click',function(){ z.hidden=true; var p=G('imgZoomPic'); if(p)p.removeAttribute('src'); });
+    return z;
+  }
+  function zoomImg(src,alt){ if(!src)return; var z=ensureZoom(); G('imgZoomPic').src=src; G('imgZoomPic').alt=alt||''; z.hidden=false; }
+  window.zoomImg=zoomImg;
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(!t||t.tagName!=='IMG')return;
+    if(t.id==='imgZoomPic')return;
+    if(t.closest&&t.closest('.hero-card'))return; /* كارت السلايدر بيفتح العرض زي ما هو */
+    var zoom=false;
+    if(t.classList&&t.classList.contains('zoomable'))zoom=true;
+    else if(t.closest&&(t.closest('.offer-detail')||t.closest('.sec-screen-head')))zoom=true;
+    else if(t.closest&&t.classList&&t.classList.contains('ic')&&(t.closest('.offer-card')||t.closest('.sec-item')))zoom=true;
+    if(!zoom)return;
+    e.preventDefault(); e.stopPropagation();
+    zoomImg(t.getAttribute('src'),t.getAttribute('alt'));
+  },true);
+
+  /* ---------- (29) تحميل الصور بالتدريج ---------- */
+  function lazyify(root){
+    try{
+      var imgs=(root===document)?Array.prototype.slice.call(document.images):(root.querySelectorAll?Array.prototype.slice.call(root.querySelectorAll('img')):[]);
+      for(var i=0;i<imgs.length;i++){
+        var im=imgs[i];
+        if(im.id==='imgZoomPic')continue;
+        if(!im.getAttribute('loading'))im.setAttribute('loading','lazy');
+        if(!im.getAttribute('decoding'))im.setAttribute('decoding','async');
+      }
+    }catch(e){}
+  }
+
+  /* ---------- (27) السكيلتون بدل «جاري التحميل…» ---------- */
+  function skeletonEl(el){
+    try{
+      if(!el||el.nodeType!==1||el.children.length)return;
+      var tx=(el.textContent||'').trim();
+      if(tx==='جاري التحميل…'||tx==='جاري التحميل...'){
+        el.classList.add('skeleton-holder');
+        el.innerHTML='<div class="skel skel-line"></div><div class="skel skel-line short"></div><div class="skel skel-card"></div>';
+      }
+    }catch(e){}
+  }
+  function skeletonScan(root){
+    try{
+      if(root.nodeType===3){ skeletonEl(root.parentNode); return; }
+      if(root.nodeType!==1)return;
+      skeletonEl(root);
+      var list=root.querySelectorAll?root.querySelectorAll('div,small,section,span'):[];
+      for(var i=0;i<list.length;i++)skeletonEl(list[i]);
+    }catch(e){}
+  }
+
+  /* ---------- (28) اهتزاز خفيف ---------- */
+  var HAPTIC=true; try{HAPTIC=localStorage.getItem('shehab_haptic')!=='0'}catch(e){}
+  function haptic(ms){ if(!HAPTIC)return; try{if(navigator.vibrate)navigator.vibrate(ms||10)}catch(e){} }
+  window.haptic=haptic;
+  document.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest?e.target.closest('button,[role="button"],.swatch,.sec-item,.offer-card,.hero-card'):null;
+    if(t)haptic(8);
+  },true);
+
+  /* ---------- مراقبة الـ DOM: تطبيق lazy + skeleton على الجديد ---------- */
+  try{
+    var ap=G('app');
+    if(ap&&window.MutationObserver){
+      new MutationObserver(function(muts){
+        for(var i=0;i<muts.length;i++){
+          var added=muts[i].addedNodes;
+          for(var j=0;j<added.length;j++){
+            var n=added[j];
+            if(n&&n.nodeType===1){ lazyify(n); skeletonScan(n); }
+            else if(n&&n.nodeType===3){ skeletonScan(n); }
+          }
+        }
+      }).observe(ap,{childList:true,subtree:true});
+    }
+    lazyify(document); skeletonScan(document.body);
+  }catch(e){}
+
+  /* ---------- (13) بحث فوري ---------- */
+  var SR_SEC=null;
+  async function loadSearchData(){
+    try{ if(!(typeof OF!=='undefined'&&OF&&OF.length)){ OF=await callC('offers'); } }catch(e){}
+    try{ if(!SR_SEC){ SR_SEC=await call('sections')||[]; } }catch(e){}
+  }
+  function allSearchItems(){
+    var out=[];
+    try{(OF||[]).forEach(function(o){ out.push({kind:'offer',id:o.id,t:o.t,p:o.p,w:o.w,ic:o.ic}) })}catch(e){}
+    try{(SR_SEC||[]).forEach(function(s){(s.items||[]).forEach(function(it){ out.push({kind:'sec',id:it.id,t:it.t,p:it.p,w:it.w,ic:it.ic,secName:s.name}) })})}catch(e){}
+    return out;
+  }
+  function runSearch(q){
+    var box=G('searchRes'); if(!box)return;
+    q=String(q||'').trim();
+    if(!q){ box.innerHTML='<small>اكتب اسم صنف أو عرض، وهتلاقيه على طول.</small>'; return; }
+    var needle=q.toLowerCase();
+    var res=allSearchItems().filter(function(x){ return String(x.t||'').toLowerCase().indexOf(needle)>-1; });
+    if(!res.length){ box.innerHTML='<div class="card">مفيش نتايج لـ «'+esc(q)+'»</div>'; return; }
+    box.innerHTML=res.slice(0,60).map(function(x){
+      var price=x.p?('<div class="p">'+esc(x.p)+' <small>جنيه</small></div>'):'';
+      var was=x.w?('<div class="offer-was">'+esc(x.w)+' جنيه</div>'):'';
+      var click=x.kind==='offer'?("offerV('"+esc(x.id)+"')"):("secItemV('"+esc(x.id)+"')");
+      return '<div class="card search-card" onclick="'+click+'">'+(x.ic?'<img class="ic" src="'+esc(x.ic)+'">':'')+'<b>'+esc(x.t)+'</b>'+price+was+(x.kind==='sec'&&x.secName?'<small style="color:#7b8495">🗂️ '+esc(x.secName)+'</small>':'')+'</div>';
+    }).join('');
+  }
+  function searchV(q){
+    V='search'; try{window.__shLastSearch=String(q||'')}catch(e){}
+    app('<h2>🔎 بحث</h2><input id="searchQ" type="search" placeholder="ابحث عن صنف أو عرض…" autocomplete="off"><div id="searchRes"></div>');
+    var inp=G('searchQ');
+    if(inp){ inp.value=q||''; inp.addEventListener('input',function(){ runSearch(inp.value) }); try{inp.focus()}catch(e){} }
+    runSearch(q||'');
+    loadSearchData().then(function(){ var i=G('searchQ'); runSearch(i?i.value:'') });
+  }
+  window.searchV=searchV;
+
+  /* زر بحث في شريط الرئيسية */
+  try{
+    var baseHome=homeV;
+    homeV=function(){
+      var r=baseHome.apply(this,arguments);
+      try{
+        var ta=document.querySelector('#app .top-actions');
+        if(ta&&!G('searchBtn')){
+          var b=document.createElement('button');
+          b.type='button'; b.className='g person'; b.id='searchBtn'; b.setAttribute('aria-label','بحث'); b.title='بحث'; b.textContent='🔎';
+          b.addEventListener('click',function(){searchV()});
+          ta.appendChild(b);
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+
+  /* ---------- (6) نقاط سلايدر الرئيسية ---------- */
+  try{
+    var baseHero=drawHero;
+    drawHero=function(){
+      var r=baseHero.apply(this,arguments);
+      try{
+        var a=featuredOffers(),box=G('of');
+        if(box&&a.length){
+          var dots=document.querySelector('#of .hero-dots');
+          if(!dots){ dots=document.createElement('div'); dots.className='hero-dots'; box.appendChild(dots); }
+          var html='';
+          for(var i=0;i<a.length;i++) html+='<button type="button" class="hero-dot'+(i===HI?' on':'')+'" data-i="'+i+'" aria-label="عرض '+(i+1)+'"></button>';
+          dots.innerHTML=html;
+          dots.onclick=function(ev){ var b=ev.target&&ev.target.closest?ev.target.closest('.hero-dot'):null; if(!b)return; ev.stopPropagation(); var i=Number(b.getAttribute('data-i')); if(isFinite(i)){ HI=i; try{drawHero()}catch(e){} } };
+        }
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
+
+  /* ---------- (12) شكل الكروت ---------- */
+  function cardsNow(){try{return localStorage.getItem('shehab_cards')||'normal'}catch(e){return 'normal'}}
+  function applyCards(){
+    var d=document.documentElement,v=cardsNow();
+    d.classList.toggle('cards-round',v==='round');
+    d.classList.toggle('cards-glass',v==='glass');
+    var l=document.querySelectorAll('.cardshape-btn');
+    for(var i=0;i<l.length;i++)l[i].classList.toggle('on',l[i].getAttribute('data-cs')===v);
+  }
+  function setCards(v){ try{localStorage.setItem('shehab_cards',v)}catch(e){} applyCards(); haptic(10); }
+  window.setCards=setCards;
+  function buildCardShape(){
+    try{
+      var box=G('appearanceBox'); if(!box||G('cardShapeRow'))return;
+      var row=document.createElement('div'); row.id='cardShapeRow'; row.className='cardshape';
+      row.innerHTML="<small>شكل الكروت</small><div class='cardshape-opts'>"+
+        "<button type='button' class='g cardshape-btn' data-cs='normal'>▭ عادي</button>"+
+        "<button type='button' class='g cardshape-btn' data-cs='round'>⬭ دائري</button>"+
+        "<button type='button' class='g cardshape-btn' data-cs='glass'>✦ زجاجي</button></div>";
+      box.appendChild(row);
+      row.addEventListener('click',function(ev){ var b=ev.target&&ev.target.closest?ev.target.closest('.cardshape-btn'):null; if(!b)return; ev.stopPropagation(); setCards(b.getAttribute('data-cs')); });
+    }catch(e){}
+  }
+  try{
+    var baseProf=profileV;
+    profileV=async function(){
+      var r=await baseProf.apply(this,arguments);
+      try{buildCardShape(); applyCards()}catch(e){}
+      return r;
+    };
+  }catch(e){}
+  try{applyCards()}catch(e){}
 })();
 </script>
