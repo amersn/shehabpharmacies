@@ -45,7 +45,7 @@ function lsGet(a){try{const s=localStorage.getItem('shc_'+a);if(!s)return null;c
 function lsSet(a,o){try{const s=JSON.stringify(o);if(s&&s.length<2500000)localStorage.setItem('shc_'+a,s)}catch(e){}}
 function lsDel(a){try{localStorage.removeItem('shc_'+a)}catch(e){}}
 function cGet(a){return RC[a]||lsGet(a)}
-function bustCaches(a){const cls=[];if(['corder','cartOrder','add','upd','cancelOrder','deleteOrder','reset','broadcast'].indexOf(a)>-1)cls.push('list','mine');if(['osave','odel','feature','rate'].indexOf(a)>-1)cls.push('offers');if(a=='mine'||a=='list'||a=='offers')cls.push(a);cls.forEach(k=>{delete RC[k];lsDel(k)})}
+function bustCaches(a){const cls=[];if(['corder','cartOrder','add','upd','cancelOrder','deleteOrder','reset','broadcast'].indexOf(a)>-1)cls.push('list','mine');if(['osave','odel','feature','rate'].indexOf(a)>-1)cls.push('offers');if(['secSave','secItemSave','secDel','secSetActive','secItemMove','secItemDel'].indexOf(a)>-1)cls.push('sections');if(a=='mine'||a=='list'||a=='offers'||a=='sections')cls.push(a);cls.forEach(k=>{delete RC[k];lsDel(k)})}
 function refreshMine(){bustCaches('mine');mineV()}
 async function callC(a,o){const e=cGet(a);if(e&&Date.now()-e.t<45000)return e.v;try{const v=await call(a,o);const ent={t:Date.now(),v};RC[a]=ent;lsSet(a,ent);return v}catch(x){if(e)return e.v;throw x}}
 
@@ -1312,25 +1312,29 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   }
   function favHeart(id){
     var b=document.createElement('button');b.type='button';b.className='g fav-heart';
+    b.setAttribute('data-id',String(id));
     b.setAttribute('aria-label','إضافة إلى المفضلة');b.title='إضافة إلى المفضلة';
     var has=false; try{ has=FAVS.map(String).indexOf(String(id))>-1 }catch(e){}
     b.textContent=has?'♥':'♡';b.style.cssText='width:52px;font-size:24px;line-height:1;color:#cf3150;margin:0';
     b.addEventListener('click',function(e){e.stopPropagation();try{favToggle(id,b)}catch(x){}});
     return b;
   }
-  async function ensureFavs(){ try{ if(!Array.isArray(FAVS)||!FAVS.length){ var l=await call('favoriteList'); FAVS=Array.isArray(l)?l.map(String):FAVS } }catch(e){} }
-  var SEC_CACHE=[];
-  async function loadHomeSections(){
-    var box=G('homeSections'); if(!box)return;
-    if(!logged()){box.innerHTML='';return}
-    var list=[];
-    try{ list=await call('sections') }catch(e){ var b0=G('homeSections'); if(b0)b0.innerHTML=''; return }
-    var box2=G('homeSections'); if(!box2)return;
-    SEC_CACHE=Array.isArray(list)?list:[];
-    await ensureFavs();
-    if(!SEC_CACHE.length){box2.innerHTML='';return}
-    box2.innerHTML='';
-    SEC_CACHE.forEach(function(sec){
+  var FAVS_READY=false;
+  async function ensureFavs(){ if(FAVS_READY)return; try{ if(!Array.isArray(FAVS)||!FAVS.length){ var l=await call('favoriteList'); FAVS=Array.isArray(l)?l.map(String):FAVS } FAVS_READY=true }catch(e){} }
+  var SEC_CACHE=[],SEC_READY=false;
+  /* هيكل وهمي (سكيلتون) يظهر فورًا مكان الأقسام بدل الفراغ */
+  function secSkeletonHTML(){
+    var s='';
+    for(var k=0;k<2;k++){
+      s+='<div class="sec-wrap"><div class="sec-head"><h2><span class="skel skel-line" style="display:inline-block;width:150px;margin:0"></span></h2></div><div class="sec-items">';
+      for(var i=0;i<3;i++)s+='<div class="sec-item"><div class="skel skel-card" style="margin:0;height:92px"></div><div class="skel skel-line" style="width:72%"></div></div>';
+      s+='</div></div>';
+    }
+    return s;
+  }
+  function renderHomeSections(box,list){
+    box.innerHTML='';
+    (list||[]).forEach(function(sec){
       if(!sec||!sec.items||!sec.items.length)return;
       var wrap=document.createElement('div');wrap.className='sec-wrap';
       var head=document.createElement('div');head.className='sec-head';
@@ -1342,8 +1346,29 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var row=document.createElement('div');row.className='sec-items';
       sec.items.forEach(function(it){row.appendChild(secItemCard(it,sec.id))});
       wrap.appendChild(row);
-      box2.appendChild(wrap);
+      box.appendChild(wrap);
     });
+  }
+  function updateFavHearts(){
+    try{
+      var hs=document.querySelectorAll('.fav-heart[data-id]');
+      for(var i=0;i<hs.length;i++){
+        var has=FAVS.map(String).indexOf(String(hs[i].getAttribute('data-id')))>-1;
+        hs[i].textContent=has?'♥':'♡';
+      }
+    }catch(e){}
+  }
+  async function loadHomeSections(){
+    var box=G('homeSections'); if(!box)return;
+    if(!logged()){box.innerHTML='';return}
+    if(SEC_READY)renderHomeSections(box,SEC_CACHE); else box.innerHTML=secSkeletonHTML();
+    var favP=ensureFavs();                       /* المفضلة بتحمّل بالتوازي، مش بتوقف الأقسام */
+    var list;
+    try{ list=await callC('sections') }catch(e){ var b0=G('homeSections'); if(b0&&!SEC_READY)b0.innerHTML=''; return }
+    SEC_CACHE=Array.isArray(list)?list:[];
+    SEC_READY=true;
+    var box2=G('homeSections'); if(box2)renderHomeSections(box2,SEC_CACHE);
+    favP.then(function(){ updateFavHearts() }).catch(function(){});
   }
   /* ---------- شاشة قسم واحد لما تدوس «مشاهدة المزيد» ---------- */
   function secLayoutState(){try{return localStorage.getItem('shehab_sec_layout')==='grid'?'grid':'list'}catch(e){return 'list'}}
@@ -1386,7 +1411,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   }
   async function secScreenFetch(id){
     try{
-      var list=await call('sections'); SEC_CACHE=Array.isArray(list)?list:[];
+      var list=await callC('sections'); SEC_CACHE=Array.isArray(list)?list:[]; SEC_READY=true;
       var s=null; for(var i=0;i<SEC_CACHE.length;i++)if(String(SEC_CACHE[i].id)===String(id))s=SEC_CACHE[i];
       renderSecScreen(s,id);
     }catch(e){ var b=G('secScreenBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>'; }
@@ -1408,7 +1433,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var f=findSecItem(id);
     if(f){renderSecItem(f.it,f.sec);return}
     (async function(){
-      try{ var l=await call('sections'); SEC_CACHE=Array.isArray(l)?l:[]; var g=findSecItem(id); renderSecItem(g?g.it:null,g?g.sec:null) }
+      try{ var l=await callC('sections'); SEC_CACHE=Array.isArray(l)?l:[]; SEC_READY=true; var g=findSecItem(id); renderSecItem(g?g.it:null,g?g.sec:null) }
       catch(e){ var b=G('secItemBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>' }
     })();
   }
@@ -1653,7 +1678,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var r=await favPrev.apply(this,arguments);
       try{
         var box=G('favList'); if(!box||V!=='favorites')return r;
-        if(!SEC_CACHE.length){ try{ var l=await call('sections'); SEC_CACHE=Array.isArray(l)?l:[] }catch(e){} }
+        if(!SEC_CACHE.length){ try{ var l=await callC('sections'); SEC_CACHE=Array.isArray(l)?l:[]; SEC_READY=true }catch(e){} }
         await ensureFavs();
         var found=[];
         (SEC_CACHE||[]).forEach(function(s){(s.items||[]).forEach(function(it){ if(FAVS.map(String).indexOf(String(it.id))>-1) found.push({it:it,sec:s}) })});
@@ -1924,7 +1949,7 @@ html.dark .search-card img.ic{background:#141c30}
   var SR_SEC=null;
   async function loadSearchData(){
     try{ if(!(typeof OF!=='undefined'&&OF&&OF.length)){ OF=await callC('offers'); } }catch(e){}
-    try{ if(!SR_SEC){ SR_SEC=await call('sections')||[]; } }catch(e){}
+    try{ if(!SR_SEC){ SR_SEC=await callC('sections')||[]; } }catch(e){}
   }
   function allSearchItems(){
     var out=[];
