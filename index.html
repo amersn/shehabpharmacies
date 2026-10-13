@@ -50,7 +50,7 @@ function refreshMine(){bustCaches('mine');mineV()}
 async function callC(a,o){const e=cGet(a);if(e&&Date.now()-e.t<45000)return e.v;try{const v=await call(a,o);const ent={t:Date.now(),v};RC[a]=ent;lsSet(a,ent);return v}catch(x){if(e)return e.v;throw x}}
 
 const fmt=(t,o)=>new Date(t).toLocaleString('ar-EG',o);
-const out=()=>{LS.clear();S={t:'',n:'',r:''};authV()};let OF=[],MD='',IC,DP,HI=0,ORIGIN='home';
+const out=()=>{LS.clear();S={t:'',n:'',r:''};try{if(window.__shResetCatalog)window.__shResetCatalog()}catch(e){};authV()};let OF=[],MD='',IC,DP,HI=0,ORIGIN='home';
 const ed=()=>S.r=='manager'||S.r=='pharmacist',ef=e=>fmt(e,{weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit'});const rc=()=>{const v=$('r').value;$('ad').hidden=v!='customer';$('ed').hidden=!['customer','manager','pharmacist'].includes(v);$('cd').hidden=v!='manager'};
 const PW=(id,ph)=>`<div class="pw2"><input id="${id}" type="password" placeholder="${ph}"><span onclick="eye('${id}')">👁</span></div>`;
 const eye=id=>{const i=$(id);i.type=i.type=='password'?'text':'password'};
@@ -1322,6 +1322,8 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   var FAVS_READY=false;
   async function ensureFavs(){ if(FAVS_READY)return; try{ if(!Array.isArray(FAVS)||!FAVS.length){ var l=await call('favoriteList'); FAVS=Array.isArray(l)?l.map(String):FAVS } FAVS_READY=true }catch(e){} }
   var SEC_CACHE=[],SEC_READY=false;
+  /* تصفير الكاش والمفضلة عند تسجيل الخروج (عشان محدش يشوف بيانات مستخدم تاني) */
+  try{ window.__shResetCatalog=function(){ FAVS_READY=false; SEC_READY=false; SEC_CACHE=[]; try{ FAVS=[] }catch(e){} } }catch(e){}
   /* هيكل وهمي (سكيلتون) يظهر فورًا مكان الأقسام بدل الفراغ */
   function secSkeletonHTML(){
     var s='';
