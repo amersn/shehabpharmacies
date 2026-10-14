@@ -1522,14 +1522,13 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       catch(e){ var b=G('secItemBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>' }
     })();
   }
-  function renderSecItem(it,sec){
+    function renderSecItem(it,sec){
     var box=G('secItemBox'); if(!box)return;
     if(!it){ box.innerHTML='<div class="err">الصنف مش موجود.</div>'; return; }
     var disc=0;try{var _p=Number(String(it.p||'').replace(',','.')),_w=Number(String(it.w||'').replace(',','.'));if(it.p&&it.w&&isFinite(_p)&&isFinite(_w)&&_w>_p&&_p>=0)disc=Math.round((_w-_p)/_w*100)}catch(e){}
     var h='<div class="card offer-detail" id="secItemDetail">';
-    h+='<div class="icard-media"><div class="icard-img">'+(it.ic?'<img src="'+E(it.ic)+'" alt="'+E(it.t||'')+'">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div><div class="icard-cap"><div class="icard-name">'+E(it.t||'')+'</div><div class="icard-price">'+(it.p?'<span class="now">'+E(it.p)+' ج</span>':'')+(it.w?'<span class="was">'+E(it.w)+' ج</span>':'')+'</div></div></div>';
-    h+='<h3>المواصفات والتفاصيل</h3><div class="pw">'+E(it.x||'لا توجد تفاصيل إضافية')+'</div>';
-    h+='<h3>تقييم العملاء</h3><div class="rating-note">لا توجد تقييمات لهذا الصنف بعد</div>';
+    h+='<div class="icard-media"><div class="icard-img">'+(it.ic?'<img class="zoomable" src="'+E(it.ic)+'" alt="'+E(it.t||'')+'" loading="lazy">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div></div>';
+    h+='<div class="item-detail-body"><div class="icard-name">'+E(it.t||'')+'</div><div class="icard-price">'+(it.p?'<span class="now">'+E(it.p)+' ج</span>':'')+(it.w?'<span class="was">'+E(it.w)+' ج</span>':'')+'</div><div class="rating-note">⭐ '+(it.avg?Number(it.avg).toFixed(1):'—')+' · '+(it.count||0)+' تقييم</div><h3>المواصفات والتفاصيل</h3><div class="pw">'+E(it.x||'لا توجد تفاصيل إضافية')+'</div></div>';
     h+='</div>';
     box.innerHTML=h;
     var d=G('secItemDetail');
@@ -1543,132 +1542,11 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         tl.appendChild(fh);
         tl.appendChild(secAct(SEC_ICONS.share,'مشاركة',function(e){e.stopPropagation();shareSecItem(it)}));
         tl.appendChild(secAct(SEC_ICONS.image,'مشاركة الصورة',function(e){e.stopPropagation();if(window.shareSecItemImage)window.shareSecItemImage(it)}));
-        tl.appendChild(secAct(SEC_ICONS.cart,'إضافة للسلة',function(e){e.stopPropagation();secItemAddCart(it)}));
       }
-      d.appendChild(qtyRow(it.id,{t:it.t,p:it.p,ic:it.ic}));
-    
+      var body=d.querySelector('.item-detail-body')||d;
+      body.appendChild(qtyRow(it.id,{t:it.t,p:it.p,ic:it.ic}));
     }
-  }
-  window.secItemV=secItemV;
-  var homePrev=(typeof homeV==='function')?homeV:null;
-  if(homePrev){ homeV=function(){ var r=homePrev.apply(this,arguments); try{ loadHomeSections() }catch(e){} return r; }; }
-
-  /* ---------- 6) decorate offer cards: rename + inline quantity ---------- */
-  function decorateCards(){
-    try{applyOffLayout()}catch(e){}
-    try{
-      var cards=document.querySelectorAll('#ol .offer-card');
-      for(var i=0;i<cards.length;i++){
-        var card=cards[i];
-        if(card.querySelector('.qty-mini,.qty-widget,.item-menu'))continue;
-        let id='',oc=card.getAttribute('onclick')||'',m=oc.match(/offerV\('([^']+)'\)/);
-        if(m)id=m[1];
-        if(!id)continue;
-        var btns=card.querySelectorAll('button');
-        for(var j=0;j<btns.length;j++){ if(String(btns[j].textContent||'').indexOf('أضف للسلة')>-1){btns[j].parentNode.removeChild(btns[j]);break} }
-        var meta={};
-        try{var o=(typeof OF!=='undefined'?OF:[]).find(function(v){return String(v.id)===String(id)})||{};meta={t:o.t,p:o.p,ic:o.ic}}catch(e){}
-        if(!card.classList.contains("offer-card"))card.appendChild(qtyRow(id,meta));
-        if(isStaff()){
-          card.appendChild(menuBtn([
-            {label:'✏️ تعديل العرض',fn:function(){try{offE(id)}catch(e){}}},
-            {label:'📥 نقل إلى قسم',fn:function(){offerMoveToSec(id)}},
-            {label:'🗑️ حذف العرض',fn:function(){offerDeleteById(id)}}
-          ]));
-        }
-      }
-    }catch(e){}
-    /* الشاشة المنبثقة للعرض: زرار طلب المنتج بالكمية */
-    try{
-      var d=document.querySelector('#app .offer-detail');
-      if(d&&!d.querySelector('.qty-mini')){
-        var did='';
-        try{ did=String(window.__shLastOfferId||'') }catch(e){}
-        if(!did){
-          var sb=d.querySelector('button[onclick*="shareOffer"]');
-          var srch=sb?String(sb.getAttribute('onclick')||''):'';
-          var m1=srch.match(/shareOffer\('([^']+)'\)/); if(m1)did=m1[1];
-        }
-        if(!did){
-          var rs='';
-          try{ var rb=d.querySelector('button[onclick*="rateOffer"]'); rs=rb?String(rb.getAttribute('onclick')||''):'' }catch(e){}
-          var m2=rs.match(/rateOffer\('([^']+)'/); if(m2)did=m2[1];
-        }
-        if(did){
-          var mta={};
-          try{var oo=(typeof OF!=='undefined'?OF:[]).find(function(v){return String(v.id)===String(did)})||{};mta={t:oo.t,p:oo.p,ic:oo.ic}}catch(e){}
-          d.appendChild(qtyRow(did,mta));
-        }
-      }
-    }catch(e){}
-  }
-  var drawOPrev=(typeof drawO==='function')?drawO:null;
-  if(drawOPrev){ drawO=function(){ var r=drawOPrev.apply(this,arguments); try{decorateCards()}catch(e){} return r; }; }
-  var offerVPrev=(typeof offerV==='function')?offerV:null;
-  if(offerVPrev){ offerV=function(){ var r=offerVPrev.apply(this,arguments); try{decorateCards()}catch(e){} return r; }; }
-
-  /* ---------- 7) profile: add moved buttons + reorder ---------- */
-  function ensureProfileBtns(p){
-    if(G('pfActions'))return;
-    var row=document.createElement('div');
-    row.className='pf-3row'; row.id='pfActions';
-    row.innerHTML='<button class="g" id="pfAddress" type="button">📍 عنواننا</button>'
-      +'<button class="g" id="pfFollow" type="button">🌐 تابعونا</button>'
-      +'<button class="g" id="pfCall" type="button">☎️ اتصل بنا</button>';
-    p.appendChild(row);
-    var box=document.createElement('div');
-    box.innerHTML=(isStaff()?'<button class="g" id="secAdminBtn" type="button">🗂️ إدارة الأقسام</button>':'')
-      +'<button class="g" id="pfLogout" type="button" style="color:#c62828">🚪 تسجيل خروج</button>';
-    while(box.firstChild)p.appendChild(box.firstChild);
-    if(G('secAdminBtn'))G('secAdminBtn').addEventListener('click',function(){try{window.secAdminV()}catch(e){}});
-    G('pfAddress').addEventListener('click',function(){try{window.shehabAddress()}catch(e){}});
-    G('pfFollow').addEventListener('click',function(){try{followV()}catch(e){}});
-    G('pfCall').addEventListener('click',function(){try{location.href='tel:+201154017470'}catch(e){}});
-    G('pfLogout').addEventListener('click',function(){try{out()}catch(e){}});
-  }
-  function reorderProfile(){
-    var p=G('profile'); if(!p)return;
-    ensureProfileBtns(p);
-    function byText(txt){var a=p.querySelectorAll('button');for(var i=0;i<a.length;i++){if(String(a[i].textContent||'').indexOf(txt)>-1)return a[i]}return null}
-    var save=p.querySelector('button[onclick*="saveProfile"]');
-    var fav=p.querySelector('button[onclick*="favoritesV"]');
-    var monthly=byText('علاجي الشهري')||byText('القوائم الشهرية');
-    /* نقاط الولاء تحت زرار حفظ بيانات الحساب */
-    var pt=G('ptCard');
-    if(pt&&save&&save.parentNode===p)save.insertAdjacentElement('afterend',pt);
-    /* علاجي الشهري تحت الأصناف المفضلة */
-    if(monthly&&fav&&fav.parentNode===p)fav.insertAdjacentElement('afterend',monthly);
-    /* إدارة الأقسام تحت زرار القوائم الشهرية (لو موجود) أو تحت المفضلة */
-    var secAdm=G('secAdminBtn');
-    var secAnchor=(monthly&&monthly.parentNode===p)?monthly:((fav&&fav.parentNode===p)?fav:null);
-    if(secAdm&&secAnchor)secAnchor.insertAdjacentElement('afterend',secAdm);
-    /* 3 زراير (عنواننا/تابعونا/اتصل بنا) في سطر واحد فوق زرار تحديث البرنامج */
-    var upd=G('appUpdateBox');
-    var logout=G('pfLogout');
-    var row3=G('pfActions');
-    var beforeUpd=(upd&&upd.parentNode===p)?upd:logout;
-    if(row3&&row3.parentNode===p&&beforeUpd&&beforeUpd.parentNode===p)p.insertBefore(row3,beforeUpd);
-    /* زرار تحديث البرنامج فوق تسجيل الخروج مباشرة */
-    if(upd&&upd.parentNode===p&&logout&&logout.parentNode===p)p.insertBefore(upd,logout);
-    /* زراير الإشعارات فوق زرار تحديث البرنامج */
-    var notifBefore=(upd&&upd.parentNode===p)?upd:logout;
-    [G('pushDiagBtn'),G('notifOrdersBtn'),byText('إعدادات إشعارات النظام')].forEach(function(n){
-      if(n&&n.parentNode===p&&notifBefore&&notifBefore.parentNode===p)p.insertBefore(n,notifBefore);
-    });
-  }
-  var pvPrev=(typeof profileV==='function')?profileV:null;
-  if(pvPrev){ profileV=async function(){ var r=await pvPrev.apply(this,arguments); try{ reorderProfile() }catch(e){} return r; }; }
-
-  /* ---------- 8) sections admin ---------- */
-  window.secAdminV=async function(){
-    run('<h2>🗂️ الأقسام</h2><small>أضف أقسام تظهر أسفل شاشة العروض، وضيف داخل كل قسم أصناف.</small><button id="secNewBtn" type="button">＋ قسم جديد</button><div id="secAdminList">جاري التحميل…</div><button class="g" onclick="offV()">⬅️ رجوع للعروض</button>');
-    var nb=G('secNewBtn'); if(nb)nb.addEventListener('click',function(){secEditor()});
-    var box=G('secAdminList');
-    var list=[];try{list=await call('sectionsAdmin')}catch(e){if(box)box.innerHTML='<div class="err">'+E(EM(e))+'</div>';return}
-    renderSecAdmin(list);
-  };
-  function renderSecAdmin(list){
-    var box=G('secAdminList'); if(!box)return;
+  }    var box=G('secAdminList'); if(!box)return;
     if(!Array.isArray(list)||!list.length){box.innerHTML='<div class="card">مفيش أقسام لسه. اضغط «قسم جديد».</div>';return}
     box.innerHTML='';
     list.forEach(function(sec){
@@ -1936,9 +1814,7 @@ html.dark .hero-dot.on{background:var(--b,#4f74d8)}
 .cardshape-btn{width:auto;flex:1 1 0;font-size:13px;padding:9px 6px}
 .cardshape-btn.on{outline:2px solid var(--b,#0b2a6f);outline-offset:1px}
 .cards-round .card{border-radius:22px}
-.cards-glass .card{background:rgba(255,255,255,.74);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);border-color:rgba(255,255,255,.65);box-shadow:0 8px 24px #0b2a6f1f}
-html.dark .cards-glass .card{background:rgba(20,28,48,.74);border-color:rgba(120,140,190,.35)}
-.search-card{display:flex;flex-direction:column;gap:4px;cursor:pointer}
+
 .search-card img.ic{width:100%;height:120px;object-fit:contain;border-radius:10px;background:#f4f7fd}
 html.dark .search-card img.ic{background:#141c30}
 .hero-card img{cursor:pointer}
@@ -2129,7 +2005,7 @@ html.dark .search-card img.ic{background:#141c30}
       row.innerHTML="<small>شكل الكروت</small><div class='cardshape-opts'>"+
         "<button type='button' class='g cardshape-btn' data-cs='normal'>▭ عادي</button>"+
         "<button type='button' class='g cardshape-btn' data-cs='round'>⬭ دائري</button>"+
-        "<button type='button' class='g cardshape-btn' data-cs='glass'>✦ زجاجي</button></div>";
+        "</div>";
       box.appendChild(row);
       row.addEventListener('click',function(ev){ var b=ev.target&&ev.target.closest?ev.target.closest('.cardshape-btn'):null; if(!b)return; ev.stopPropagation(); setCards(b.getAttribute('data-cs')); });
     }catch(e){}
