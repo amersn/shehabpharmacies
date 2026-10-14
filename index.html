@@ -90,7 +90,7 @@ async function go(m){try{if(m=='up'&&$('w').value!==$('w2').value)throw 'كلم�
 if(m=='up'){Object.assign(d,{name:$('n').value,role:$('r').value,code:$('cd').value,addr:$('ad').value,email:$('eml').value,confirmPass:$('w2').value});
 const x=await call('signup',d);if(x.status=='pending'){authV('in');$('e').textContent='تم التسجيل ✔ استنى موافقة المدير على حسابك';return}S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV();return}
 const x=await call('login',d);S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV()}catch(x){$('e').textContent=em(x)}}async function shareApp(){try{if(navigator.share)await navigator.share({title:'صيدليات شهاب',url:location.href});else{await navigator.clipboard.writeText(location.href);alert('تم نسخ رابط التطبيق')}}catch(e){}}
-function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions"><button class="g person notification-btn" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div><img class="lg lit" src="${LOGO}">${c?'<button class="g person cart-btn" id="cartHome" onclick="cartV()" aria-label="سلة العروض" title="سلة العروض">🛒</button>':'<span style="width:46px"></span>'}</div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div><div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">🎁 العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint()}
+function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions"><button class="g person notification-btn" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div><img class="lg lit" src="${LOGO}"></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div><div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">🎁 العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint()}
 async function notifV(){V='notify';app(`<h2>🔔 إشعارات الطلبات</h2><small>البريد اختياري. أضفه لو حابب توصلك رسالة عند تسجيل الطلب أو تحديث حالته. يمكنك ربط تيليجرام أيضًا.</small><input id="notifyEmail" type="email" autocomplete="email" placeholder="البريد الإلكتروني (اختياري)"><button onclick="saveNotifyEmail(this)">حفظ البريد</button><div id="ne" class="err"></div><hr><div id="tgstatus">جاري تحميل حالة تيليجرام…</div><button class="g" onclick="makeTelegramLink(this)">ربط حساب Telegram</button><p><a id="tgurl" hidden target="_blank" rel="noopener">افتح رابط الربط في Telegram واضغط Start</a></p><small>لا يمكن للبوت إرسال رسالة قبل أن تبدأه. كل رابط ربط صالح لعشر دقائق ولمرة واحدة.</small>`);try{const s=await call('settings');$('notifyEmail').value=s.email||'';$('tgstatus').textContent=s.telegram?'✅ Telegram مربوط بهذا الحساب':'Telegram غير مربوط'}catch(x){$('tgstatus').textContent=em(x)}}
 async function saveNotifyEmail(b){try{b.disabled=1;await call('setEmail',{email:$('notifyEmail').value});$('ne').textContent='تم حفظ البريد ✔'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}
 async function makeTelegramLink(b){try{b.disabled=1;const x=await call('tgLink');$('tgurl').href=x.url;$('tgurl').hidden=false;$('tgstatus').textContent='اضغط الرابط ثم Start لإتمام الربط'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}async function loadO(){try{const ce=cGet('offers');if(ce){OF=ce.v;if(HI>=featuredOffers().length)HI=0;drawHero()}var _d=null;try{_d=await homeDataOnce()}catch(_e){}OF=(_d&&Array.isArray(_d.offers))?_d.offers:await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero()}catch(x){const e=$('of');if(e&&!OF.length)e.textContent=em(x)}}
@@ -1358,13 +1358,6 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       el.style.cursor='pointer';
       el.addEventListener('click',function(){try{secItemV(it.id)}catch(e){}});
       var acts=el.querySelector('.acts');
-      var fh=document.createElement('button');fh.type='button';fh.className='g fav-heart';fh.setAttribute('data-id',String(it.id));fh.title='المفضلة';fh.setAttribute('aria-label','المفضلة');
-      var has=false;try{has=FAVS.map(String).indexOf(String(it.id))>-1}catch(x){}
-      fh.textContent=has?'♥':'♡';
-      fh.addEventListener('click',function(e){e.stopPropagation();try{favToggle(it.id,fh)}catch(x){}});
-      acts.appendChild(fh);
-      acts.appendChild(secAct(SEC_ICONS.share,'مشاركة',function(e){e.stopPropagation();shareSecItem(it)}));
-      acts.appendChild(secAct(SEC_ICONS.image,'مشاركة الصورة',function(e){e.stopPropagation();if(window.shareSecItemImage)window.shareSecItemImage(it)}));
       acts.appendChild(secAct(SEC_ICONS.cart,'إضافة للسلة',function(e){e.stopPropagation();secItemAddCart(it)}));
       return el;
     }
@@ -1555,14 +1548,6 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       d.appendChild(qtyRow(it.id,{t:it.t,p:it.p,ic:it.ic}));
     
     }
-    var bk=document.createElement('button');bk.type='button';bk.className='g';bk.textContent='⬅️ رجوع';
-    bk.addEventListener('click',function(){
-      var f='';try{f=String(window.__shSecItemFrom||'')}catch(e){}
-      if(f==='favorites'){ try{favoritesV()}catch(e){homeV()} }
-      else if(f==='sec'&&sec){ secScreenV(sec.id) }
-      else { homeV() }
-    });
-    box.appendChild(bk);
   }
   window.secItemV=secItemV;
   var homePrev=(typeof homeV==='function')?homeV:null;
@@ -1818,9 +1803,8 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       if(!WRAP){if(!READY)return;build()}
       var logged=false;try{logged=!!(typeof S!=='undefined'&&S&&S.t)}catch(e){}
       var v='';try{v=(typeof V!=='undefined'&&V)||''}catch(e){}
-      var dup=!!document.getElementById('cartHome');
-      /* يظهر لكل مستخدم مسجّل دخول، على أي شاشة ما عدا السلة، وما يظهرش مكرر فوق الشاشة الرئيسية */
-      var show=logged&&v!=='cart'&&!dup;
+      /* يظهر لكل مستخدم مسجّل دخول على كل الشاشات (حتى الرئيسية) ما عدا شاشة السلة */
+      var show=logged&&v!=='cart';
       WRAP.hidden=!show;
       if(!show)return;
       var n=cartCount();
@@ -3008,6 +2992,20 @@ html.dark .ocard-cart{box-shadow:0 10px 20px -12px #000}
 #ol.ol-grid .ocard-foot{gap:5px;margin-top:6px}
 #ol.ol-grid .ocard-cart{width:34px;height:34px;min-width:34px;font-size:16px}
 #ol.ol-grid .ocard-foot .rating-note{font-size:10.5px}
+</style>
+<style>
+/* ===== كروت الأصناف في أقسام الرئيسية: أكبر شوية ===== */
+.sec-home-grid{gap:8px;padding:6px 0;margin:0 -10px}
+.sec-item.sec-sq{padding:9px;gap:6px}
+.sec-item.sec-sq .t{font-size:12px;min-height:32px}
+.sec-item.sec-sq .p{font-size:15px}
+.sec-item.sec-sq .offer-was{font-size:10.5px}
+/* زرار إضافة للسلة بس — بحجم مناسب للدوس */
+.sec-item.sec-sq .acts .act{width:32px!important;height:32px;min-width:32px;font-size:15px!important}
+.sec-item.sec-sq .acts .act svg{width:17px;height:17px}
+/* ===== لوجو ثابت فوق على الشمال + زرار السلة العائم على كل الشاشات ===== */
+.topbar{position:sticky;top:0;z-index:45;margin:-16px -16px 0;padding:12px 16px 8px;background:var(--bg)}
+.topbar .lg{margin:0}
 </style>
 <script>
 /* ===== ترتيب نهاية «حسابي»: (عنواننا / تابعونا / اتصل بنا) ← تحديث البرنامج ← تسجيل خروج ===== */
