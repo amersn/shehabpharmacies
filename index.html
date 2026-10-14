@@ -1861,13 +1861,8 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var w=G('myDataWrap')||MYDATA_WRAP;
     if(!w){ try{profileV()}catch(e){}; return; }
     V='mydata';
-    run('<h2>👤 بياناتي</h2><div id="myDataBox"></div><div id="myDataPts"></div><button class="g" type="button" id="myDataBack">⬅️ رجوع لحسابي</button>');
-    try{ pointsCardInData(); }catch(e){}
-    function pointsCardInData(){
-      var mp=G('myDataPts'); if(!mp||G('ptCardInData')) return;
-      var hh=document.createElement('div'); hh.className='pt-card'; hh.id='ptCardInData'; hh.innerHTML='<b style="font-size:16px">⭐ نقاط الولاء</b><div class="rating-note">جاري تحميل النقاط…</div>'; mp.appendChild(hh);
-      (async function(){ var d=null; try{ d=await call('loyaltyGet'); }catch(e){} if(d&&typeof d.points!=='undefined'&&hh.parentNode){ var pts=Number(d.points)||0,step=Number(d.step||100)||100,can=pts>=step; var h='<b style="font-size:16px">⭐ نقاط الولاء</b><div style="margin-top:4px">رصيدك: <span class="ly-badge">'+pts+' نقطة</span></div>'; if(d.first&&d.welcomeOn) h+='<div class="rating-note">🎉 عندك خصم ترحيبي <b>'+d.welcomePct+'%</b> على أول أوردر — بيتطبق لوحده.</div>'; if(can) h+='<div class="rating-note">تقدر تحوّل نقاطك لكود خصم تستعمله في السلة.</div><button class="g" id="ptRedeem2" style="margin-top:8px">تحويل نقاطي لكود خصم</button>'; hh.innerHTML=h; var rb=G('ptRedeem2'); if(rb) rb.addEventListener('click',function(){ try{ loyaltyRedeemV(); }catch(e){} }); } })();
-    }
+    run('<h2>👤 بياناتي</h2><div id="myDataBox"></div><button class="g" type="button" id="myDataBack">⬅️ رجوع لحسابي</button>');
+
     var box=G('myDataBox'); if(box){ w.hidden=false; box.appendChild(w); }
     var bk=G('myDataBack'); if(bk)bk.addEventListener('click',function(){profileV()});
   }
