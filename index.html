@@ -81,7 +81,7 @@ async function go(m){try{if(m=='up'&&$('w').value!==$('w2').value)throw 'كلم�
 if(m=='up'){Object.assign(d,{name:$('n').value,role:$('r').value,code:$('cd').value,addr:$('ad').value,email:$('eml').value,confirmPass:$('w2').value});
 const x=await call('signup',d);if(x.status=='pending'){authV('in');$('e').textContent='تم التسجيل ✔ استنى موافقة المدير على حسابك';return}S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV();return}
 const x=await call('login',d);S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV()}catch(x){$('e').textContent=em(x)}}async function shareApp(){try{if(navigator.share)await navigator.share({title:'صيدليات شهاب',url:location.href});else{await navigator.clipboard.writeText(location.href);alert('تم نسخ رابط التطبيق')}}catch(e){}}
-function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions"><button class="g person notification-btn" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div><img class="lg" src="${LOGO}">${c?'<button class="g person cart-btn" id="cartHome" onclick="cartV()" aria-label="سلة العروض" title="سلة العروض">🛒</button>':'<span style="width:46px"></span>'}</div><h2>أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">🎁 العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint()}
+function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions"><button class="g person notification-btn" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div><img class="lg" src="${LOGO}">${c?'<button class="g person cart-btn" id="cartHome" onclick="cartV()" aria-label="سلة العروض" title="سلة العروض">🛒</button>':'<span style="width:46px"></span>'}</div><h2>أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">🎁 العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint()}
 async function notifV(){V='notify';app(`<h2>🔔 إشعارات الطلبات</h2><small>البريد اختياري. أضفه لو حابب توصلك رسالة عند تسجيل الطلب أو تحديث حالته. يمكنك ربط تيليجرام أيضًا.</small><input id="notifyEmail" type="email" autocomplete="email" placeholder="البريد الإلكتروني (اختياري)"><button onclick="saveNotifyEmail(this)">حفظ البريد</button><div id="ne" class="err"></div><hr><div id="tgstatus">جاري تحميل حالة تيليجرام…</div><button class="g" onclick="makeTelegramLink(this)">ربط حساب Telegram</button><p><a id="tgurl" hidden target="_blank" rel="noopener">افتح رابط الربط في Telegram واضغط Start</a></p><small>لا يمكن للبوت إرسال رسالة قبل أن تبدأه. كل رابط ربط صالح لعشر دقائق ولمرة واحدة.</small>`);try{const s=await call('settings');$('notifyEmail').value=s.email||'';$('tgstatus').textContent=s.telegram?'✅ Telegram مربوط بهذا الحساب':'Telegram غير مربوط'}catch(x){$('tgstatus').textContent=em(x)}}
 async function saveNotifyEmail(b){try{b.disabled=1;await call('setEmail',{email:$('notifyEmail').value});$('ne').textContent='تم حفظ البريد ✔'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}
 async function makeTelegramLink(b){try{b.disabled=1;const x=await call('tgLink');$('tgurl').href=x.url;$('tgurl').hidden=false;$('tgstatus').textContent='اضغط الرابط ثم Start لإتمام الربط'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}async function loadO(){try{const ce=cGet('offers');if(ce){OF=ce.v;if(HI>=featuredOffers().length)HI=0;drawHero()}var _d=null;try{_d=await homeDataOnce()}catch(_e){}OF=(_d&&Array.isArray(_d.offers))?_d.offers:await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero()}catch(x){const e=$('of');if(e&&!OF.length)e.textContent=em(x)}}
@@ -368,7 +368,6 @@ function heroStart(){var sc=q('heroScroll');if(!sc)return;if(HERO&&HERO.raf)try{
 try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(a.length<2)a=(typeof OF!=='undefined'&&OF&&OF.length)?OF.slice(0,10):a;if(!a.length){e.innerHTML=`<div class='card'>مفيش عروض حاليًا</div>`;return}HI=(HI+a.length)%a.length;var list=a.slice(0,10);try{window.__heroList=list}catch(e){}var cards=list.map(heroCardHTML).join(''),two=list.length>1;e.innerHTML='<div class="hero-scroll" id="heroScroll"><div class="hero-track"><div class="hero-copy">'+cards+'</div>'+(two?'<div class="hero-copy">'+cards+'</div>':'')+'</div></div><div class="rating-note" style="text-align:center;margin:4px 0 0">اسحب العروض بصباعك — واضغط على العرض للتفاصيل</div>';heroStart()};stepHero=function(){};window.heroGoto=function(i){try{if(!HERO||!HERO.sc)return;var cw=Math.max(146,Math.floor((HERO.sc.clientWidth-10)/2));HERO.x=-(i*(cw+10));heroNorm();heroApply();HERO.hold=true;setTimeout(function(){if(HERO)HERO.hold=false},2200);}catch(e){}}}catch(e){}
 var OFF_Q='';
 try{var drawOBase=drawO;drawO=function(){if(!OFF_Q){drawOBase();return}var all=OF;try{OF=all.filter(function(o){return String(o.t||'').toLowerCase().indexOf(OFF_Q)>-1||String(o.x||'').toLowerCase().indexOf(OFF_Q)>-1})}catch(e){}drawOBase();OF=all};var offVBase=offV;offV=async function(){await offVBase();var ap=q('app');var hd=ap?ap.querySelector('h2'):null;if(hd&&!q('offSearch')){OFF_Q='';var box=document.createElement('div');box.innerHTML=`<input id='offSearch' placeholder='🔍 دوّر على عرض بالاسم' autocomplete='off'>`;hd.insertAdjacentElement('afterend',box.firstChild);var inp=q('offSearch');inp.value='';inp.addEventListener('input',function(){OFF_Q=String(inp.value||'').trim().toLowerCase();try{drawO()}catch(e){}})}}}catch(e){}
-try{var pvBase=profileV;profileV=async function(){await pvBase();var p=q('profile');if(!p||q('monthlyProfileBtn'))return;var mb=document.createElement('button');mb.type='button';mb.className='g';mb.id='monthlyProfileBtn';mb.textContent=(S&&S.r!=='customer')?'🗓️ القوائم الشهرية (العملاء)':'🗓️ علاجي الشهري';mb.addEventListener('click',function(){if(S&&S.r!=='customer')monthlyAdminV();else monthlyV()});p.appendChild(mb)}}catch(e){}
 try{var ovBase=offerV;offerV=function(id,fromCache){ovBase(id,fromCache);try{if(!S||S.r!=='customer')return;var ap=q('app');if(!ap||!ap.querySelector)return;var card=ap.querySelector('.card');if(!card)return;var btns=card.querySelectorAll('button');var cartBtn=null;for(var i=0;i<btns.length;i++){if(String(btns[i].textContent||'').indexOf('سلة')>-1){cartBtn=btns[i];break}}if(!cartBtn)return;var bar=document.createElement('div');bar.className='offer-actionbar';cartBtn.parentNode.removeChild(cartBtn);bar.appendChild(cartBtn);ap.appendChild(bar)}catch(e){}}}catch(e){}
 function boot(){buildNav();watchApp();navSync();themeSyncUI()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
@@ -1034,9 +1033,7 @@ html.dark .ma-chip{background:#1c2744;color:#dbe7ff;border-color:#2c3b5f}
     profileV=async function(){
       await p2.apply(this,arguments);
       try{
-        var box=G('profile'); if(!box||G('maBtn')) return;
-        box.insertAdjacentHTML('beforeend','<button class="g" id="maBtn">⏰ منبّه الدواء</button>');
-        var mb=G('maBtn'); if(mb){ mb.addEventListener('click',function(){ try{ medV(); }catch(e){} }); }
+        var box=G('profile'); if(!box) return;
         if(isStaff()){
           if(!G('ordSound')){ box.insertAdjacentHTML('beforeend','<div class="card" id="ordSound"><b>🔔 صوت تنبيه الأوردر للصيدلي</b><div class="rating-note">لو فيه أوردر جديد بيصير صوت عالي + اهتزاز حتى تعرفه.</div><button class="g" id="ordToggle">جاري التحميل…</button><button class="g" id="ordTest">🔈 تجربة الصوت</button></div>'); }
           var t=G('ordToggle'), tt=G('ordTest'), a=and();
@@ -1554,12 +1551,15 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
 
   /* ---------- 7) profile: add moved buttons + reorder ---------- */
   function ensureProfileBtns(p){
-    if(G('pfAddress'))return;
+    if(G('pfActions'))return;
+    var row=document.createElement('div');
+    row.className='pf-3row'; row.id='pfActions';
+    row.innerHTML='<button class="g" id="pfAddress" type="button">📍 عنواننا</button>'
+      +'<button class="g" id="pfFollow" type="button">🌐 تابعونا</button>'
+      +'<button class="g" id="pfCall" type="button">☎️ اتصل بنا</button>';
+    p.appendChild(row);
     var box=document.createElement('div');
     box.innerHTML=(isStaff()?'<button class="g" id="secAdminBtn" type="button">🗂️ إدارة الأقسام</button>':'')
-      +'<button class="g" id="pfAddress" type="button">📍 عنواننا</button>'
-      +'<button class="g" id="pfFollow" type="button">🌐 تابعونا</button>'
-      +'<button class="g" id="pfCall" type="button">☎️ اتصل بنا</button>'
       +'<button class="g" id="pfLogout" type="button" style="color:#c62828">🚪 تسجيل خروج</button>';
     while(box.firstChild)p.appendChild(box.firstChild);
     if(G('secAdminBtn'))G('secAdminBtn').addEventListener('click',function(){try{window.secAdminV()}catch(e){}});
@@ -1580,19 +1580,22 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     if(pt&&save&&save.parentNode===p)save.insertAdjacentElement('afterend',pt);
     /* علاجي الشهري تحت الأصناف المفضلة */
     if(monthly&&fav&&fav.parentNode===p)fav.insertAdjacentElement('afterend',monthly);
-    /* إدارة الأقسام تحت زرار القوائم الشهرية (للعملاء) */
+    /* إدارة الأقسام تحت زرار القوائم الشهرية (لو موجود) أو تحت المفضلة */
     var secAdm=G('secAdminBtn');
-    if(secAdm&&monthly&&monthly.parentNode===p)monthly.insertAdjacentElement('afterend',secAdm);
-    /* عنواننا / تابعونا / اتصل بنا في الآخر قبل تحديث البرنامج */
+    var secAnchor=(monthly&&monthly.parentNode===p)?monthly:((fav&&fav.parentNode===p)?fav:null);
+    if(secAdm&&secAnchor)secAnchor.insertAdjacentElement('afterend',secAdm);
+    /* 3 زراير (عنواننا/تابعونا/اتصل بنا) في سطر واحد فوق زرار تحديث البرنامج */
     var upd=G('appUpdateBox');
-    var beforeEnd=(upd&&upd.parentNode===p)?upd:G('pfLogout');
-    [G('pfAddress'),G('pfFollow'),G('pfCall')].forEach(function(n){
-      if(n&&n.parentNode===p&&beforeEnd&&beforeEnd.parentNode===p)p.insertBefore(n,beforeEnd);
-    });
-    /* ال3 زراير بتوع الإشعارات تحت خالص قبل تسجيل الخروج */
     var logout=G('pfLogout');
+    var row3=G('pfActions');
+    var beforeUpd=(upd&&upd.parentNode===p)?upd:logout;
+    if(row3&&row3.parentNode===p&&beforeUpd&&beforeUpd.parentNode===p)p.insertBefore(row3,beforeUpd);
+    /* زرار تحديث البرنامج فوق تسجيل الخروج مباشرة */
+    if(upd&&upd.parentNode===p&&logout&&logout.parentNode===p)p.insertBefore(upd,logout);
+    /* زراير الإشعارات فوق زرار تحديث البرنامج */
+    var notifBefore=(upd&&upd.parentNode===p)?upd:logout;
     [G('pushDiagBtn'),G('notifOrdersBtn'),byText('إعدادات إشعارات النظام')].forEach(function(n){
-      if(n&&n.parentNode===p&&logout&&logout.parentNode===p)p.insertBefore(n,logout);
+      if(n&&n.parentNode===p&&notifBefore&&notifBefore.parentNode===p)p.insertBefore(n,notifBefore);
     });
   }
   var pvPrev=(typeof profileV==='function')?profileV:null;
@@ -2866,6 +2869,41 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
       if(hit)vibrate(8);
     }catch(x){}
   },true);
+})();
+</script>
+<style>
+/* الرئيسية: زرارين جنب بعض (علاجي الشهري + منبّه الدواء) تحت زرار الواتساب */
+.home-duo2{display:flex;gap:8px;margin:10px 0 4px}
+.home-duo2>button{flex:1 1 0;width:auto;min-width:0;margin:0;font-size:12.5px;font-weight:800;line-height:1.2;padding:11px 6px;border-radius:14px;border:0;display:flex;align-items:center;justify-content:center;gap:6px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,.14)}
+.home-duo2>button.rb-month{background:#5ec8f0;color:#06304a}
+.home-duo2>button.rb-med{background:#f7a8c8;color:#5c1338}
+.home-duo2>button:active{transform:scale(.97)}
+html.dark .home-duo2>button.rb-month{background:#38b6e6;color:#052634}
+html.dark .home-duo2>button.rb-med{background:#ef85b5;color:#3c0a23}
+/* حسابي: 3 زراير (عنواننا/تابعونا/اتصل بنا) جنب بعض في سطر واحد وبحجم واحد */
+.pf-3row{display:flex;gap:6px;margin:10px 0}
+.pf-3row>button{flex:1 1 0;width:auto;min-width:0;margin:0;font-size:12.5px;padding:10px 4px;border-radius:12px;white-space:nowrap}
+</style>
+<script>
+/* ===== ترتيب نهاية «حسابي»: (عنواننا / تابعونا / اتصل بنا) ← تحديث البرنامج ← تسجيل خروج ===== */
+(function(){
+  try{
+    var prev=profileV;
+    profileV=async function(){
+      var r=await prev.apply(this,arguments);
+      try{
+        var p=document.getElementById('profile'); if(!p)return r;
+        var row=document.getElementById('pfActions');
+        var upd=document.getElementById('appUpdateBox');
+        var logout=document.getElementById('pfLogout');
+        if(logout&&logout.parentNode===p)p.appendChild(logout);
+        if(upd&&upd.parentNode===p&&logout&&logout.parentNode===p)p.insertBefore(upd,logout);
+        if(row&&row.parentNode===p&&upd&&upd.parentNode===p)p.insertBefore(row,upd);
+        else if(row&&row.parentNode===p&&logout&&logout.parentNode===p)p.insertBefore(row,logout);
+      }catch(e){}
+      return r;
+    };
+  }catch(e){}
 })();
 </script>
 
