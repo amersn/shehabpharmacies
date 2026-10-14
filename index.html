@@ -1497,7 +1497,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var items=G('secScreenItems'),arr=(sec.items||[]);
     if(items&&items.parentNode)items.parentNode.insertBefore(secLayoutBar(),items);
     if(!arr.length){ if(items)items.innerHTML='<div class="card">مفيش أصناف في القسم ده لسه.</div>'; }
-    else if(items)arr.forEach(function(it){ items.appendChild(secItemCard(it,sec.id)) });
+    else if(items)arr.forEach(function(it){ items.appendChild(secItemCard(it,sec.id,true)) });
     applySecLayout();
     var bk=G('secScreenBack'); if(bk)bk.addEventListener('click',function(){homeV()});
   }
@@ -1790,7 +1790,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         if(!found.length)return r;
         var head=document.createElement('h3');head.style.margin='14px 0 6px';head.textContent='🗂️ أصناف الأقسام';
         var row=document.createElement('div');row.className='sec-screen-items sec-grid';
-        found.forEach(function(f){ row.appendChild(secItemCard(f.it,f.sec.id)) });
+        found.forEach(function(f){ row.appendChild(secItemCard(f.it,f.sec.id,true)) });
         box.appendChild(head); box.appendChild(row);
       }catch(e){}
       return r;
@@ -2977,6 +2977,17 @@ button.sec-more{background:linear-gradient(180deg,#FCF6E8,#F4E8CE);color:#7C5C22
 html.dark button.sec-more{background:linear-gradient(180deg,#2b2517,#221d12);color:#EBD9AE;border-color:#4b3f26}
 #nav{box-shadow:0 -10px 26px -18px rgba(23,26,31,.45);border-top:1px solid rgba(176,138,79,.22)}
 html.dark #nav{box-shadow:0 -10px 26px -14px #000}
+</style>
+<style>
+/* ===== شاشة القسم والمفضلة: نفس مربعات الرئيسية (3 جنب بعض) ===== */
+.sec-screen-items.sec-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sec-screen-items.sec-grid .sec-item.sec-sq .tile img.ic{width:100%;height:100%;object-fit:contain}
+.sec-screen-items.sec-grid .sec-item.sec-sq .t{font-size:12px;min-height:32px}
+.sec-screen-items.sec-grid .sec-item.sec-sq .p{font-size:13px}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq{display:grid;grid-template-columns:142px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;padding:10px}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .tile{grid-row:1/3;width:142px;min-width:142px;aspect-ratio:1}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .t{grid-column:2;grid-row:1;min-height:0;align-self:end;font-size:15px}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .pr{grid-column:2;grid-row:2;align-self:start;margin-top:3px}
 </style>
 <script>
 /* ===== ترتيب نهاية «حسابي»: (عنواننا / تابعونا / اتصل بنا) ← تحديث البرنامج ← تسجيل خروج ===== */
