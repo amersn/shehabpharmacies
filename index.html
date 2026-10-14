@@ -322,7 +322,7 @@ function setDark(on){try{localStorage.setItem('shehab_dark',on?'1':'0')}catch(e)
 function accentNow(){var cur='#0b2a6f';try{cur=localStorage.getItem('shehab_accent')||'#0b2a6f'}catch(e){}return cur}
 function themeSyncUI(){var d=q('darkToggle');if(d)d.checked=document.documentElement.classList.contains('dark');var cur=accentNow();var l=document.querySelectorAll('.swatch');for(var i=0;i<l.length;i++)l[i].classList.toggle('on',l[i].getAttribute('data-c')===cur)}
 function setAccent(c){try{localStorage.setItem('shehab_accent',c)}catch(e){}document.documentElement.style.setProperty('--b',c);themeSyncUI()}
-window.setDark=setDark;window.setAccent=setAccent;
+window.setDark=setDark;window.setAccent=setAccent;window.themeSyncUI=themeSyncUI;window.accentNow=accentNow;
 /* ---- علاجي الشهري: محفوظ على السيرفر (مع احتياطي محلي) ---- */
 var MON_SERVER=false,MON=[];
 function monthlyLocalKey(){return 'shehab_monthly_'+(S&&S.n?S.n:'u')}
@@ -368,7 +368,7 @@ function heroStart(){var sc=q('heroScroll');if(!sc)return;if(HERO&&HERO.raf)try{
 try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(a.length<2)a=(typeof OF!=='undefined'&&OF&&OF.length)?OF.slice(0,10):a;if(!a.length){e.innerHTML=`<div class='card'>مفيش عروض حاليًا</div>`;return}HI=(HI+a.length)%a.length;var list=a.slice(0,10);try{window.__heroList=list}catch(e){}var cards=list.map(heroCardHTML).join(''),two=list.length>1;e.innerHTML='<div class="hero-scroll" id="heroScroll"><div class="hero-track"><div class="hero-copy">'+cards+'</div>'+(two?'<div class="hero-copy">'+cards+'</div>':'')+'</div></div><div class="rating-note" style="text-align:center;margin:4px 0 0">اسحب العروض بصباعك — واضغط على العرض للتفاصيل</div>';heroStart()};stepHero=function(){};window.heroGoto=function(i){try{if(!HERO||!HERO.sc)return;var cw=Math.max(146,Math.floor((HERO.sc.clientWidth-10)/2));HERO.x=-(i*(cw+10));heroNorm();heroApply();HERO.hold=true;setTimeout(function(){if(HERO)HERO.hold=false},2200);}catch(e){}}}catch(e){}
 var OFF_Q='';
 try{var drawOBase=drawO;drawO=function(){if(!OFF_Q){drawOBase();return}var all=OF;try{OF=all.filter(function(o){return String(o.t||'').toLowerCase().indexOf(OFF_Q)>-1||String(o.x||'').toLowerCase().indexOf(OFF_Q)>-1})}catch(e){}drawOBase();OF=all};var offVBase=offV;offV=async function(){await offVBase();var ap=q('app');var hd=ap?ap.querySelector('h2'):null;if(hd&&!q('offSearch')){OFF_Q='';var box=document.createElement('div');box.innerHTML=`<input id='offSearch' placeholder='🔍 دوّر على عرض بالاسم' autocomplete='off'>`;hd.insertAdjacentElement('afterend',box.firstChild);var inp=q('offSearch');inp.value='';inp.addEventListener('input',function(){OFF_Q=String(inp.value||'').trim().toLowerCase();try{drawO()}catch(e){}})}}}catch(e){}
-try{var pvBase=profileV;profileV=async function(){await pvBase();var p=q('profile');if(!p||q('appearanceBox'))return;var box=document.createElement('div');box.className='profile-field';box.id='appearanceBox';var colors=['#0b2a6f','#0a5ea4','#0e7c66','#33691e','#7b2ff7','#b3261e','#c2185b','#4a4f57'];box.innerHTML=`<h3 style='margin:6px 0'>🎨 إعدادات الشكل</h3><small>لون التطبيق</small><div class='swatches'>${colors.map(function(c){return `<button type='button' class='swatch' data-c='${c}' style='background:${c}' aria-label='لون'></button>`}).join('')}</div><small>الاختيار بيتحفظ على الجهاز.</small>`;var mb=document.createElement('button');mb.type='button';mb.className='g';mb.textContent=(S&&S.r!=='customer')?'🗓️ القوائم الشهرية (العملاء)':'🗓️ علاجي الشهري';mb.addEventListener('click',function(){if(S&&S.r!=='customer')monthlyAdminV();else monthlyV()});p.appendChild(mb);p.appendChild(box);var sw=box.querySelectorAll('.swatch');for(var i=0;i<sw.length;i++)(function(s){s.addEventListener('click',function(){setAccent(s.getAttribute('data-c'))})})(sw[i]);themeSyncUI()}}catch(e){}
+try{var pvBase=profileV;profileV=async function(){await pvBase();var p=q('profile');if(!p||q('monthlyProfileBtn'))return;var mb=document.createElement('button');mb.type='button';mb.className='g';mb.id='monthlyProfileBtn';mb.textContent=(S&&S.r!=='customer')?'🗓️ القوائم الشهرية (العملاء)':'🗓️ علاجي الشهري';mb.addEventListener('click',function(){if(S&&S.r!=='customer')monthlyAdminV();else monthlyV()});p.appendChild(mb)}}catch(e){}
 try{var ovBase=offerV;offerV=function(id,fromCache){ovBase(id,fromCache);try{if(!S||S.r!=='customer')return;var ap=q('app');if(!ap||!ap.querySelector)return;var card=ap.querySelector('.card');if(!card)return;var btns=card.querySelectorAll('button');var cartBtn=null;for(var i=0;i<btns.length;i++){if(String(btns[i].textContent||'').indexOf('سلة')>-1){cartBtn=btns[i];break}}if(!cartBtn)return;var bar=document.createElement('div');bar.className='offer-actionbar';cartBtn.parentNode.removeChild(cartBtn);bar.appendChild(cartBtn);ap.appendChild(bar)}catch(e){}}}catch(e){}
 function boot(){buildNav();watchApp();navSync();themeSyncUI()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
@@ -2060,7 +2060,7 @@ html.dark .search-card img.ic{background:#141c30}
     for(var i=0;i<l.length;i++)l[i].classList.toggle('on',l[i].getAttribute('data-cs')===v);
   }
   function setCards(v){ try{localStorage.setItem('shehab_cards',v)}catch(e){} applyCards(); haptic(10); }
-  window.setCards=setCards;
+  window.setCards=setCards;window.applyCards=applyCards;
   function buildCardShape(){
     try{
       var box=G('appearanceBox'); if(!box||G('cardShapeRow'))return;
@@ -2823,7 +2823,9 @@ html.dark .set-row .set-lbl small{color:#9aa7c0}
 .switch input:checked + .slider{background:var(--b,#0b2a6f)}
 .switch input:checked + .slider:before{transform:translateX(23px)}
 .switch input:focus-visible + .slider{outline:2px solid #0a5ea4;outline-offset:2px}
-html.dark .switch .slider{background:#3a4460}
+html.dark .switch .slider{background:#26314f;box-shadow:inset 0 1px 3px #00000059}
+html.dark .switch input:checked + .slider{background:var(--b,#0b2a6f);background:color-mix(in srgb,var(--b,#0b2a6f) 62%,#bcd0ff)}
+html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
 </style>
 <script>
 /* ===== شاشة «إعدادات البرنامج»: اهتزاز أثناء الضغط + الوضع الليلي ===== */
@@ -2837,14 +2839,23 @@ html.dark .switch .slider{background:#3a4460}
     try{V='settings'}catch(e){}
     var darkOn=false;try{darkOn=document.documentElement.classList.contains('dark')}catch(e){}
     var vOn=vibOn();
+    var colors=['#0b2a6f','#0a5ea4','#0e7c66','#33691e','#7b2ff7','#b3261e','#c2185b','#4a4f57'];
     var html='<h2>⚙️ إعدادات البرنامج</h2>'
       +'<div class="card set-row"><div class="set-lbl"><b>📳 اهتزاز أثناء الضغط</b><small>اهتزاز خفيف عند لمس الأزرار</small></div><label class="switch"><input type="checkbox" id="setVib"'+(vOn?' checked':'')+'><span class="slider"></span></label></div>'
       +'<div class="card set-row"><div class="set-lbl"><b>🌙 الوضع الليلي</b><small>مظهر داكن مريح للعين</small></div><label class="switch"><input type="checkbox" id="setDark"'+(darkOn?' checked':'')+'><span class="slider"></span></label></div>'
+      +'<div class="card"><h3 style="margin:6px 0 10px">🎨 لون البرنامج</h3><div class="swatches">'+colors.map(function(c){return '<button type="button" class="swatch" data-c="'+c+'" style="background:'+c+'" aria-label="لون"></button>'}).join('')+'</div><small>الاختيار بيتحفظ على الجهاز.</small></div>'
+      +'<div class="card"><h3 style="margin:6px 0 8px">🎨 إعدادات الشكل</h3><small>شكل الكروت</small><div class="cardshape-opts"><button type="button" class="g cardshape-btn" data-cs="normal">▭ عادي</button><button type="button" class="g cardshape-btn" data-cs="round">⬭ دائري</button><button type="button" class="g cardshape-btn" data-cs="glass">✦ زجاجي</button></div></div>'
       +'<button class="g" type="button" id="settingsBack">⬅️ رجوع لحسابي</button>';
     try{app(html)}catch(e){try{run(html)}catch(e2){}}
     var vt=get('setVib');if(vt)vt.addEventListener('change',function(){setVibrate(!!vt.checked)});
     var dt=get('setDark');if(dt)dt.addEventListener('change',function(){try{setDark(!!dt.checked)}catch(e){}});
     var bk=get('settingsBack');if(bk)bk.addEventListener('click',function(){try{profileV()}catch(e){}});
+    var sws=document.querySelectorAll('#app .swatch');
+    for(var i=0;i<sws.length;i++)(function(s){s.addEventListener('click',function(){setAccent(s.getAttribute('data-c'))})})(sws[i]);
+    var csb=document.querySelectorAll('#app .cardshape-btn');
+    for(var k=0;k<csb.length;k++)(function(b){b.addEventListener('click',function(){try{setCards(b.getAttribute('data-cs'))}catch(e){}})}) (csb[k]);
+    try{themeSyncUI()}catch(e){}
+    try{applyCards()}catch(e){}
     try{if(typeof navSync==='function')navSync()}catch(e){}
   }
   window.settingsV=settingsV;
