@@ -87,7 +87,7 @@ async function saveNotifyEmail(b){try{b.disabled=1;await call('setEmail',{email:
 async function makeTelegramLink(b){try{b.disabled=1;const x=await call('tgLink');$('tgurl').href=x.url;$('tgurl').hidden=false;$('tgstatus').textContent='اضغط الرابط ثم Start لإتمام الربط'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}async function loadO(){try{const ce=cGet('offers');if(ce){OF=ce.v;if(HI>=featuredOffers().length)HI=0;drawHero()}var _d=null;try{_d=await homeDataOnce()}catch(_e){}OF=(_d&&Array.isArray(_d.offers))?_d.offers:await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero()}catch(x){const e=$('of');if(e&&!OF.length)e.textContent=em(x)}}
 const featuredOffers=()=>OF.filter(o=>o.f);
 function drawHero(){const e=$('of');if(!e)return;const a=featuredOffers();if(!a.length){e.innerHTML='<div class="card">مفيش عروض مميزة حاليًا</div>';return}HI=(HI+a.length)%a.length;const o=a[HI];e.innerHTML=`<div class="hero-shell"><button class="g hero-arrow" onclick="stepHero(-1)" aria-label="العرض السابق">‹</button><div class="hero-card" onclick="offerV('${esc(o.id)}')">${o.ic?`<img src="${esc(o.ic)}" alt="">`:''}<b>${esc(o.t)}</b>${prices(o)}${o.x?`<small>${esc(o.x)}</small>`:''}<div class="rating-note">⭐ ${o.avg?o.avg.toFixed(1):'—'} · ${o.count||0} تقييم</div></div><button class="g hero-arrow" onclick="stepHero(1)" aria-label="العرض التالي">›</button></div><div class="rating-note">${HI+1} / ${a.length} · اضغط على العرض للتفاصيل</div>`}
-function stepHero(d){const a=featuredOffers();if(a.length<2)return;HI=(HI+d+a.length)%a.length;const c=$('of').querySelector('.hero-card');if(c){c.style.opacity='0';c.style.transform=`translateX(${d>0?'-':'+'}12px)`}setTimeout(drawHero,130)}setInterval(function(){try{if((V||'')!=='home'||document.hidden)return;const a=featuredOffers();if(a.length<2)return;const e=$('of');if(!e||!e.querySelector('.hero-card'))return;stepHero(1)}catch(e){}},2500);async function offV(){V='off';app(`<h2>🎁 كل العروض</h2>${ed()?'<button onclick="offE()">➕ إضافة عرض</button>':''}<div id="ol">جاري التحميل…</div>`);try{const ce=cGet('offers');if(ce){OF=ce.v;drawO()}OF=await callC('offers');drawO()}catch(x){if(!OF.length)$('ol').textContent=em(x)}}function drawO(){$('ol').innerHTML=OF.map(o=>`<div class="card offer-card" style="border-color:#0b2a6f" onclick="offerV('${esc(o.id)}')">${o.ic?`<img class="ic" src="${esc(o.ic)}">`:''}<b>${esc(o.t)}</b>${prices(o)}${o.x?`<br><span class="pw">${esc(o.x)}</span>`:''}<div class="rating-note">⭐ ${o.avg?o.avg.toFixed(1):'—'} · ${o.count||0} تقييم</div>${ed()?`<label class="featured-toggle" onclick="event.stopPropagation()"><input type="checkbox" ${o.f?'checked':''} onchange="featureOffer('${esc(o.id)}',this)"> إظهار في الرئيسية</label><button class="g" onclick="event.stopPropagation();offE('${esc(o.id)}')">تعديل</button>`:''}</div>`).join('')||'مفيش عروض حاليًا'}
+function stepHero(d){const a=featuredOffers();if(a.length<2)return;HI=(HI+d+a.length)%a.length;const c=$('of').querySelector('.hero-card');if(c){c.style.opacity='0';c.style.transform=`translateX(${d>0?'-':'+'}12px)`}setTimeout(drawHero,130)}setInterval(function(){try{if((V||'')!=='home'||document.hidden)return;const a=featuredOffers();if(a.length<2)return;const e=$('of');if(!e||!e.querySelector('.hero-card'))return;stepHero(1)}catch(e){}},2500);async function offV(){V='off';app(`<h2>🎁 كل العروض</h2>${ed()?'<button onclick="offE()">➕ إضافة عرض</button>':''}${S.r=='manager'?'<button class="g" onclick="tgChannelV()">📢 قناة تيليجرام</button>':''}<div id="ol">جاري التحميل…</div>`);try{const ce=cGet('offers');if(ce){OF=ce.v;drawO()}OF=await callC('offers');drawO()}catch(x){if(!OF.length)$('ol').textContent=em(x)}}function drawO(){$('ol').innerHTML=OF.map(o=>`<div class="card offer-card" style="border-color:#0b2a6f" onclick="offerV('${esc(o.id)}')">${o.ic?`<img class="ic" src="${esc(o.ic)}">`:''}<b>${esc(o.t)}</b>${prices(o)}${o.x?`<br><span class="pw">${esc(o.x)}</span>`:''}<div class="rating-note">⭐ ${o.avg?o.avg.toFixed(1):'—'} · ${o.count||0} تقييم</div>${ed()?`<label class="featured-toggle" onclick="event.stopPropagation()"><input type="checkbox" ${o.f?'checked':''} onchange="featureOffer('${esc(o.id)}',this)"> إظهار في الرئيسية</label><button class="g" onclick="event.stopPropagation();offE('${esc(o.id)}')">تعديل</button>`:''}</div>`).join('')||'مفيش عروض حاليًا'}
 async function featureOffer(id,el){try{await call('feature',{id,featured:el.checked});const o=OF.find(x=>x.id==id);if(o)o.f=el.checked;HI=0;drawHero()}catch(x){el.checked=!el.checked;alert(em(x))}}
 function offerV(id,fromCache=false){if(!fromCache&&V!='offer')ORIGIN=V;const o=OF.find(x=>x.id==id);if(!o)return;V='offer';app(`<div class="card offer-detail">${o.ic?`<img class="offer-photo" src="${esc(o.ic)}" alt="${esc(o.t)}">`:''}<h2>${esc(o.t)}</h2>${prices(o)}<h3>المواصفات والتفاصيل</h3><div class="pw">${esc(o.x)||'لا توجد تفاصيل إضافية'}</div><h3>تقييم العملاء</h3><div class="rating-note">${o.avg?o.avg.toFixed(1):'—'} من 5 · ${o.count||0} تقييم</div><div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=(o.mine||0)?'on':''}" aria-label="${n} نجوم" onclick="rateOffer('${esc(o.id)}',${n})">★</button>`).join('')}</div><div class="rating-note">اختار من نجمة إلى خمس نجوم</div>${ed()?`<button class="g" onclick="offE('${esc(o.id)}')">تعديل العرض</button>`:''}</div>`)}
 function offerBack(){if(ORIGIN=='home')homeV();else offV()}
@@ -2910,6 +2910,52 @@ html.dark .home-duo2>button.rb-med{background:#ef85b5;color:#3c0a23}
       return r;
     };
   }catch(e){}
+})();
+</script>
+<script>
+/* ===== قناة تيليجرام: نشر العروض الجديدة تلقائيًا (للمدير) ===== */
+(function(){
+  function el(id){return document.getElementById(id)}
+  function msg(id,txt){var e=el(id);if(e)e.textContent=txt||''}
+  function render(s){
+    var tokenHint=s.tokenSet?'✅ التوكن مضبوط — اتركه فارغًا أو ألصق توكنًا جديدًا':'123456:ABC-DEF... (من @BotFather)';
+    var html='<h2>📢 قناة تيليجرام</h2>'
+      +'<small>لما تضيف عرض جديد، البوت يبعت رسالة للقناة فيها عنوان العرض وتفاصيله والصورة والسعر ولينك العرض.</small>'
+      +'<label for="tgChannel">اسم القناة (مثال: @shehab_offers) أو رقم الـ chat id</label>'
+      +'<input id="tgChannel" placeholder="@channel_name" value="'+esc(s.channel||'')+'">'
+      +'<label for="tgToken">توكن البوت (من @BotFather)</label>'
+      +'<input id="tgToken" placeholder="'+esc(tokenHint)+'" autocomplete="off">'
+      +'<div class="card set-row"><div class="set-lbl"><b>🚀 نشر العرض الجديد تلقائيًا</b><small>يبعت رسالة للقناة فور حفظ العرض الجديد</small></div><label class="switch"><input type="checkbox" id="tgAuto"'+(s.auto?' checked':'')+'><span class="slider"></span></label></div>'
+      +'<button type="button" id="tgSave">💾 حفظ الإعدادات</button>'
+      +'<button type="button" class="g" id="tgTest">📨 إرسال رسالة تجريبية</button>'
+      +'<div class="err" id="tgErr"></div>'
+      +'<small id="tgLast">حالة آخر إرسال: '+(s.last?esc(s.last):'—')+'</small>'
+      +'<button type="button" class="g" id="tgBack">⬅️ رجوع لحسابي</button>';
+    try{app(html)}catch(e){try{run(html)}catch(e2){}}
+    el('tgSave').onclick=function(){save()};
+    el('tgTest').onclick=function(){test()};
+    el('tgBack').onclick=function(){try{profileV()}catch(e){}};
+  }
+  function save(){
+    var b=el('tgSave');if(b)b.disabled=true;msg('tgErr','جاري الحفظ…');
+    call('tgChannelSet',{channel:String((el('tgChannel')||{}).value||''),token:String((el('tgToken')||{}).value||''),auto:!!(el('tgAuto')&&el('tgAuto').checked)})
+      .then(function(){if(el('tgToken'))el('tgToken').value='';msg('tgErr','✅ تم الحفظ. جرّب «إرسال رسالة تجريبية».')})
+      .catch(function(x){msg('tgErr',em(x))})
+      .then(function(){if(b)b.disabled=false});
+  }
+  function test(){
+    var b=el('tgTest');if(b)b.disabled=true;msg('tgErr','جاري الإرسال…');
+    call('tgChannelTest',{})
+      .then(function(r){var ok=r&&r.ok;msg('tgErr',ok?'✅ اتبعتت رسالة للقناة.':('⚠️ فشل الإرسال. '+((r&&r.last)||'')));var l=el('tgLast');if(l)l.textContent='حالة آخر إرسال: '+((r&&r.last)||'—')})
+      .catch(function(x){msg('tgErr',em(x))})
+      .then(function(){if(b)b.disabled=false});
+  }
+  function open(){
+    try{V='tgchan'}catch(e){}
+    try{app('<h2>📢 قناة تيليجرام</h2><small>جاري التحميل…</small>')}catch(e){}
+    call('tgChannelGet').then(function(s){render(s||{})}).catch(function(x){render({});msg('tgErr',em(x))});
+  }
+  window.tgChannelV=open;
 })();
 </script>
 
