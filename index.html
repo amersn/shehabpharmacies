@@ -360,6 +360,7 @@ html.dark .skl{background:linear-gradient(90deg,#1b2540 25%,#243052 37%,#1b2540 
 .offer-actionbar{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 70px);z-index:54;display:flex;justify-content:center;pointer-events:none}
 .offer-actionbar button{pointer-events:auto;max-width:min(100% - 32px,488px);box-shadow:0 6px 18px #0003}
 </style>
+
 <script>
 (function(){
 function q(id){return document.getElementById(id)}
@@ -492,6 +493,7 @@ profileV=async function(){
 .wa-big .wa-t2{font-size:12.5px;font-weight:600;line-height:1.2;opacity:.93}
 html.dark .wa-big{box-shadow:0 8px 20px #00000073}
 </style>
+
 <script>
 /* ===== «إعدادات إشعارات الطلبات» moved from the home screen into حسابي ===== */
 (function(){
@@ -673,6 +675,7 @@ html.dark .qc-btn{background:#1c2744;border-color:#2c3b5f}
 @media(max-width:360px){.qc-grid{grid-template-columns:1fr}}
 .repeat-btn{margin-top:8px;width:100%}
 </style>
+
 <script>
 /* ============ استشارة سريعة + إرسال الأوردر واتساب + تحسين «اطلب تاني» ============ */
 (function(){
@@ -802,6 +805,7 @@ html.dark .qc-btn{background:#1c2744;border-color:#2c3b5f}
 .pt-card{background:linear-gradient(135deg,#fff7e6,#ffeccc);border:1px solid #f0d9a8;border-radius:16px;padding:12px;margin-top:10px}
 html.dark .pt-card{background:linear-gradient(135deg,#2a2416,#33280f);border-color:#4a3d1c}
 </style>
+
 <script>
 /* ============ نقاط الولاء + أكواد خصم متعدّدة (مرة واحدة / متعدد) + خصم ترحيبي ============ */
 (function(){
@@ -883,9 +887,8 @@ html.dark .pt-card{background:linear-gradient(135deg,#2a2416,#33280f);border-col
             +'<button class="g" id="lySetBtn">⭐ إعدادات نقاط الولاء</button>');
           var cb=G('cpAdminBtn'); if(cb) cb.addEventListener('click',function(){ try{ couponAdminV() }catch(e){} });
           var lb=G('lySetBtn'); if(lb) lb.addEventListener('click',function(){ try{ loyaltySettingsV() }catch(e){} });
-        } else {
-          
         }
+        await pointsCard();
       }catch(e){}
     };
   }catch(e){}
@@ -1057,6 +1060,7 @@ html.dark .ma-card{background:linear-gradient(135deg,#151b2a,#1c2233);border-col
 .ma-chip{display:inline-block;background:#F3EFE6;color:#1a237e;border-radius:999px;padding:2px 10px;margin:4px 6px 0 0;font-size:13px}
 html.dark .ma-chip{background:#1c2744;color:#dbe7ff;border-color:#2c3b5f}
 </style>
+
 <script>
 (function(){
   function G(id){ return document.getElementById(id); }
@@ -1174,6 +1178,7 @@ html.dark #ol .offer-card img.ic{background:#0f1730}
 #cartFab .cart-count{background:#d32f2f;top:-4px;right:-4px;font-size:11px;height:19px;min-width:19px;line-height:19px}
 html.dark #cartFab{box-shadow:0 6px 18px #00000080}
 </style>
+
 <script>
 (function(){
   'use strict';
@@ -1546,7 +1551,73 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var body=d.querySelector('.item-detail-body')||d;
       body.appendChild(qtyRow(it.id,{t:it.t,p:it.p,ic:it.ic}));
     }
-  }    var box=G('secAdminList'); if(!box)return;
+  }
+  window.secItemV=secItemV;
+  var homePrev=(typeof homeV==='function')?homeV:null;
+  if(homePrev){ homeV=function(){ var r=homePrev.apply(this,arguments); try{ loadHomeSections() }catch(e){} return r; }; }
+
+  /* ---------- 7) profile: add moved buttons + reorder ---------- */
+  function ensureProfileBtns(p){
+    if(G('pfActions'))return;
+    var row=document.createElement('div');
+    row.className='pf-3row'; row.id='pfActions';
+    row.innerHTML='<button class="g" id="pfAddress" type="button">📍 عنواننا</button>'
+      +'<button class="g" id="pfFollow" type="button">🌐 تابعونا</button>'
+      +'<button class="g" id="pfCall" type="button">☎️ اتصل بنا</button>';
+    p.appendChild(row);
+    var box=document.createElement('div');
+    box.innerHTML=(isStaff()?'<button class="g" id="secAdminBtn" type="button">🗂️ إدارة الأقسام</button>':'')
+      +'<button class="g" id="pfLogout" type="button" style="color:#c62828">🚪 تسجيل خروج</button>';
+    while(box.firstChild)p.appendChild(box.firstChild);
+    if(G('secAdminBtn'))G('secAdminBtn').addEventListener('click',function(){try{window.secAdminV()}catch(e){}});
+    G('pfAddress').addEventListener('click',function(){try{window.shehabAddress()}catch(e){}});
+    G('pfFollow').addEventListener('click',function(){try{followV()}catch(e){}});
+    G('pfCall').addEventListener('click',function(){try{location.href='tel:+201154017470'}catch(e){}});
+    G('pfLogout').addEventListener('click',function(){try{out()}catch(e){}});
+  }
+  function reorderProfile(){
+    var p=G('profile'); if(!p)return;
+    ensureProfileBtns(p);
+    function byText(txt){var a=p.querySelectorAll('button');for(var i=0;i<a.length;i++){if(String(a[i].textContent||'').indexOf(txt)>-1)return a[i]}return null}
+    var save=p.querySelector('button[onclick*="saveProfile"]');
+    var fav=p.querySelector('button[onclick*="favoritesV"]');
+    var monthly=byText('علاجي الشهري')||byText('القوائم الشهرية');
+    /* نقاط الولاء تحت زرار حفظ بيانات الحساب */
+    var pt=G('ptCard');
+    if(pt&&save&&save.parentNode===p)save.insertAdjacentElement('afterend',pt);
+    /* علاجي الشهري تحت الأصناف المفضلة */
+    if(monthly&&fav&&fav.parentNode===p)fav.insertAdjacentElement('afterend',monthly);
+    /* إدارة الأقسام تحت زرار القوائم الشهرية (لو موجود) أو تحت المفضلة */
+    var secAdm=G('secAdminBtn');
+    var secAnchor=(monthly&&monthly.parentNode===p)?monthly:((fav&&fav.parentNode===p)?fav:null);
+    if(secAdm&&secAnchor)secAnchor.insertAdjacentElement('afterend',secAdm);
+    /* 3 زراير (عنواننا/تابعونا/اتصل بنا) في سطر واحد فوق زرار تحديث البرنامج */
+    var upd=G('appUpdateBox');
+    var logout=G('pfLogout');
+    var row3=G('pfActions');
+    var beforeUpd=(upd&&upd.parentNode===p)?upd:logout;
+    if(row3&&row3.parentNode===p&&beforeUpd&&beforeUpd.parentNode===p)p.insertBefore(row3,beforeUpd);
+    /* زرار تحديث البرنامج فوق تسجيل الخروج مباشرة */
+    if(upd&&upd.parentNode===p&&logout&&logout.parentNode===p)p.insertBefore(upd,logout);
+    /* زراير الإشعارات فوق زرار تحديث البرنامج */
+    var notifBefore=(upd&&upd.parentNode===p)?upd:logout;
+    [G('pushDiagBtn'),G('notifOrdersBtn'),byText('إعدادات إشعارات النظام')].forEach(function(n){
+      if(n&&n.parentNode===p&&notifBefore&&notifBefore.parentNode===p)p.insertBefore(n,notifBefore);
+    });
+  }
+  var pvPrev=(typeof profileV==='function')?profileV:null;
+  if(pvPrev){ profileV=async function(){ var r=await pvPrev.apply(this,arguments); try{ reorderProfile() }catch(e){} return r; }; }
+
+  /* ---------- 8) sections admin ---------- */
+  window.secAdminV=async function(){
+    run('<h2>🗂️ الأقسام</h2><small>أضف أقسام تظهر أسفل شاشة العروض، وضيف داخل كل قسم أصناف.</small><button id="secNewBtn" type="button">＋ قسم جديد</button><div id="secAdminList">جاري التحميل…</div><button class="g" onclick="offV()">⬅️ رجوع للعروض</button>');
+    var nb=G('secNewBtn'); if(nb)nb.addEventListener('click',function(){secEditor()});
+    var box=G('secAdminList');
+    var list=[];try{list=await call('sectionsAdmin')}catch(e){if(box)box.innerHTML='<div class="err">'+E(EM(e))+'</div>';return}
+    renderSecAdmin(list);
+  };
+  function renderSecAdmin(list){
+    var box=G('secAdminList'); if(!box)return;
     if(!Array.isArray(list)||!list.length){box.innerHTML='<div class="card">مفيش أقسام لسه. اضغط «قسم جديد».</div>';return}
     box.innerHTML='';
     list.forEach(function(sec){
@@ -1819,6 +1890,7 @@ html.dark .hero-dot.on{background:var(--b,#4f74d8)}
 html.dark .search-card img.ic{background:#141c30}
 .hero-card img{cursor:pointer}
 </style>
+
 <script>
 /* ===== المرحلة 1: زووم الصور + lazy-load + اهتزاز + سكيلتون + بحث + شكل الكروت + نقاط السلايدر ===== */
 (function(){
@@ -2044,6 +2116,7 @@ html.dark .pt-log{border-color:#232d49}
 .share-img-btn{margin-top:10px}
 @media print{.ord-steps{display:none}}
 </style>
+
 <script>
 /* ===== المرحلة 2: نغمة لكل حالة أوردر + خط زمني + سجل نقاط + مشاركة كصورة + طباعة/تصدير CSV ===== */
 (function(){
@@ -2374,6 +2447,7 @@ html.dark .pt-log{border-color:#232d49}
 .st3-bar-v{width:70%;background:#0b2a6f;border-radius:6px 6px 0 0;min-height:2px}
 .st3-log{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:5px 2px;border-bottom:1px dashed #dbe3f3;font-size:13px}
 </style>
+
 <script>
 (function(){
   var LOW_SHOW=5;
@@ -2642,6 +2716,7 @@ html.dark .home-duo .duo.qc{background:#5b21b6}
 .guest-badge{display:inline-block;background:#fff3cd;color:#8a6d00;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:700;margin:2px 0 8px}
 .guest-actions{margin-top:8px}
 </style>
+
 <script>
 (function(){
   'use strict';
@@ -2773,6 +2848,7 @@ html.dark .switch .slider{background:#26314f;box-shadow:inset 0 1px 3px #0000005
 html.dark .switch input:checked + .slider{background:var(--b,#0b2a6f);background:color-mix(in srgb,var(--b,#0b2a6f) 62%,#bcd0ff)}
 html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
 </style>
+
 <script>
 /* ===== شاشة «إعدادات البرنامج»: اهتزاز أثناء الضغط + الوضع الليلي ===== */
 (function(){
@@ -2882,6 +2958,7 @@ html.dark #nav{box-shadow:0 -10px 26px -14px #000}
 .topbar{position:sticky;top:0;z-index:45;margin:-16px -16px 0;padding:12px 16px 8px;background:var(--bg)}
 .topbar .lg{margin:0}
 </style>
+
 <script>
 /* ===== ترتيب نهاية «حسابي»: (عنواننا / تابعونا / اتصل بنا) ← تحديث البرنامج ← تسجيل خروج ===== */
 (function(){
