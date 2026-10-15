@@ -1616,6 +1616,34 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var list=[];try{list=await call('sectionsAdmin')}catch(e){if(box)box.innerHTML='<div class="err">'+E(EM(e))+'</div>';return}
     renderSecAdmin(list);
   };
+  /* ---------- عرض منبثق: زرار طلب المنتج بالكمية ---------- */
+  var _shOfferVPrev=(typeof offerV==='function')?offerV:null;
+  if(_shOfferVPrev){ offerV=function(){ var r=_shOfferVPrev.apply(this,arguments); try{ offerDetailQty() }catch(e){} return r; }; }
+  function offerDetailQty(){
+    try{
+      var d=document.querySelector('#app .offer-detail');
+      if(d&&!d.querySelector('.qty-mini')){
+        var did='';
+        try{ did=String(window.__shLastOfferId||'') }catch(e){}
+        if(!did){
+          var sb=d.querySelector('button[onclick*="shareOffer"]');
+          var srch=sb?String(sb.getAttribute('onclick')||''):'';
+          var m1=srch.match(/shareOffer\('([^']+)'\)/); if(m1)did=m1[1];
+        }
+        if(!did){
+          var rs='';
+          try{ var rb=d.querySelector('button[onclick*="rateOffer"]'); rs=rb?String(rb.getAttribute('onclick')||''):'' }catch(e){}
+          var m2=rs.match(/rateOffer\('([^']+)'/); if(m2)did=m2[1];
+        }
+        if(did){
+          var mta={};
+          try{var oo=(typeof OF!=='undefined'?OF:[]).find(function(v){return String(v.id)===String(did)})||{};mta={t:oo.t,p:oo.p,ic:oo.ic}}catch(e){}
+          d.appendChild(qtyRow(did,mta));
+        }
+      }
+    }catch(e){}
+  }
+
   function renderSecAdmin(list){
     var box=G('secAdminList'); if(!box)return;
     if(!Array.isArray(list)||!list.length){box.innerHTML='<div class="card">مفيش أقسام لسه. اضغط «قسم جديد».</div>';return}
@@ -2938,7 +2966,11 @@ html.dark #nav{box-shadow:0 -10px 26px -14px #000}
 #ol .offer-card .rating-note{font-size:10.5px}
 #ol .offer-card .icard-cap{display:none}
 #ol .offer-card .icard-tools{display:none}
-#ol .offer-card .ocard-foot{display:none}
+#ol .offer-card .ocard-foot{display:flex;align-items:center;gap:8px;margin:6px 0 0;justify-content:flex-end}
+.ocard-cart{width:44px;height:44px;min-width:44px;flex:0 0 auto;padding:0;margin:0;border-radius:50%;background:var(--b,#0b2a6f);color:#fff;font-size:20px;line-height:1;display:grid;place-items:center;box-shadow:0 10px 20px -12px rgba(11,42,111,.95)}
+html.dark .ocard-cart{box-shadow:0 10px 20px -12px #000}
+#ol.ol-grid .ocard-foot{gap:5px;margin-top:5px;justify-content:flex-end}
+#ol.ol-grid .ocard-cart{width:34px;height:34px;min-width:34px;font-size:16px}
 #ol .offer-card .pw{display:none}
 #ol .offer-card .featured-toggle,#ol .offer-card button.g[onclick*="offE"]{display:none}
 #ol.ol-grid .offer-card .icard-img{height:110px}
