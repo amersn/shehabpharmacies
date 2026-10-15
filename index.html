@@ -2021,7 +2021,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
 
   /* ---------- (2) تجميع إعدادات الإشعارات في زرار واحد ---------- */
   function buildNotifSettings(){
-    var p=G('profile'); if(!p||G('notifSettingsBtn'))return;
+    var p=G('profile'); if(!p||G('notifSettingsWrap'))return;
     function byText(txt){var a=p.querySelectorAll('button');for(var i=0;i<a.length;i++){if(String(a[i].textContent||'').indexOf(txt)>-1)return a[i]}return null}
     var nodes=[];
     var nOrders=G('notifOrdersBtn'); if(nOrders)nodes.push(nOrders);
@@ -2036,23 +2036,21 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var wrap=document.createElement('div');wrap.id='notifSettingsWrap';wrap.hidden=true;
     nodes.forEach(function(n){ if(n&&n.parentNode)wrap.appendChild(n) });
     NOTIF_WRAP=wrap;
-    var btn=document.createElement('button');btn.type='button';btn.className='g';btn.id='notifSettingsBtn';btn.textContent='🔔 إعدادات الإشعارات';
-    btn.addEventListener('click',function(){notifSettingsV()});
-    var ref=G('myDataBtn');
-    if(ref&&ref.parentNode===p)p.insertBefore(btn,ref.nextSibling);else p.appendChild(btn);
     p.appendChild(wrap);
   }
   function notifSettingsV(){
     var w=G('notifSettingsWrap')||NOTIF_WRAP;
     if(!w){ try{profileV()}catch(e){}; return; }
     V='notifSettings';
-    run('<h2>🔔 إعدادات الإشعارات</h2><div id="notifSettingsBox"></div><button class="g" type="button" id="notifBack">⬅️ رجوع لحسابي</button>');
+    run('<h2>🔔 إعدادات الإشعارات</h2><div id="notifSettingsBox"></div><button class="g" type="button" id="notifBack">⬅️ رجوع للإعدادات</button>');
     var box=G('notifSettingsBox'); if(box){ w.hidden=false; box.appendChild(w); }
-    var bk=G('notifBack'); if(bk)bk.addEventListener('click',function(){profileV()});
+    var bk=G('notifBack'); if(bk)bk.addEventListener('click',function(){try{if(typeof settingsV==='function')settingsV();else profileV()}catch(e){profileV()}});
   }
 
   window.myDataV=myDataV;
   window.notifSettingsV=notifSettingsV;
+  /* يضمن تجهيز إعدادات الإشعارات قبل فتح شاشة إعدادات البرنامج */
+  window.__shNotifWrap=function(){ try{buildNotifSettings()}catch(e){} return NOTIF_WRAP; };
 
   var base=(typeof profileV==='function')?profileV:null;
   if(base){
@@ -2263,7 +2261,7 @@ html.dark .search-card img.ic{background:#141c30}
   }catch(e){}
 
   /* ---------- (12) شكل الكروت ---------- */
-  function cardsNow(){try{return localStorage.getItem('shehab_cards')||'normal'}catch(e){return 'normal'}}
+  function cardsNow(){try{localStorage.removeItem('shehab_cards')}catch(e){}return 'normal'}
   function applyCards(){
     var d=document.documentElement,v=cardsNow();
     d.classList.toggle('cards-round',v==='round');
@@ -3080,6 +3078,7 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
   window.shVibrate=vibrate;window.setVibrate=setVibrate;
   function settingsV(){
     try{V='settings'}catch(e){}
+    try{if(typeof window.__shNotifWrap==='function')window.__shNotifWrap()}catch(e){}
     var darkOn=false;try{darkOn=document.documentElement.classList.contains('dark')}catch(e){}
     var vOn=vibOn();
     var colors=['#0B3D33','#0b2a6f','#0a5ea4','#0e7c66','#33691e','#7b2ff7','#b3261e','#c2185b','#4a4f57'];
@@ -3087,16 +3086,13 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
       +'<div class="card set-row"><div class="set-lbl"><b>📳 اهتزاز أثناء الضغط</b><small>اهتزاز خفيف عند لمس الأزرار</small></div><label class="switch"><input type="checkbox" id="setVib"'+(vOn?' checked':'')+'><span class="slider"></span></label></div>'
       +'<div class="card set-row"><div class="set-lbl"><b>🌙 الوضع الليلي</b><small>مظهر داكن مريح للعين</small></div><label class="switch"><input type="checkbox" id="setDark"'+(darkOn?' checked':'')+'><span class="slider"></span></label></div>'
       +'<div class="card"><h3 style="margin:6px 0 10px">🎨 لون البرنامج</h3><div class="swatches">'+colors.map(function(c){return '<button type="button" class="swatch" data-c="'+c+'" style="background:'+c+'" aria-label="لون"></button>'}).join('')+'</div><small>الاختيار بيتحفظ على الجهاز.</small></div>'
-      +'<div class="card"><h3 style="margin:6px 0 8px">🎨 إعدادات الشكل</h3><small>شكل الكروت</small><div class="cardshape-opts"><button type="button" class="g cardshape-btn" data-cs="normal">▭ عادي</button><button type="button" class="g cardshape-btn" data-cs="round">⬭ دائري</button><button type="button" class="g cardshape-btn" data-cs="glass">✦ زجاجي</button></div></div>'
+      +'<button class="g" type="button" id="settingsNotifBtn">🔔 إعدادات الإشعارات</button>'
       +'<button class="g" type="button" id="settingsBack">⬅️ رجوع لحسابي</button>';
     try{app(html)}catch(e){try{run(html)}catch(e2){}}
     var vt=get('setVib');if(vt)vt.addEventListener('change',function(){setVibrate(!!vt.checked)});
     var dt=get('setDark');if(dt)dt.addEventListener('change',function(){try{setDark(!!dt.checked)}catch(e){}});
+    var snb=get('settingsNotifBtn');if(snb)snb.addEventListener('click',function(){try{window.notifSettingsV()}catch(e){}});
     var bk=get('settingsBack');if(bk)bk.addEventListener('click',function(){try{profileV()}catch(e){}});
-    var sws=document.querySelectorAll('#app .swatch');
-    for(var i=0;i<sws.length;i++)(function(s){s.addEventListener('click',function(){setAccent(s.getAttribute('data-c'))})})(sws[i]);
-    var csb=document.querySelectorAll('#app .cardshape-btn');
-    for(var k=0;k<csb.length;k++)(function(b){b.addEventListener('click',function(){try{setCards(b.getAttribute('data-cs'))}catch(e){}})}) (csb[k]);
     try{themeSyncUI()}catch(e){}
     try{applyCards()}catch(e){}
     try{if(typeof navSync==='function')navSync()}catch(e){}
@@ -3163,6 +3159,7 @@ html.dark #nav{box-shadow:0 -10px 26px -14px #000}
 #ol .offer-card .icard-badge{z-index:3}
 #ol .offer-card .icard-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 #ol .offer-card .icard-price .now{font-size:16px;font-weight:800;color:var(--b,#0b2a6f)}
+html.dark #ol .offer-card .icard-price .now{color:#F3DFB2}
 #ol .offer-card .icard-price .was{font-size:11.5px;color:var(--muted,#7b8495);text-decoration:line-through}
 #ol .offer-card .rating-note{font-size:11.5px;text-align:start;margin:0}
 #ol .offer-card .rating-foot{display:none}
@@ -3179,6 +3176,8 @@ html.dark .ocard-cart{box-shadow:0 10px 20px -12px #000}
 #ol:not(.ol-grid) .offer-card .icard-img img{max-width:100%;max-height:100%;object-fit:contain;border-radius:0;margin:0;background:transparent}
 #ol:not(.ol-grid) .offer-card .icard-badge{top:6px;right:6px;font-size:10.5px;padding:3px 8px}
 #ol:not(.ol-grid) .offer-card .icard-body{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+#ol .offer-card .icard-name{color:var(--b,#0b2a6f)}
+html.dark #ol .offer-card .icard-name{color:var(--fg,#e8ecf5)}
 #ol:not(.ol-grid) .offer-card .icard-name{font-size:14.5px;font-weight:800;line-height:1.4;min-height:0}
 #ol:not(.ol-grid) .offer-card .ocard-foot{grid-column:3;grid-row:1;display:flex;align-items:center;justify-content:center;margin:0}
 /* ---- أفقي (B): 2 جنب بعض ---- */
@@ -3188,6 +3187,8 @@ html.dark .ocard-cart{box-shadow:0 10px 20px -12px #000}
 #ol.ol-grid .offer-card .icard-img{height:132px;padding:9px;display:grid;place-items:center}
 #ol.ol-grid .offer-card .icard-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;background:transparent;border-radius:0;margin:0}
 #ol.ol-grid .offer-card .icard-body{display:flex;flex-direction:column;gap:6px;min-width:0}
+#ol.ol-grid .offer-card .icard-name{color:var(--b,#0b2a6f)}
+html.dark #ol.ol-grid .offer-card .icard-name{color:var(--fg,#e8ecf5)}
 #ol.ol-grid .offer-card .icard-name{font-size:12.5px;font-weight:700;line-height:1.4;min-height:35px}
 #ol.ol-grid .offer-card .rating-note{font-size:10.5px}
 #ol.ol-grid .offer-card .rating-inline{display:none}
@@ -3219,7 +3220,7 @@ html.dark .item-card .icard-tools .act,html.dark .item-card .icard-tools .fav-he
 .rate-hint{color:var(--muted,#8B857A);font-size:11.5px;margin-top:2px}
 .item-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;border-top:1px solid var(--line,#e8e2d6);padding-top:12px}
 .item-actions button{flex:1 1 auto;min-width:110px;margin:0}
-.item-addbar{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 62px);z-index:56;max-width:520px;margin:0 auto;padding:8px 14px;background:var(--card);border-top:1px solid var(--line)}
+.item-addbar{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 92px);z-index:56;max-width:520px;margin:0 auto;padding:8px 14px;background:var(--card);border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -8px 20px -14px rgba(0,0,0,.55)}
 html.dark .item-addbar{background:#131b30;border-color:#2c3b5f}
 .item-addbar .qty-mini{margin:0}
 .item-addbar .qty-mini button.qty-add{width:100%;min-height:46px;font-size:16px;font-weight:800;border-radius:12px}
