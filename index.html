@@ -45,7 +45,7 @@ function lsGet(a){try{const s=localStorage.getItem('shc_'+a);if(!s)return null;c
 function lsSet(a,o){try{const s=JSON.stringify(o);if(s&&s.length<2500000)localStorage.setItem('shc_'+a,s)}catch(e){}}
 function lsDel(a){try{localStorage.removeItem('shc_'+a)}catch(e){}}
 function cGet(a){return RC[a]||lsGet(a)}
-function bustCaches(a){const cls=[];if(['corder','cartOrder','add','upd','cancelOrder','deleteOrder','reset','broadcast'].indexOf(a)>-1)cls.push('list','mine');if(['osave','odel','feature','rate','offerToSec'].indexOf(a)>-1)cls.push('offers');if(['secSave','secItemSave','secDel','secSetActive','secItemMove','secItemDel','offerToSec'].indexOf(a)>-1)cls.push('sections');if(a=='mine'||a=='list'||a=='offers'||a=='sections')cls.push(a);if(cls.indexOf('offers')>-1||cls.indexOf('sections')>-1){try{window.__shBustHome&&window.__shBustHome()}catch(e){}}cls.forEach(k=>{delete RC[k];lsDel(k)})}
+function bustCaches(a){const cls=[];if(['corder','cartOrder','add','upd','cancelOrder','deleteOrder','reset','broadcast'].indexOf(a)>-1)cls.push('list','mine');if(['osave','odel','feature','rate','offerToSec'].indexOf(a)>-1)cls.push('offers');if(['secSave','secItemSave','secDel','secSetActive','secItemMove','secItemDel','offerToSec','rateItem'].indexOf(a)>-1)cls.push('sections');if(a=='mine'||a=='list'||a=='offers'||a=='sections')cls.push(a);if(cls.indexOf('offers')>-1||cls.indexOf('sections')>-1){try{window.__shBustHome&&window.__shBustHome()}catch(e){}}cls.forEach(k=>{delete RC[k];lsDel(k)})}
 function refreshMine(){bustCaches('mine');mineV()}
 async function callC(a,o){const e=cGet(a);if(e&&Date.now()-e.t<45000)return e.v;try{const v=await call(a,o);const ent={t:Date.now(),v};RC[a]=ent;lsSet(a,ent);return v}catch(x){if(e)return e.v;throw x}}
 /* perf: نداء واحد لبيانات الرئيسية (تحقّق الجلسة + العروض + الأقسام + المفضلة) — بدل 4 نداءات، لتقليل زمن الفتح */
@@ -1249,13 +1249,13 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     }catch(e){}
     cartPersistSafe();cartBadgeSafe();
   }
-  function qtyRow(id,meta){
+  function qtyRow(id,meta,label){
     var w=document.createElement('div');w.className='qty-mini';
     function render(){
       var x=findCart(id),q=x?(Number(x.qty)||0):0;
       w.innerHTML='';
       if(q<1){
-        var b=document.createElement('button');b.type='button';b.className='g qty-add';b.style.flex='1';b.textContent='🛒 طلب المنتج';
+        var b=document.createElement('button');b.type='button';b.className='g qty-add';b.style.flex='1';b.textContent=label||'🛒 طلب المنتج';
         b.addEventListener('click',function(e){e.stopPropagation();cartUpsert(id,meta,1);render();TO('تمت الإضافة للسلة ✔','ok')});
         w.appendChild(b);return;
       }
@@ -1527,31 +1527,140 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       catch(e){ var b=G('secItemBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>' }
     })();
   }
-    function renderSecItem(it,sec){
-    var box=G('secItemBox'); if(!box)return;
-    if(!it){ box.innerHTML='<div class="err">الصنف مش موجود.</div>'; return; }
-    var disc=0;try{var _p=Number(String(it.p||'').replace(',','.')),_w=Number(String(it.w||'').replace(',','.'));if(it.p&&it.w&&isFinite(_p)&&isFinite(_w)&&_w>_p&&_p>=0)disc=Math.round((_w-_p)/_w*100)}catch(e){}
-    var h='<div class="card offer-detail" id="secItemDetail">';
-    h+='<div class="icard-media"><div class="icard-img">'+(it.ic?'<img class="zoomable" src="'+E(it.ic)+'" alt="'+E(it.t||'')+'" loading="lazy">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div></div>';
-    h+='<div class="item-detail-body"><div class="icard-name">'+E(it.t||'')+'</div><div class="icard-price">'+(it.p?'<span class="now">'+E(it.p)+' ج</span>':'')+(it.w?'<span class="was">'+E(it.w)+' ج</span>':'')+'</div><div class="rating-note">⭐ '+(it.avg?Number(it.avg).toFixed(1):'—')+' · '+(it.count||0)+' تقييم</div><h3>المواصفات والتفاصيل</h3><div class="pw">'+E(it.x||'لا توجد تفاصيل إضافية')+'</div></div>';
-    h+='</div>';
-    box.innerHTML=h;
-    var d=G('secItemDetail');
-    if(d){
-      var tl=d.querySelector('.icard-tools');
-      if(tl){
-        var fh=document.createElement('button');fh.type='button';fh.className='g fav-heart';fh.setAttribute('data-id',String(it.id));fh.title='المفضلة';fh.setAttribute('aria-label','المفضلة');
-        var has=false;try{has=FAVS.map(String).indexOf(String(it.id))>-1}catch(x){}
-        fh.textContent=has?'♥':'♡';
-        fh.addEventListener('click',function(e){e.stopPropagation();try{favToggle(it.id,fh)}catch(x){}});
-        tl.appendChild(fh);
-        tl.appendChild(secAct(SEC_ICONS.share,'مشاركة',function(e){e.stopPropagation();shareSecItem(it)}));
-        tl.appendChild(secAct(SEC_ICONS.image,'مشاركة الصورة',function(e){e.stopPropagation();if(window.shareSecItemImage)window.shareSecItemImage(it)}));
-      }
-      var body=d.querySelector('.item-detail-body')||d;
-      body.appendChild(qtyRow(it.id,{t:it.t,p:it.p,ic:it.ic}));
+  /* ===== كارت الصنف الموحّد: نفس الشكل بالظبط في شاشة العروض وشاشة الأقسام ===== */
+  function shItemCardHTML(m,opts){
+    opts=opts||{}; m=m||{};
+    var disc=0;try{var _p=Number(String(m.p||'').replace(',','.')),_w=Number(String(m.w||'').replace(',','.'));if(m.p&&m.w&&isFinite(_p)&&isFinite(_w)&&_w>_p&&_p>=0)disc=Math.round((_w-_p)/_w*100)}catch(e){}
+    var h='<div class="card item-card" id="secItemDetail">';
+    h+='<div class="icard-media"><div class="icard-img">'+(m.ic?'<img class="zoomable" src="'+E(m.ic)+'" alt="'+E(m.t||'')+'">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div><div class="icard-name">'+E(m.t||'')+'</div></div>';
+    h+='<div class="item-detail-body">';
+    h+='<div class="icard-price">'+(m.p?'<span class="now">'+E(m.p)+' ج</span>':'')+(m.w?'<span class="was">'+E(m.w)+' ج</span>':'')+'</div>';
+    if(m.x)h+='<div class="item-details">'+E(m.x)+'</div>';
+    h+='<div class="item-rate" data-id="'+E(m.id)+'" data-kind="'+(opts.kind||'item')+'"><div class="rate-stars"></div><div class="rating-note">⭐ '+(m.avg?Number(m.avg).toFixed(1):'—')+' · '+(m.count||0)+' تقييم</div><div class="rate-hint">اضغط على النجوم لتقييم '+(opts.kind==='offer'?'العرض':'المنتج')+'</div></div>';
+    h+='<div class="item-actions" hidden></div>';
+    h+='</div></div>';
+    h+='<div class="item-addbar" id="itemAddBar"></div>';
+    return h;
+  }
+  function shStarsHTML(mine){
+    var on=Number(mine)||0,out='';
+    for(var n=5;n>=1;n--)out+='<button type="button" data-n="'+n+'" class="'+(n<=on?'on':'')+'" aria-label="'+n+' نجوم">★</button>';
+    return out;
+  }
+  function mkItemAct(label,fn){var b=document.createElement('button');b.type='button';b.className='g';b.textContent=label;b.addEventListener('click',function(e){e.stopPropagation();fn(b)});return b}
+  async function shRate(kind,id,stars,rw){
+    try{
+      var b=rw&&rw.querySelector('.rate-stars'),bs=b?b.querySelectorAll('button'):[];
+      for(var i=0;i<bs.length;i++)bs[i].disabled=true;
+      if(kind==='offer')await call('rate',{id:id,stars:stars});else await call('rateItem',{id:id,stars:stars});
+      var n=rw&&rw.querySelector('.rating-note');if(n)n.textContent='⭐ '+Number(stars).toFixed(1)+' · تم تقييمك';
+      if(typeof TO==='function')TO('تم التقييم ✔','ok');
+      try{if(kind==='offer'){OF=await callC('offers')}else{SEC_CACHE=await callC('sections')}}catch(e){}
+    }catch(e){
+      if(typeof TO==='function')TO(EM(e),'bad');
+    }finally{
+      var b2=rw&&rw.querySelector('.rate-stars'),bs2=b2?b2.querySelectorAll('button'):[];
+      for(var j=0;j<bs2.length;j++)bs2[j].disabled=false;
     }
   }
+  async function shPublishToChannel(btn,kind,id){
+    if(btn)btn.disabled=true;
+    try{var r=await call('tgChannelTest',{id:id,kind:kind});if(r&&r.ok)TO('تم النشر على قناة تيليجرام ✔','ok');else TO('فشل النشر'+((r&&r.last)?': '+r.last:''),'bad')}
+    catch(e){TO(EM(e),'bad')}
+    finally{if(btn)btn.disabled=false}
+  }
+  function shDeleteCurrent(kind,id){
+    if(!confirm(kind==='offer'?'تحذف العرض؟':'تحذف الصنف؟'))return;
+    (async function(){
+      try{
+        await call(kind==='offer'?'odel':'secItemDel',{id:id});
+        TO(kind==='offer'?'تم حذف العرض ✔':'تم حذف الصنف ✔','ok');
+        try{document.body.classList.remove('sh-item-open')}catch(e){}
+        if(kind==='offer'){try{OF=await callC('offers')}catch(e){}try{offV()}catch(e){try{homeV()}catch(e2){}}}
+        else{try{bustCaches('sections')}catch(e){}try{loadHomeSections()}catch(e){}try{homeV()}catch(e){}}
+      }catch(e){TO(EM(e),'bad')}
+    })();
+  }
+  function shWireItemCard(root,m,opts){
+    opts=opts||{}; m=m||{}; if(!root)return;
+    var d=root.querySelector('#secItemDetail')||root;
+    try{document.body.classList.add('sh-item-open')}catch(e){}
+    /* الصورة: زرار المفضلة + زرار المشاركة بس */
+    var tl=d.querySelector('.icard-tools');
+    if(tl){
+      var fh=favHeart(m.id);
+      try{fh.style.removeProperty('width');fh.style.removeProperty('font-size')}catch(e){}
+      tl.appendChild(fh);
+      tl.appendChild(secAct(SEC_ICONS.share,'مشاركة',function(e){e.stopPropagation();if(opts.kind==='offer')shareOffer(m.id);else shareSecItem(m)}));
+    }
+    /* التقييم بنجوم قابلة للضغط */
+    var rw=d.querySelector('.item-rate');
+    if(rw){
+      var sb=rw.querySelector('.rate-stars');
+      if(sb){
+        sb.innerHTML=shStarsHTML(m.mine);
+        sb.addEventListener('click',function(e){
+          var b=e.target&&e.target.closest?e.target.closest('button[data-n]'):null;if(!b)return;
+          e.stopPropagation();
+          var n=Number(b.getAttribute('data-n'))||0;
+          var all=sb.querySelectorAll('button');for(var i=0;i<all.length;i++)all[i].classList.toggle('on',Number(all[i].getAttribute('data-n'))<=n);
+          shRate(opts.kind,m.id,n,rw);
+        });
+      }
+    }
+    /* أزرار المدير: نشر على القناة + تعديل + نقل + حذف */
+    var acts=d.querySelector('.item-actions');
+    if(acts&&isStaff()){
+      acts.hidden=false;
+      acts.appendChild(mkItemAct('📢 انشر على القناة',function(b){shPublishToChannel(b,opts.kind,m.id)}));
+      if(opts.kind==='offer'){
+        acts.appendChild(mkItemAct('✏️ تعديل',function(){try{offE(m.id)}catch(e){}}));
+        acts.appendChild(mkItemAct('📥 نقل إلى قسم',function(){try{offerMoveToSec(m.id)}catch(e){}}));
+        acts.appendChild(mkItemAct('🗑 حذف',function(){shDeleteCurrent('offer',m.id)}));
+      }else{
+        acts.appendChild(mkItemAct('✏️ تعديل',function(){try{secItemEditor(shItemSecId(opts.secId,m.id),m.id)}catch(e){}}));
+        acts.appendChild(mkItemAct('📥 نقل إلى قسم',function(){try{secItemMoveDialog(m.id)}catch(e){}}));
+        acts.appendChild(mkItemAct('🗑 حذف',function(){shDeleteCurrent('item',m.id)}));
+      }
+    }
+    /* زرار أضف للسلة ثابت أسفل الشاشة */
+    var bar=root.querySelector('#itemAddBar');
+    if(bar)bar.appendChild(qtyRow(m.id,{t:m.t,p:m.p,ic:m.ic},'🛒 أضف للسلة'));
+  }
+  function shItemMeta(x){
+    return {id:x.id,t:x.t,x:x.x,p:x.p,w:x.w,ic:x.ic,avg:x.avg,count:x.count,mine:x.mine};
+  }
+  function shItemSecId(secId,id){
+    if(secId)return secId;
+    try{var l=Array.isArray(SEC_CACHE)?SEC_CACHE:[];for(var i=0;i<l.length;i++){var its=(l[i]&&l[i].items)||[];for(var j=0;j<its.length;j++){if(String(its[j].id)===String(id))return l[i].id}}}catch(e){}
+    return secId;
+  }
+  /* لما نسيب شاشة كارت الصنف نرجّع زرار السلة العايم */
+  try{
+    var shBarObs=new MutationObserver(function(){if(!G('itemAddBar')){try{document.body.classList.remove('sh-item-open')}catch(e){}}});
+    shBarObs.observe(G('app'),{childList:true});
+  }catch(e){}
+
+  function renderSecItem(it,sec){
+    var box=G('secItemBox'); if(!box)return;
+    if(!it){ box.innerHTML='<div class="err">الصنف مش موجود.</div>'; return; }
+    var m=shItemMeta(it),opts={kind:'item',secId:sec&&sec.id};
+    box.innerHTML=shItemCardHTML(m,opts);
+    shWireItemCard(box,m,opts);
+  }
+  /* نفس الكارت بالظبط لما تفتح عرض من شاشة العروض */
+  var _shOfferVPrev=offerV;
+  offerV=function(id,fromCache){
+    try{
+      if(!fromCache&&V!='offer')ORIGIN=V;
+      var o=(typeof OF!=='undefined'?OF:[]).find(function(x){return String(x.id)==String(id)});
+      if(!o)return _shOfferVPrev.apply(this,arguments);
+      V='offer';try{window.__shLastOfferId=String(id)}catch(e){}
+      var m=shItemMeta(o),opts={kind:'offer'};
+      app(shItemCardHTML(m,opts));
+      shWireItemCard(G('app'),m,opts);
+    }catch(e){return _shOfferVPrev.apply(this,arguments)}
+  };
   window.secItemV=secItemV;
   var homePrev=(typeof homeV==='function')?homeV:null;
   if(homePrev){ homeV=function(){ var r=homePrev.apply(this,arguments); try{ loadHomeSections() }catch(e){} return r; }; }
@@ -2975,6 +3084,37 @@ html.dark .ocard-cart{box-shadow:0 10px 20px -12px #000}
 #ol .offer-card .featured-toggle,#ol .offer-card button.g[onclick*="offE"]{display:none}
 #ol.ol-grid .offer-card .icard-img{height:110px}
 #ol.ol-grid .offer-card{padding:8px}
+
+/* ===== كارت الصنف الموحّد (نفس الشكل في العروض والأقسام) ===== */
+.item-card{padding:12px;position:relative}
+.item-card .icard-media{margin:0;border-radius:14px}
+.item-card .icard-img{height:280px;padding:14px}
+.item-card .icard-tools{top:12px;left:12px;flex-direction:row;gap:8px}
+.item-card .icard-tools .act,.item-card .icard-tools .fav-heart{width:40px;min-width:40px;height:40px;padding:0;margin:0;border-radius:50%;border:1px solid var(--line,#e8e2d6);background:#ffffffeb;color:var(--btext,var(--b,#0b2a6f));display:grid;place-items:center;font-size:21px;line-height:1}
+.item-card .icard-tools .fav-heart{color:#cf3150}
+html.dark .item-card .icard-tools .act,html.dark .item-card .icard-tools .fav-heart{background:#1c2744;border-color:#2c3b5f}
+.item-card .icard-name{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:36px 14px 12px;color:#fff;font-weight:700;font-size:18px;line-height:1.4;text-shadow:0 1px 6px rgba(0,0,0,.7);background:linear-gradient(to top,rgba(5,14,12,.92),rgba(5,14,12,.35) 60%,transparent)}
+.item-card .icard-badge{z-index:3}
+.item-card .item-detail-body{padding:0}
+.item-card .icard-price{display:flex;align-items:baseline;gap:10px;text-align:start;margin:14px 2px 2px}
+.item-card .icard-price .now{display:inline;font-size:24px;font-weight:800;color:var(--b,#0b2a6f)}
+.item-card .icard-price .was{display:inline;font-size:14px;font-weight:700;color:var(--muted,#8B857A);text-decoration:line-through}
+.item-card .item-details{margin:8px 2px 0;color:var(--fg,#171A1F);opacity:.85;font-size:14px;line-height:1.75;white-space:pre-wrap}
+.item-rate{margin:14px 2px 2px}
+.rate-stars{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px;margin-bottom:4px}
+.rate-stars button{border:0;background:none;padding:0;line-height:1;font-size:30px;color:#DAD3C3;cursor:pointer;transition:transform .1s,color .1s}
+.rate-stars button.on{color:#E8A33D}
+.rate-stars button:disabled{cursor:default}
+.item-rate .rating-note{text-align:start;margin:0}
+.rate-hint{color:var(--muted,#8B857A);font-size:11.5px;margin-top:2px}
+.item-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;border-top:1px solid var(--line,#e8e2d6);padding-top:12px}
+.item-actions button{flex:1 1 auto;min-width:110px;margin:0}
+.item-addbar{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 62px);z-index:56;max-width:520px;margin:0 auto;padding:8px 14px;background:var(--card);border-top:1px solid var(--line)}
+html.dark .item-addbar{background:#131b30;border-color:#2c3b5f}
+.item-addbar .qty-mini{margin:0}
+.item-addbar .qty-mini button.qty-add{width:100%;min-height:46px;font-size:16px;font-weight:800;border-radius:12px}
+body.sh-item-open{padding-bottom:150px}
+body.sh-item-open #cartFabWrap{display:none}
 </style>
 <style>
 /* ===== كروت الأصناف في أقسام الرئيسية: أكبر شوية ===== */
