@@ -2081,11 +2081,7 @@ html.dark .skel{background:linear-gradient(90deg,#1a2236 25%,#232d49 37%,#1a2236
 .hero-dot.on{width:22px;border-radius:5px;background:var(--b,#0b2a6f)}
 html.dark .hero-dot{background:#3a4665}
 html.dark .hero-dot.on{background:var(--b,#4f74d8)}
-.cardshape{margin:12px 0 4px}
-.cardshape-opts{display:flex;gap:8px;margin-top:6px}
-.cardshape-btn{width:auto;flex:1 1 0;font-size:13px;padding:9px 6px}
-.cardshape-btn.on{outline:2px solid var(--b,#0b2a6f);outline-offset:1px}
-.cards-round .card{border-radius:22px}
+/* إعدادات الشكل اتلغت — كله عادي */
 
 .search-card img.ic{width:100%;height:120px;object-fit:contain;border-radius:10px;background:#f4f7fd}
 html.dark .search-card img.ic{background:#141c30}
@@ -2260,37 +2256,15 @@ html.dark .search-card img.ic{background:#141c30}
     };
   }catch(e){}
 
-  /* ---------- (12) شكل الكروت ---------- */
-  function cardsNow(){try{localStorage.removeItem('shehab_cards')}catch(e){}return 'normal'}
+  /* ---------- (12) شكل الكروت: تم إلغاء الخيار — كله عادي ---------- */
   function applyCards(){
-    var d=document.documentElement,v=cardsNow();
-    d.classList.toggle('cards-round',v==='round');
-    d.classList.toggle('cards-glass',v==='glass');
-    var l=document.querySelectorAll('.cardshape-btn');
-    for(var i=0;i<l.length;i++)l[i].classList.toggle('on',l[i].getAttribute('data-cs')===v);
+    var d=document.documentElement;
+    try{localStorage.removeItem('shehab_cards')}catch(e){}
+    d.classList.remove('cards-round'); d.classList.remove('cards-glass');
+    var q=document.querySelectorAll('.cardshape-btn,.cardshape,#cardShapeRow');
+    for(var i=0;i<q.length;i++){ try{q[i].remove()}catch(e){} }
   }
-  function setCards(v){ try{localStorage.setItem('shehab_cards',v)}catch(e){} applyCards(); haptic(10); }
-  window.setCards=setCards;window.applyCards=applyCards;
-  function buildCardShape(){
-    try{
-      var box=G('appearanceBox'); if(!box||G('cardShapeRow'))return;
-      var row=document.createElement('div'); row.id='cardShapeRow'; row.className='cardshape';
-      row.innerHTML="<small>شكل الكروت</small><div class='cardshape-opts'>"+
-        "<button type='button' class='g cardshape-btn' data-cs='normal'>▭ عادي</button>"+
-        "<button type='button' class='g cardshape-btn' data-cs='round'>⬭ دائري</button>"+
-        "</div>";
-      box.appendChild(row);
-      row.addEventListener('click',function(ev){ var b=ev.target&&ev.target.closest?ev.target.closest('.cardshape-btn'):null; if(!b)return; ev.stopPropagation(); setCards(b.getAttribute('data-cs')); });
-    }catch(e){}
-  }
-  try{
-    var baseProf=profileV;
-    profileV=async function(){
-      var r=await baseProf.apply(this,arguments);
-      try{buildCardShape(); applyCards()}catch(e){}
-      return r;
-    };
-  }catch(e){}
+  window.applyCards=applyCards;
   try{applyCards()}catch(e){}
 })();
 </script>
