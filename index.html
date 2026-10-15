@@ -1339,17 +1339,19 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     return wrap;
   }
   function pickSection(title,cb){
+    var m=document.createElement('div');m.className='m';
+    m.innerHTML='<div><b>'+E(title)+'</b><small>اختار القسم</small><div id="secPickList"><div class="rating-note">جاري تحميل الأقسام…</div></div><button class="g" type="button" id="secPickCancel">إلغاء</button></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
+    G('secPickCancel').addEventListener('click',function(){m.remove()});
+    var box=G('secPickList');
     (async function(){
       var list=[];
-      try{list=await call('sectionsAdmin')}catch(e){TO(EM(e),'bad');return}
+      try{list=await call('sectionsAdmin')}catch(e){m.remove();TO(EM(e),'bad');return}
       list=(list||[]).filter(function(s){return s&&s.active!==false});
-      if(!list.length){TO('مفيش أقسام، اضغط «قسم جديد» الأول','bad');return}
-      var m=document.createElement('div');m.className='m';
-      m.innerHTML='<div><b>'+E(title)+'</b><small>اختار القسم</small><div id="secPickList"></div><button class="g" type="button" id="secPickCancel">إلغاء</button></div>';
-      document.body.appendChild(m);
-      m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
-      G('secPickCancel').addEventListener('click',function(){m.remove()});
-      var box=G('secPickList');
+      if(!list.length){m.remove();TO('مفيش أقسام، اضغط «قسم جديد» الأول','bad');return}
+      if(m.parentNode!==document.body)return;
+      box.innerHTML='';
       list.forEach(function(s){
         var b=document.createElement('button');b.type='button';b.className='g';b.style.textAlign='right';b.textContent='🗂️ '+String(s.name||'');
         b.addEventListener('click',function(){m.remove();cb(s.id)});
@@ -1360,7 +1362,13 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   function secItemMoveDialog(id){
     pickSection('نقل الصنف إلى قسم',function(secId){
       (async function(){
-        try{await call('secItemMove',{id:id,sec:secId});TO('تم نقل الصنف ✔','ok');loadHomeSections()}catch(e){TO(EM(e),'bad')}
+        TO('⏳ جاري نقل الصنف…','');
+        try{
+          await call('secItemMove',{id:id,sec:secId});
+          TO('تم نقل الصنف إلى القسم ✔','ok');
+          loadHomeSections();
+          try{afterSecChange()}catch(e){}
+        }catch(e){TO(EM(e),'bad')}
       })();
     });
   }
@@ -1916,7 +1924,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   function secItemMenuItems(sec,it){
     return [
       {label:'✏️ تعديل الصنف', fn:function(){secItemEditor(sec.id,it.id)}},
-      {label:'📥 نقل إلى قسم تاني', fn:function(){pickSection('نقل الصنف إلى قسم',function(secId){(async function(){try{await call('secItemMove',{id:it.id,sec:secId});TO('تم نقل الصنف ✔','ok');afterSecChange()}catch(x){TO(EM(x),'bad')}})()})}},
+      {label:'📥 نقل إلى قسم تاني', fn:function(){secItemMoveDialog(it.id)}},
       {sep:true},
       {label:'🗑️ حذف الصنف', danger:true, fn:function(){ if(!confirm('تحذف الصنف «'+(it.t||'')+'»؟'))return; (async function(){try{await call('secItemDel',{id:it.id});TO('تم الحذف ✔','ok');afterSecChange()}catch(x){TO(EM(x),'bad')}})() }}
     ];
