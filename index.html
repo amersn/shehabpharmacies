@@ -1584,33 +1584,46 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   function shWireItemCard(root,m,opts){
     opts=opts||{}; m=m||{}; if(!root)return;
     var d=root.querySelector('#secItemDetail')||root;
+    var guest=!!opts.guest;
     try{document.body.classList.add('sh-item-open')}catch(e){}
     /* الصورة: زرار المفضلة + زرار المشاركة بس */
     var tl=d.querySelector('.icard-tools');
     if(tl){
-      var fh=favHeart(m.id);
-      try{fh.style.removeProperty('width');fh.style.removeProperty('font-size')}catch(e){}
-      tl.appendChild(fh);
+      if(guest){
+        var gf=document.createElement('button');gf.type='button';gf.className='g act';gf.title='المفضلة';gf.setAttribute('aria-label','المفضلة');gf.textContent='♡';
+        gf.addEventListener('click',function(e){e.stopPropagation();try{window.__shGuestOrder()}catch(x){}});
+        tl.appendChild(gf);
+      }else{
+        var fh=favHeart(m.id);
+        try{fh.style.removeProperty('width');fh.style.removeProperty('font-size')}catch(e){}
+        tl.appendChild(fh);
+      }
       tl.appendChild(secAct(SEC_ICONS.share,'مشاركة',function(e){e.stopPropagation();if(opts.kind==='offer')shareOffer(m.id);else shareSecItem(m)}));
     }
-    /* التقييم بنجوم قابلة للضغط */
+    /* التقييم */
     var rw=d.querySelector('.item-rate');
     if(rw){
       var sb=rw.querySelector('.rate-stars');
+      var hint=rw.querySelector('.rate-hint');
       if(sb){
-        sb.innerHTML=shStarsHTML(m.mine);
-        sb.addEventListener('click',function(e){
-          var b=e.target&&e.target.closest?e.target.closest('button[data-n]'):null;if(!b)return;
-          e.stopPropagation();
-          var n=Number(b.getAttribute('data-n'))||0;
-          var all=sb.querySelectorAll('button');for(var i=0;i<all.length;i++)all[i].classList.toggle('on',Number(all[i].getAttribute('data-n'))<=n);
-          shRate(opts.kind,m.id,n,rw);
-        });
+        if(guest){
+          sb.innerHTML=shStarsHTML(Math.round(Number(m.avg)||0));
+          if(hint)hint.textContent='سجّل دخول عشان تقيّم المنتج';
+        }else{
+          sb.innerHTML=shStarsHTML(m.mine);
+          sb.addEventListener('click',function(e){
+            var b=e.target&&e.target.closest?e.target.closest('button[data-n]'):null;if(!b)return;
+            e.stopPropagation();
+            var n=Number(b.getAttribute('data-n'))||0;
+            var all=sb.querySelectorAll('button');for(var i=0;i<all.length;i++)all[i].classList.toggle('on',Number(all[i].getAttribute('data-n'))<=n);
+            shRate(opts.kind,m.id,n,rw);
+          });
+        }
       }
     }
     /* أزرار المدير: نشر على القناة + تعديل + نقل + حذف */
     var acts=d.querySelector('.item-actions');
-    if(acts&&isStaff()){
+    if(acts&&!guest&&isStaff()){
       acts.hidden=false;
       acts.appendChild(mkItemAct('📢 انشر على القناة',function(b){shPublishToChannel(b,opts.kind,m.id)}));
       if(opts.kind==='offer'){
@@ -1623,10 +1636,24 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         acts.appendChild(mkItemAct('🗑 حذف',function(){shDeleteCurrent('item',m.id)}));
       }
     }
-    /* زرار أضف للسلة ثابت أسفل الشاشة */
+    /* الشريط الثابت أسفل الشاشة */
     var bar=root.querySelector('#itemAddBar');
-    if(bar)bar.appendChild(qtyRow(m.id,{t:m.t,p:m.p,ic:m.ic},'🛒 أضف للسلة'));
+    if(bar){
+      if(guest){
+        bar.classList.add('guest-bar');
+        if(acts){
+          acts.hidden=false;
+          acts.appendChild(mkItemAct('👤 تسجيل الدخول / حساب جديد',function(){try{authV()}catch(e){}}));
+        }
+        var ob=document.createElement('button');ob.type='button';ob.className='g qty-add';ob.textContent='🛒 اطلب الآن';
+        ob.addEventListener('click',function(){try{window.__shGuestOrder()}catch(e){}});
+        bar.appendChild(ob);
+      }else{
+        bar.appendChild(qtyRow(m.id,{t:m.t,p:m.p,ic:m.ic},'🛒 أضف للسلة'));
+      }
+    }
   }
+  try{window.shItemCardHTML=shItemCardHTML;window.shWireItemCard=shWireItemCard}catch(e){}
   function shItemMeta(x){
     return {id:x.id,t:x.t,x:x.x,p:x.p,w:x.w,ic:x.ic,avg:x.avg,count:x.count,mine:x.mine};
   }
@@ -2924,16 +2951,25 @@ html.dark .home-duo .duo.qc{background:#5b21b6}
   }
   function renderGuest(d,kind){
     d=d||{};
-    var h='<img class="lg" src="'+LOGOURL()+'"><h2>صيدليات شهاب</h2>'+
-      '<div class="guest-badge">👀 بتشاهد كزائر — تقدر تقرأ التفاصيل، وتسجّل دخول للطلب</div>'+
-      '<div class="card offer-detail">';
+    var isItem=(kind==='i');
+    var head='<img class="lg" src="'+LOGOURL()+'"><h2>صيدليات شهاب</h2>'+
+      '<div class="guest-badge">👀 بتشاهد كزائر — تقدر تقرأ التفاصيل، وتسجّل دخول للطلب</div>';
+    if(d.secName)head+='<small style="display:block;text-align:center;margin-bottom:6px">القسم: '+E(d.secName)+'</small>';
+    if(kind==='offer'&&d.live===false)head+='<div class="offer-cd">⏳ العرض مش متاح حاليًا (انتهت المدة)</div>';
+    if(typeof d.q==='number'&&d.q===0)head+='<div class="stk out">نفدت الكمية</div>';
+    /* نفس كارت الصنف الموحّد بالظبط (وضع الزائر) */
+    if(typeof window.shItemCardHTML==='function'){
+      var meta={id:d.id,t:d.t,x:d.x,p:d.p,w:d.w,ic:d.ic,avg:d.avg,count:d.count,mine:0};
+      var opts={kind:isItem?'item':'offer',guest:true};
+      APPH(head+window.shItemCardHTML(meta,opts));
+      try{window.shWireItemCard(G('app'),meta,opts)}catch(e){}
+      return;
+    }
+    /* احتياطي (لو الدالة الموحّدة مش متاحة) */
+    var h=head+'<div class="card offer-detail">';
     if(d.ic)h+='<img class="offer-photo" src="'+E(d.ic)+'" alt="'+E(d.t||'')+'">';
-    if(d.secName)h+='<small>القسم: '+E(d.secName)+'</small>';
     h+='<h2>'+E(d.t||'')+'</h2>'+gPrices(d);
-    if(kind==='offer'&&d.live===false)h+='<div class="offer-cd">⏳ العرض مش متاح حاليًا (انتهت المدة)</div>';
-    if(typeof d.q==='number'&&d.q===0)h+='<div class="stk out">نفدت الكمية</div>';
-    h+='<h3>المواصفات والتفاصيل</h3><div class="pw">'+E(d.x||'لا توجد تفاصيل إضافية')+'</div>';
-    if(kind==='offer')h+='<h3>تقييم العملاء</h3><div class="rating-note">'+(d.avg?Number(d.avg).toFixed(1):'—')+' من 5 · '+(d.count||0)+' تقييم</div>';
+    h+='<div class="pw">'+E(d.x||'لا توجد تفاصيل إضافية')+'</div>';
     h+='</div><div class="guest-actions">'+
       '<button onclick="__shGuestOrder()">🛒 اطلب الآن</button>'+
       '<button class="g" onclick="__shGuestShare()">📤 مشاركة</button>'+
@@ -3113,6 +3149,8 @@ html.dark .item-card .icard-tools .act,html.dark .item-card .icard-tools .fav-he
 html.dark .item-addbar{background:#131b30;border-color:#2c3b5f}
 .item-addbar .qty-mini{margin:0}
 .item-addbar .qty-mini button.qty-add{width:100%;min-height:46px;font-size:16px;font-weight:800;border-radius:12px}
+.item-addbar.guest-bar{bottom:0;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.item-addbar.guest-bar .g.qty-add{background:var(--b,#0b2a6f);color:#fff;border:0}
 body.sh-item-open{padding-bottom:150px}
 body.sh-item-open #cartFabWrap{display:none}
 </style>
