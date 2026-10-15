@@ -209,7 +209,15 @@ async function openOfferById(id){id=String(id||'');if(!id)return false;try{if(!A
 async function openOrderById(id){id=String(id||'');try{if(S.r=='customer')await mineV();else await listV();setTimeout(()=>{try{const el=document.querySelector('[data-oid="'+id+'"]');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='3px solid #0b2a6f';el.style.outlineOffset='2px';setTimeout(()=>{el.style.outline=''},2600)}}catch(e){}},220)}catch(e){}}
 homeV=function(m=''){__shHomeBeforeOffer(m);const oid=PENDING_OFFER;if(oid){PENDING_OFFER='';setTimeout(function(){openOfferById(oid)},60)}const rid=PENDING_ORDER;if(rid){PENDING_ORDER='';setTimeout(function(){openOrderById(rid)},90)}const pv=PENDING_VIEW;if(pv){PENDING_VIEW='';setTimeout(function(){try{if(pv==='offers')offV()}catch(e){}},60)}const iid=PENDING_ITEM;if(iid){PENDING_ITEM='';setTimeout(function(){try{if(typeof window.secItemV==='function')window.secItemV(iid)}catch(e){}},60)}};
 /* Refresh the data of whatever screen is open WITHOUT going back to the home screen. */
-async function softRefresh(){try{const v=V||'home';if(v==='home'){bustCaches('offers');OF=await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero();refreshNotificationBadge()}else if(v==='off'){bustCaches('offers');OF=await callC('offers');drawO()}else if(v==='list'){bustCaches('list');O=await callC('list');draw()}else if(v==='mine'){bustCaches('mine');drawMine(await callC('mine'))}else if(v==='offer'){const id=window.__shLastOfferId;if(id){bustCaches('offers');OF=await callC('offers');if(OF.some(o=>String(o.id)==String(id)))offerV(String(id),true)}}else if(v==='cart'){bustCaches('offers');OF=await callC('offers');cartRender()}else if(v==='notifications'){await notificationCenter()}else if(v==='profile'){await profileV()}else if(v==='notify'){await notifV()}else if(v==='broadcast'){await broadcastV()}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
+async function softRefresh(){try{const v=V||'home';if(v==='home'){bustCaches('offers');OF=await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero();refreshNotificationBadge();try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.loadHomeSections==='function')window.loadHomeSections()}catch(e){}}else if(v==='off'){bustCaches('offers');OF=await callC('offers');drawO()}else if(v==='list'){bustCaches('list');O=await callC('list');draw()}else if(v==='mine'){bustCaches('mine');drawMine(await callC('mine'))}else if(v==='offer'){const id=window.__shLastOfferId;if(id){bustCaches('offers');OF=await callC('offers');if(OF.some(o=>String(o.id)==String(id)))offerV(String(id),true)}}else if(v==='cart'){bustCaches('offers');OF=await callC('offers');cartRender()}else if(v==='notifications'){await notificationCenter()}else if(v==='profile'){await profileV()}else if(v==='notify'){await notifV()}else if(v==='broadcast'){await broadcastV()}
+else if(v==='sec'){try{bustCaches('sections');if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.secScreenV==='function')window.secScreenV(window.__shLastSecId||'')}catch(e){}}
+else if(v==='secItem'){try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(window.__shLastSecItemId&&typeof window.secItemV==='function')window.secItemV(window.__shLastSecItemId)}catch(e){}}
+else if(v==='favorites'){try{bustCaches('favorites');await favoritesV()}catch(e){}}
+else if(v==='monthly'){try{await monthlyV()}catch(e){}}
+else if(v==='monthlyAll'){try{monthlyAdminV()}catch(e){}}
+else if(v==='couponAdmin'){try{couponAdminV()}catch(e){}}
+else if(v==='loyaltySettings'){try{if(typeof window.loyaltySettingsV==='function')await window.loyaltySettingsV()}catch(e){}}
+else if(v==='search'){try{if(typeof window.searchV==='function')window.searchV()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
 /* ---- Shehab: share an offer + server-backed notification centre ---- */
 async function loadCartAddr(){try{const u=await call('profile');const a=$('cartAddr');if(a&&u&&u.address&&!a.value)a.value=u.address}catch(e){}}
 async function shareOffer(id){id=String(id||'');if(!id)return;const url=BC_LINK_BASE+'?o='+encodeURIComponent(id);if(typeof window.openShareSheet==='function'){try{window.openShareSheet({url:url,text:'شوف العرض ده في صيدليات شهاب',title:'صيدليات شهاب'});return}catch(e){}}try{if(navigator.share){await navigator.share({title:'صيدليات شهاب',text:'شوف العرض ده في صيدليات شهاب',url});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(url);if(typeof showShehabPushToast==='function')showShehabPushToast('تم نسخ رابط العرض ✔');else alert('تم نسخ رابط العرض ✔')}catch(e){try{prompt('انسخ رابط العرض:',url)}catch(e2){}}}
@@ -406,7 +414,7 @@ function heroMarkDots(){try{var ds=document.querySelectorAll('#of .hero-dot');fo
 function heroPaint(dir){var sl=document.getElementById('heroSlide');if(!sl)return;var list=window.__heroList||[];if(!list.length)return;var o=list[HSL.i]||list[0];sl.innerHTML=heroCardHTML(o);var c=sl.firstElementChild;if(c){c.style.transition='none';c.style.opacity='0';c.style.transform='translateX('+(dir>0?'-15%':'15%')+')';requestAnimationFrame(function(){c.style.transition='opacity .3s ease, transform .3s ease';c.style.opacity='1';c.style.transform='translateX(0)'})}}
 function heroAdvance(dir){var list=window.__heroList||[];if(list.length<2)return;dir=dir||1;HSL.i=(HSL.i+dir+list.length)%list.length;var sl=document.getElementById('heroSlide'),c=sl?sl.firstElementChild:null;if(c){c.style.transition='opacity .22s ease, transform .22s ease';c.style.opacity='0';c.style.transform='translateX('+(dir>0?'108%':'-108%')+')';setTimeout(function(){heroPaint(dir);heroMarkDots()},220)}else{heroPaint(dir);heroMarkDots()}}
 function heroAuto(){if(HSL.timer)return;HSL.timer=setInterval(function(){try{if(V!=='home'||document.hidden||HSL.paused)return;var list=window.__heroList||[];if(list.length<2)return;var sl=document.getElementById('heroSlide');if(!sl||!sl.isConnected)return;heroAdvance(1)}catch(e){}},4200)}
-function heroWire(){var sl=document.getElementById('heroSlide');if(!sl||sl.getAttribute('data-hooked'))return;sl.setAttribute('data-hooked','1');var sx=0,down=false;sl.addEventListener('click',function(ev){if(heroMoved>6){heroMoved=0;return}var card=ev.target&&ev.target.closest?ev.target.closest('.hero-card'):null;if(card&&card.getAttribute('data-oid'))offerV(card.getAttribute('data-oid'))});sl.addEventListener('pointerdown',function(ev){down=true;heroMoved=0;sx=ev.clientX;HSL.paused=true;clearTimeout(HSL.pt);try{sl.setPointerCapture(ev.pointerId)}catch(e){}});sl.addEventListener('pointermove',function(ev){if(!down)return;var d=Math.abs(ev.clientX-sx);if(d>heroMoved)heroMoved=d});var end=function(ev){if(!down)return;down=false;var d=(ev.clientX||0)-sx;HSL.paused=false;if(Math.abs(d)>44){heroMoved=99;heroAdvance(d<0?1:-1)}};sl.addEventListener('pointerup',end);sl.addEventListener('pointercancel',function(){down=false;HSL.paused=false});sl.addEventListener('pointerleave',function(){if(!down)HSL.paused=false})}
+function heroWire(){var sl=document.getElementById('heroSlide');if(!sl||sl.getAttribute('data-hooked'))return;sl.setAttribute('data-hooked','1');var sx=0,down=false;sl.addEventListener('click',function(ev){if(heroMoved>6){heroMoved=0;return}var card=ev.target&&ev.target.closest?ev.target.closest('.hero-card'):null;if(card&&card.getAttribute('data-oid'))offerV(card.getAttribute('data-oid'))});sl.addEventListener('pointerdown',function(ev){down=true;heroMoved=0;sx=ev.clientX;HSL.paused=true;clearTimeout(HSL.pt);try{sl.setPointerCapture(ev.pointerId)}catch(e){}});sl.addEventListener('pointermove',function(ev){if(!down)return;var d=Math.abs(ev.clientX-sx);if(d>heroMoved)heroMoved=d});var end=function(ev){if(!down)return;down=false;var d=(ev.clientX||0)-sx;HSL.paused=false;if(Math.abs(d)>44){heroMoved=99;heroAdvance(d<0?-1:1)}};sl.addEventListener('pointerup',end);sl.addEventListener('pointercancel',function(){down=false;HSL.paused=false});sl.addEventListener('pointerleave',function(){if(!down)HSL.paused=false})}
 try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(a.length<2)a=(typeof OF!=='undefined'&&OF&&OF.length)?OF.slice(0,10):a;if(!a.length){e.innerHTML='<div class="card">مفيش عروض حاليًا</div>';return}HI=(HI+a.length)%a.length;var list=a.slice(0,10);try{window.__heroList=list}catch(x){}if(!(HSL.i>=0&&HSL.i<list.length))HSL.i=0;HI=HSL.i;e.innerHTML='<div class="hero-slide" id="heroSlide">'+heroCardHTML(list[HSL.i])+'</div>';heroWire();heroAuto();setTimeout(heroMarkDots,0)};stepHero=function(){};window.heroGoto=function(i){try{var list=window.__heroList||[];if(list.length<2)return;i=Number(i);if(!isFinite(i)||i===HSL.i)return;var dir=i>HSL.i?1:-1;HSL.i=i;heroPaint(dir);heroMarkDots();HSL.paused=true;clearTimeout(HSL.pt);HSL.pt=setTimeout(function(){HSL.paused=false},3500)}catch(e){}}}catch(e){}
 
 var OFF_Q='';
@@ -1546,6 +1554,13 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     }catch(e){ var b=G('secScreenBox'); if(b)b.innerHTML='<div class="err">'+E(EM(e))+'</div>'; }
   }
   window.secScreenV=secScreenV;
+  window.loadHomeSections=loadHomeSections;
+  /* إعادة تحميل الأقسام من السيرفر (بتُستخدم في السحب للتحديث) */
+  window.__shSecReload=async function(){
+    try{ bustCaches('sections') }catch(e){}
+    try{ var l=await call('sections'); SEC_CACHE=Array.isArray(l)?l:[]; SEC_READY=true }catch(e){}
+    return SEC_CACHE;
+  };
   /* ---------- شاشة تفاصيل صنف داخل قسم (زي شاشة العرض) ---------- */
   function findSecItem(id){
     for(var i=0;i<SEC_CACHE.length;i++){
@@ -2157,6 +2172,7 @@ html.dark .search-card img.ic{background:#141c30}
   var HAPTIC=true; try{HAPTIC=localStorage.getItem('shehab_haptic')!=='0'}catch(e){}
   function haptic(ms){ if(!HAPTIC)return; try{if(navigator.vibrate)navigator.vibrate(ms||10)}catch(e){} }
   window.haptic=haptic;
+  window.__shHapticSet=function(v){HAPTIC=!!v};
   document.addEventListener('click',function(e){
     var t=e.target&&e.target.closest?e.target.closest('button,[role="button"],.swatch,.sec-item,.offer-card,.hero-card'):null;
     if(t)haptic(8);
@@ -3046,9 +3062,9 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
 /* ===== شاشة «إعدادات البرنامج»: اهتزاز أثناء الضغط + الوضع الليلي ===== */
 (function(){
   function get(id){return document.getElementById(id)}
-  function vibOn(){try{return localStorage.getItem('shehab_vibrate')!=='0'}catch(e){return true}}
+  function vibOn(){try{var v=localStorage.getItem('shehab_vibrate');if(v===null)v=localStorage.getItem('shehab_haptic');return v!=='0'}catch(e){return true}}
   function vibrate(ms){try{if(!vibOn())return;if(navigator&&typeof navigator.vibrate==='function')navigator.vibrate(ms||8)}catch(e){}}
-  function setVibrate(on){try{localStorage.setItem('shehab_vibrate',on?'1':'0')}catch(e){}if(on)vibrate(15)}
+  function setVibrate(on){on=!!on;try{localStorage.setItem('shehab_vibrate',on?'1':'0')}catch(e){}try{localStorage.setItem('shehab_haptic',on?'1':'0')}catch(e){}try{if(window.__shHapticSet)window.__shHapticSet(on)}catch(e){}if(on)vibrate(15)}
   window.shVibrate=vibrate;window.setVibrate=setVibrate;
   function settingsV(){
     try{V='settings'}catch(e){}
@@ -3067,6 +3083,7 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
     var dt=get('setDark');if(dt)dt.addEventListener('change',function(){try{setDark(!!dt.checked)}catch(e){}});
     var snb=get('settingsNotifBtn');if(snb)snb.addEventListener('click',function(){try{window.notifSettingsV()}catch(e){}});
     var bk=get('settingsBack');if(bk)bk.addEventListener('click',function(){try{profileV()}catch(e){}});
+    var sws=document.querySelectorAll('#app .swatch');for(var swi=0;swi<sws.length;swi++)(function(sw){sw.addEventListener('click',function(){try{setAccent(sw.getAttribute('data-c'))}catch(e){}})})(sws[swi]);
     try{themeSyncUI()}catch(e){}
     try{applyCards()}catch(e){}
     try{if(typeof navSync==='function')navSync()}catch(e){}
@@ -3151,6 +3168,7 @@ html.dark .ocard-cart{box-shadow:0 10px 20px -12px #000}
 #ol:not(.ol-grid) .offer-card .icard-badge{top:6px;right:6px;font-size:10.5px;padding:3px 8px}
 #ol:not(.ol-grid) .offer-card .icard-body{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:6px;min-width:0}
 #ol .offer-card .icard-name{color:var(--b,#0b2a6f)}
+#ol .offer-card .icard-name{text-shadow:none}
 html.dark #ol .offer-card .icard-name{color:var(--fg,#e8ecf5)}
 #ol:not(.ol-grid) .offer-card .icard-name{font-size:14.5px;font-weight:800;line-height:1.4;min-height:0}
 #ol:not(.ol-grid) .offer-card .ocard-foot{grid-column:3;grid-row:1;display:flex;align-items:center;justify-content:center;margin:0}
@@ -3200,8 +3218,8 @@ html.dark .item-addbar{background:#131b30;border-color:#2c3b5f}
 .item-addbar .qty-mini button.qty-add{width:100%;min-height:46px;font-size:16px;font-weight:800;border-radius:12px}
 .item-addbar.guest-bar{bottom:0;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
 .item-addbar.guest-bar .g.qty-add{background:var(--b,#0b2a6f);color:#fff;border:0}
-body.sh-item-open{padding-bottom:175px}
-body.sh-item-open #cartFabWrap{display:none}
+body.sh-item-open{padding-bottom:240px}
+body.sh-item-open #cartFabWrap{bottom:calc(env(safe-area-inset-bottom) + 172px)}
 </style>
 <style>
 /* ===== كروت الأصناف في أقسام الرئيسية: أكبر شوية ===== */
@@ -3216,6 +3234,12 @@ body.sh-item-open #cartFabWrap{display:none}
 /* ===== لوجو ثابت فوق على الشمال + زرار السلة العائم على كل الشاشات ===== */
 .topbar{position:sticky;top:0;z-index:45;margin:-16px -16px 0;padding:12px 16px 8px;background:var(--bg)}
 .topbar .lg{margin:0}
+/* ===== سحب للتحديث (متصفح): سهم بينزل من فوق ويلف زي الرئيسية ===== */
+#shPtr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:120;width:44px;height:44px;border-radius:50%;background:var(--card,#fff);border:1px solid var(--line,#e8e2d6);box-shadow:0 10px 22px -14px rgba(0,0,0,.55);display:grid;place-items:center;pointer-events:none;opacity:0;transform:translate(-50%,0);transition:opacity .18s ease}
+#shPtr.on{opacity:1}
+#shPtr svg{width:22px;height:22px;fill:none;stroke:var(--b,#0b2a6f);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#shPtr.spin svg{animation:shPtrSpin .75s linear infinite}
+@keyframes shPtrSpin{to{transform:rotate(360deg)}}
 </style>
 
 <script>
@@ -3314,3 +3338,53 @@ body.sh-item-open #cartFabWrap{display:none}
 })();
 </script>
 
+<script>
+/* ===== السحب للتحديث في المتصفح: سهم ينزل من فوق ويلف مع التحديث زي الرئيسية ===== */
+(function(){
+  'use strict';
+  try{ if(window.ShehabAndroid) return }catch(e){}   /* الأندرويد عنده سحب أصلي */
+  var THRESH=78,MAX=118,y0=0,pulling=false,dist=0,busy=false,el=null,svg=null;
+  function ensure(){
+    if(el&&el.isConnected)return el;
+    el=document.createElement('div');el.id='shPtr';el.setAttribute('aria-hidden','true');
+    el.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 5v12"/><path d="M6.6 12.2 12 17.6l5.4-5.4"/></svg>';
+    document.body.appendChild(el);svg=el.querySelector("svg");return el;
+  }
+  function paint(y,spin){
+    var e=ensure();
+    e.style.transform='translate(-50%,'+Math.round(y)+'px)';
+    e.classList.toggle('on',y>0||!!spin);
+    e.classList.toggle('spin',!!spin);
+    if(svg){
+      if(spin){svg.style.animation="";svg.style.transform=""}
+      else{svg.style.animation='none';svg.style.transform='rotate('+Math.round(Math.min(y/THRESH,1)*180)+'deg)'}
+    }
+  }
+  function topY(){try{return window.scrollY||document.documentElement.scrollTop||document.body.scrollTop||0}catch(e){return 0}}
+  function inModal(){try{return !!document.querySelector('.m')}catch(e){return false}}
+  document.addEventListener('touchstart',function(ev){
+    if(busy)return;var t=ev.touches&&ev.touches[0];if(!t)return;
+    if(inModal()||topY()>2){pulling=false;return}
+    y0=t.clientY;pulling=true;dist=0;
+  },{passive:true});
+  document.addEventListener('touchmove',function(ev){
+    if(!pulling||busy)return;var t=ev.touches&&ev.touches[0];if(!t)return;
+    var dy=t.clientY-y0;
+    if(dy<=0){if(dist>0){dist=0;paint(0,false)}return}
+    if(topY()>2){pulling=false;paint(0,false);return}
+    dist=Math.min(dy*0.55,MAX);paint(dist,false);
+    if(ev.cancelable&&dy>10)ev.preventDefault();
+  },{passive:false});
+  function end(){
+    if(!pulling||busy)return;pulling=false;
+    if(dist>=THRESH*0.85&&typeof window.softRefresh==='function'){
+      busy=true;paint(54,true);
+      Promise.resolve().then(function(){return window.softRefresh()}).catch(function(){}).then(function(){
+        setTimeout(function(){busy=false;paint(0,false)},320);
+      });
+    }else{paint(0,false)}
+  }
+  document.addEventListener('touchend',end,{passive:true});
+  document.addEventListener('touchcancel',end,{passive:true});
+})();
+</script>
