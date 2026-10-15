@@ -96,7 +96,7 @@ async function saveNotifyEmail(b){try{b.disabled=1;await call('setEmail',{email:
 async function makeTelegramLink(b){try{b.disabled=1;const x=await call('tgLink');$('tgurl').href=x.url;$('tgurl').hidden=false;$('tgstatus').textContent='اضغط الرابط ثم Start لإتمام الربط'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}async function loadO(){try{const ce=cGet('offers');if(ce){OF=ce.v;if(HI>=featuredOffers().length)HI=0;drawHero()}var _d=null;try{_d=await homeDataOnce()}catch(_e){}OF=(_d&&Array.isArray(_d.offers))?_d.offers:await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero()}catch(x){const e=$('of');if(e&&!OF.length)e.textContent=em(x)}}
 const featuredOffers=()=>OF.filter(o=>o.f);
 function drawHero(){const e=$('of');if(!e)return;const a=featuredOffers();if(!a.length){e.innerHTML='<div class="card">مفيش عروض مميزة حاليًا</div>';return}HI=(HI+a.length)%a.length;const o=a[HI];e.innerHTML=`<div class="hero-shell"><button class="g hero-arrow" onclick="stepHero(-1)" aria-label="العرض السابق">‹</button><div class="hero-card" onclick="offerV('${esc(o.id)}')">${o.ic?`<img src="${esc(o.ic)}" alt="">`:''}<b>${esc(o.t)}</b>${prices(o)}${o.x?`<small>${esc(o.x)}</small>`:''}<div class="rating-note">⭐ ${o.avg?o.avg.toFixed(1):'—'} · ${o.count||0} تقييم</div></div><button class="g hero-arrow" onclick="stepHero(1)" aria-label="العرض التالي">›</button></div><div class="rating-note">${HI+1} / ${a.length} · اضغط على العرض للتفاصيل</div>`}
-function stepHero(d){const a=featuredOffers();if(a.length<2)return;HI=(HI+d+a.length)%a.length;const c=$('of').querySelector('.hero-card');if(c){c.style.opacity='0';c.style.transform=`translateX(${d>0?'-':'+'}12px)`}setTimeout(drawHero,130)}setInterval(function(){try{if((V||'')!=='home'||document.hidden)return;const a=featuredOffers();if(a.length<2)return;const e=$('of');if(!e||!e.querySelector('.hero-card'))return;stepHero(1)}catch(e){}},2500);async function offV(){V='off';app(`<h2>🎁 كل العروض</h2>${ed()?'<button onclick="offE()">➕ إضافة عرض</button>':''}${S.r=='manager'?'<button class="g" onclick="tgChannelV()">📢 قناة تيليجرام</button>':''}<div id="ol">جاري التحميل…</div>`);try{const ce=cGet('offers');if(ce){OF=ce.v;drawO()}OF=await callC('offers');drawO()}catch(x){if(!OF.length)$('ol').textContent=em(x)}}function drawO(){var dPc=function(o){try{var p=Number(String(o.p||'').replace(',','.')),w=Number(String(o.w||'').replace(',','.'));if(o.p&&o.w&&isFinite(p)&&isFinite(w)&&w>p&&p>=0)return Math.round((w-p)/w*100)}catch(e){}return 0};var dM=function(o){var d=dPc(o);return '<div class="icard-media"><div class="icard-img">'+(o.ic?('<img src="'+esc(o.ic)+'" alt="'+esc(o.t)+'" loading="lazy">'):'')+'</div>'+(d>0?('<span class="icard-badge">خصم '+d+'٪</span>'):'')+'</div><div class="icard-body"><div class="icard-name">'+esc(o.t)+'</div><div class="icard-price">'+(o.p?('<span class="now">'+esc(o.p)+' ج</span>'):'')+(o.w?('<span class="was">'+esc(o.w)+' ج</span>'):'')+'</div><div class="rating-note">⭐ '+(o.avg?o.avg.toFixed(1):'—')+' · '+(o.count||0)+' تقييم</div></div>'};$('ol').innerHTML=OF.map(function(o){return '<div class="card offer-card" data-id="'+esc(o.id)+'" style="border-color:var(--b,#0b2a6f)" onclick="offerV(\''+esc(o.id)+'\')">'+dM(o)+'<div class="ocard-foot"></div>'+(o.x?('<div class="pw">'+esc(o.x)+'</div>'):'')+(ed()?('<label class="featured-toggle" onclick="event.stopPropagation()"><input type="checkbox" '+(o.f?'checked':'')+' onchange="featureOffer(\''+esc(o.id)+'\',this)"> إظهار في الرئيسية</label><button class="g" onclick="event.stopPropagation();offE(\''+esc(o.id)+'\')">تعديل</button>'):'')+'</div>'}).join('')||'مفيش عروض حاليًا'}
+function stepHero(d){const a=featuredOffers();if(a.length<2)return;HI=(HI+d+a.length)%a.length;const c=$('of').querySelector('.hero-card');if(c){c.style.opacity='0';c.style.transform=`translateX(${d>0?'-':'+'}12px)`}setTimeout(drawHero,130)}setInterval(function(){try{if((V||'')!=='home'||document.hidden)return;const a=featuredOffers();if(a.length<2)return;const e=$('of');if(!e||!e.querySelector('.hero-card'))return;stepHero(1)}catch(e){}},2500);async function offV(){V='off';app(`<h2>🎁 كل العروض</h2>${ed()?'<button onclick="offE()">➕ إضافة عرض</button>':''}${S.r=='manager'?'<button class="g" onclick="tgChannelV()">📢 قناة تيليجرام</button>':''}<div id="ol">جاري التحميل…</div>`);try{const ce=cGet('offers');if(ce){OF=ce.v;drawO()}OF=await callC('offers');drawO()}catch(x){if(!OF.length)$('ol').textContent=em(x)}}function drawO(){var dPc=function(o){try{var p=Number(String(o.p||'').replace(',','.')),w=Number(String(o.w||'').replace(',','.'));if(o.p&&o.w&&isFinite(p)&&isFinite(w)&&w>p&&p>=0)return Math.round((w-p)/w*100)}catch(e){}return 0};var dM=function(o){var d=dPc(o);return '<div class="icard-media"><div class="icard-img">'+(o.ic?('<img src="'+esc(o.ic)+'" alt="'+esc(o.t)+'" loading="lazy">'):'')+'</div>'+(d>0?('<span class="icard-badge">خصم '+d+'٪</span>'):'')+'</div><div class="icard-body"><div class="icard-name">'+esc(o.t)+'</div><div class="icard-price">'+(o.p?('<span class="now">'+esc(o.p)+' ج</span>'):'')+(o.w?('<span class="was">'+esc(o.w)+' ج</span>'):'')+'</div><div class="rating-note rating-inline">⭐ '+(o.avg?o.avg.toFixed(1):'—')+' · '+(o.count||0)+' تقييم</div><div class="ocard-chips"></div></div>'};var dR=function(o){return '<span class="rating-note rating-foot">⭐ '+(o.avg?o.avg.toFixed(1):'—')+' · '+(o.count||0)+' تقييم</span>'};$('ol').innerHTML=OF.map(function(o){return '<div class="card offer-card" data-id="'+esc(o.id)+'" onclick="offerV(\''+esc(o.id)+'\')">'+dM(o)+'<div class="ocard-foot">'+dR(o)+'</div>'+(o.x?('<div class="pw">'+esc(o.x)+'</div>'):'')+(ed()?('<label class="featured-toggle" onclick="event.stopPropagation()"><input type="checkbox" '+(o.f?'checked':'')+' onchange="featureOffer(\''+esc(o.id)+'\',this)"> إظهار في الرئيسية</label><button class="g" onclick="event.stopPropagation();offE(\''+esc(o.id)+'\')">تعديل</button>'):'')+'</div>'}).join('')||'مفيش عروض حاليًا'}
 async function featureOffer(id,el){try{await call('feature',{id,featured:el.checked});const o=OF.find(x=>x.id==id);if(o)o.f=el.checked;HI=0;drawHero()}catch(x){el.checked=!el.checked;alert(em(x))}}
 function offerV(id,fromCache=false){if(!fromCache&&V!='offer')ORIGIN=V;const o=OF.find(x=>x.id==id);if(!o)return;V='offer';app(`<div class="card offer-detail">${o.ic?`<img class="offer-photo" src="${esc(o.ic)}" alt="${esc(o.t)}">`:''}<h2>${esc(o.t)}</h2>${prices(o)}<h3>المواصفات والتفاصيل</h3><div class="pw">${esc(o.x)||'لا توجد تفاصيل إضافية'}</div><h3>تقييم العملاء</h3><div class="rating-note">${o.avg?o.avg.toFixed(1):'—'} من 5 · ${o.count||0} تقييم</div><div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=(o.mine||0)?'on':''}" aria-label="${n} نجوم" onclick="rateOffer('${esc(o.id)}',${n})">★</button>`).join('')}</div><div class="rating-note">اختار من نجمة إلى خمس نجوم</div>${ed()?`<button class="g" onclick="offE('${esc(o.id)}')">تعديل العرض</button>`:''}</div>`)}
 function offerBack(){if(ORIGIN=='home')homeV();else offV()}
@@ -2701,7 +2701,7 @@ html.dark .pt-log{border-color:#232d49}
         if(c.classList.contains('hero-card'))id=String(c.getAttribute('data-oid')||'');
         else{var mm=(c.getAttribute('onclick')||'').match(/'([^']+)'/);id=mm?mm[1]:''}
         var o=findOffer(id);if(!o)continue;
-        var b=offerBadges(o,false);if(b)c.insertAdjacentHTML('beforeend',b);
+        var b=offerBadges(o,false);if(b){var cw=c.querySelector('.ocard-chips');var tgt=cw||c;tgt.insertAdjacentHTML('beforeend',b)}
         var st=offerState(o);if(st.expired||st.future)c.style.opacity='.6';
       }
       var det=document.querySelector('.offer-detail');
@@ -3137,37 +3137,63 @@ html.dark button.sec-more{background:linear-gradient(180deg,#2b2517,#221d12);col
 html.dark #nav{box-shadow:0 -10px 26px -14px #000}
 </style>
 <style>
-/* ===== شاشة القسم والمفضلة: نفس مربعات الرئيسية (3 جنب بعض) ===== */
-.sec-screen-items.sec-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-.sec-screen-items.sec-grid .sec-item.sec-sq .tile img.ic{width:100%;height:100%;object-fit:contain}
-.sec-screen-items.sec-grid .sec-item.sec-sq .t{font-size:12px;min-height:32px}
-.sec-screen-items.sec-grid .sec-item.sec-sq .p{font-size:13px}
-.sec-screen-items:not(.sec-grid) .sec-item.sec-sq{display:grid;grid-template-columns:142px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;padding:10px}
-.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .tile{grid-row:1/3;width:142px;min-width:142px;aspect-ratio:1}
-.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .t{grid-column:2;grid-row:1;min-height:0;align-self:end;font-size:15px}
-.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .pr{grid-column:2;grid-row:2;align-self:start;margin-top:3px}
+/* ===== شاشة القسم: رأسي (A) = صورة مربعة على اليمين + البيانات جنبها | أفقي (B) = 2 جنب بعض ===== */
+.sec-screen-items.sec-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.sec-screen-items{gap:12px}
+.sec-screen-items .sec-item.sec-sq{border:1px solid var(--line,#E8E2D6);border-radius:16px;box-shadow:0 10px 24px -22px rgba(11,42,111,.75)}
+.sec-screen-items .sec-item.sec-sq .tile{border-radius:13px;padding:8px}
+.sec-screen-items .sec-item.sec-sq .tile img.ic{width:100%;height:100%;object-fit:contain}
+.sec-screen-items .sec-item.sec-sq .p{font-weight:800;font-size:15px}
+/* ---- رأسي (A): صف أفقي ---- */
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq{display:grid;grid-template-columns:118px minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:13px;row-gap:5px;align-items:center;padding:11px}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .tile{grid-column:1;grid-row:1/3;width:118px;min-width:118px;aspect-ratio:1}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .t{grid-column:2;grid-row:1;min-height:0;align-self:end;font-size:14.5px}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq .pr{grid-column:2;grid-row:2;align-self:start;margin-top:0}
+.sec-screen-items:not(.sec-grid) .sec-item.sec-sq>.stk{grid-column:2;grid-row:3;justify-self:start;margin:0}
+/* ---- أفقي (B): كارت بصورة كبيرة والاسم والسعر تحتها ---- */
+.sec-screen-items.sec-grid .sec-item.sec-sq{padding:9px;gap:7px}
+.sec-screen-items.sec-grid .sec-item.sec-sq .tile{aspect-ratio:1}
+.sec-screen-items.sec-grid .sec-item.sec-sq .t{font-size:12.5px;min-height:35px;line-height:1.4}
+.sec-screen-items.sec-grid .sec-item.sec-sq>.stk{align-self:flex-start;margin:0}
 </style>
 <style>
-/* ===== كروت شاشة «العروض»: مشابهة لكروت الأقسام مع إبقاء التقييم ===== */
-#ol .offer-card{display:flex;flex-direction:column;gap:8px;padding:10px}
-#ol .offer-card .icard-media{margin:0;border-radius:12px}
-#ol .offer-card .icard-img{height:130px;padding:8px}
-#ol .offer-card .icard-body{display:flex;flex-direction:column;gap:6px}
-#ol .offer-card .icard-name{font-size:13px;min-height:34px;line-height:1.35;font-weight:700}
-#ol .offer-card .icard-price .now{font-size:15px;font-weight:800;color:var(--b,#0b2a6f)}
-#ol .offer-card .icard-price .was{font-size:10.5px;color:var(--muted,#7b8495);text-decoration:line-through}
-#ol .offer-card .rating-note{font-size:10.5px}
-#ol .offer-card .icard-cap{display:none}
-#ol .offer-card .icard-tools{display:none}
-#ol .offer-card .ocard-foot{display:flex;align-items:center;gap:8px;margin:6px 0 0;justify-content:flex-end}
-.ocard-cart{width:44px;height:44px;min-width:44px;flex:0 0 auto;padding:0;margin:0;border-radius:50%;background:var(--b,#0b2a6f);color:#fff;font-size:20px;line-height:1;display:grid;place-items:center;box-shadow:0 10px 20px -12px rgba(11,42,111,.95)}
+/* ===== شاشة «كل العروض»: رأسي (A) = صف فيه صورة مربعة + البيانات + السلة | أفقي (B) = كارت بصورة كبيرة، 2 جنب بعض ===== */
+#ol{display:flex;flex-direction:column;gap:12px}
+#ol .offer-card{border:1px solid var(--line,#E8E2D6);border-radius:16px;background:var(--card,#fff);overflow:hidden;cursor:pointer;box-shadow:0 10px 24px -22px rgba(11,42,111,.75)}
+#ol .offer-card .icard-badge{z-index:3}
+#ol .offer-card .icard-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+#ol .offer-card .icard-price .now{font-size:16px;font-weight:800;color:var(--b,#0b2a6f)}
+#ol .offer-card .icard-price .was{font-size:11.5px;color:var(--muted,#7b8495);text-decoration:line-through}
+#ol .offer-card .rating-note{font-size:11.5px;text-align:start;margin:0}
+#ol .offer-card .rating-foot{display:none}
+#ol .offer-card .ocard-chips{display:flex;flex-wrap:wrap;gap:5px;margin:0}
+#ol .offer-card .ocard-chips:empty{display:none}
+#ol .offer-card .icard-cap,#ol .offer-card .icard-tools{display:none}
+#ol .offer-card .pw,#ol .offer-card .featured-toggle,#ol .offer-card button.g[onclick*="offE"]{display:none}
+.ocard-cart{width:40px;height:40px;min-width:40px;flex:0 0 auto;padding:0;margin:0;border-radius:50%;background:var(--b,#0b2a6f);color:#fff;font-size:18px;line-height:1;display:grid;place-items:center;box-shadow:0 10px 20px -12px rgba(11,42,111,.95)}
 html.dark .ocard-cart{box-shadow:0 10px 20px -12px #000}
-#ol.ol-grid .ocard-foot{gap:5px;margin-top:5px;justify-content:flex-end}
+/* ---- رأسي (A) ---- */
+#ol:not(.ol-grid) .offer-card{display:grid;grid-template-columns:106px minmax(0,1fr) auto;grid-template-rows:auto;column-gap:13px;align-items:center;padding:11px}
+#ol:not(.ol-grid) .offer-card .icard-media{grid-column:1;grid-row:1;position:relative;margin:0;width:106px;height:106px;border:1px solid var(--line,#E8E2D6);border-radius:13px;background:#fff;display:grid;place-items:center;padding:8px;overflow:hidden}
+#ol:not(.ol-grid) .offer-card .icard-img{height:100%;padding:0;display:grid;place-items:center;background:transparent}
+#ol:not(.ol-grid) .offer-card .icard-img img{max-width:100%;max-height:100%;object-fit:contain;border-radius:0;margin:0;background:transparent}
+#ol:not(.ol-grid) .offer-card .icard-badge{top:6px;right:6px;font-size:10.5px;padding:3px 8px}
+#ol:not(.ol-grid) .offer-card .icard-body{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+#ol:not(.ol-grid) .offer-card .icard-name{font-size:14.5px;font-weight:800;line-height:1.4;min-height:0}
+#ol:not(.ol-grid) .offer-card .ocard-foot{grid-column:3;grid-row:1;display:flex;align-items:center;justify-content:center;margin:0}
+/* ---- أفقي (B): 2 جنب بعض ---- */
+#ol.ol-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
+#ol.ol-grid .offer-card{display:flex;flex-direction:column;gap:7px;padding:9px}
+#ol.ol-grid .offer-card .icard-media{position:relative;margin:0;border:1px solid var(--line,#E8E2D6);border-radius:13px;background:#fff;overflow:hidden}
+#ol.ol-grid .offer-card .icard-img{height:132px;padding:9px;display:grid;place-items:center}
+#ol.ol-grid .offer-card .icard-img img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;background:transparent;border-radius:0;margin:0}
+#ol.ol-grid .offer-card .icard-body{display:flex;flex-direction:column;gap:6px;min-width:0}
+#ol.ol-grid .offer-card .icard-name{font-size:12.5px;font-weight:700;line-height:1.4;min-height:35px}
+#ol.ol-grid .offer-card .rating-note{font-size:10.5px}
+#ol.ol-grid .offer-card .rating-inline{display:none}
+#ol.ol-grid .offer-card .rating-foot{display:inline;flex:1;min-width:0}
+#ol.ol-grid .offer-card .ocard-foot{display:flex;align-items:center;justify-content:space-between;margin:auto 0 0}
 #ol.ol-grid .ocard-cart{width:34px;height:34px;min-width:34px;font-size:16px}
-#ol .offer-card .pw{display:none}
-#ol .offer-card .featured-toggle,#ol .offer-card button.g[onclick*="offE"]{display:none}
-#ol.ol-grid .offer-card .icard-img{height:110px}
-#ol.ol-grid .offer-card{padding:8px}
 
 /* ===== كارت الصنف الموحّد (نفس الشكل في العروض والأقسام) ===== */
 .item-card{padding:12px;position:relative}
