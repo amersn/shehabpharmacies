@@ -116,7 +116,8 @@ async function odel(id,b){if(!confirm('تحذف العرض؟'))return;try{b.disa
 
 function ordV(){V='ord';MD='';ORDER_IMAGE='';ORDER_AUDIO='';app(`<h2>طلب أصناف</h2><small>اكتب أسماء الأصناف والكميات، أو أرفق صورة الروشتة أو تسجيلًا صوتيًا.</small><textarea id="it" rows="5" placeholder="مثال: بنادول اكسترا - 2 شريط"></textarea><div class="media-buttons"><button class="g" onclick="$('orderCamera').click()">📷 تصوير الروشتة</button><button class="g" onclick="$('orderUpload').click()">🖼️ رفع صورة</button></div><input id="orderCamera" type="file" accept="image/*" capture="environment" hidden onchange="pickOrderImage(this)"><input id="orderUpload" type="file" accept="image/*" hidden onchange="pickOrderImage(this)"><div id="orderPreview"></div><button class="g" onclick="toggleOrderRecording(this)">🎙️ سجل بصوتك</button><div id="voiceState"></div><textarea id="orderNotes" rows="2" placeholder="أضف ملاحظات للطلب (اختياري)"></textarea><div class="row"><button id="b1" class="g" onclick="mode('delivery')"${DELIVERY_ON?'':' hidden'}>🛵 توصيل</button><button id="b2" class="g" onclick="mode('pickup')">🏪 استلام من الصيدلية</button></div><div id="orderAddrWrap" style="display:none"><label for="orderAddr">📍 عنوان التوصيل</label><input id="orderAddr" maxlength="500" placeholder="اكتب عنوان التوصيل بالتفصيل"><small>ده العنوان المسجّل في حسابك، وتقدر تعدّله لهذا الطلب فقط.</small></div><div class="err" id="e"></div><button onclick="corder(this)">إرسال الطلب</button>`);loadOrderAddr();if(!DELIVERY_ON)try{mode('pickup')}catch(e){}}
 let ORDER_IMAGE='',ORDER_AUDIO='',ORDER_RECORDER,ORDER_AUDIO_CHUNKS=[];
-function pickOrderImage(input){const f=input.files&&input.files[0];if(!f)return;if(f.size>5*1024*1024){$('e').textContent='حجم الصورة يجب أن يكون أقل من 5 ميجابايت';input.value='';return}const r=new FileReader();r.onload=()=>{ORDER_IMAGE=r.result;$('orderPreview').innerHTML='<small>✅ صورة الروشتة جاهزة للإرسال</small>'};r.readAsDataURL(f)}
+function pickOrderImage(input){const f=input.files&&input.files[0];if(!f)return;try{input.value=''}catch(e){}const box=$('orderPreview'),err=$('e');if(f.size>14*1024*1024){if(err)err.textContent='الصورة كبيرة جدًا — صوّرها تاني بجودة أقل';return}if(err)err.textContent='';if(box)box.innerHTML='<small>⏳ جاري تجهيز الصورة…</small>';const r=new FileReader();r.onload=()=>{const src=String(r.result||'');const done=du=>{ORDER_IMAGE=du;if(box)box.innerHTML='<div class="order-shot"><img src="'+du+'" alt="صورة الروشتة"><button type="button" class="g" id="orderImgDel">❌ شيل الصورة</button></div>';const d=$('orderImgDel');if(d)d.addEventListener('click',removeOrderImage)};try{const i=new Image();i.onload=()=>{try{const k=Math.min(1,1400/Math.max(i.width||1,i.height||1)),w=Math.max(1,Math.round((i.width||1400)*k)),h=Math.max(1,Math.round((i.height||1400)*k)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);let du=c.toDataURL('image/jpeg',.72);if(du.length>4200000)du=c.toDataURL('image/jpeg',.6);done(du)}catch(e){done(src)}};i.onerror=()=>done(src);i.src=src}catch(e){done(src)}};r.onerror=()=>{if(err)err.textContent='مقدرناش نقرأ الصورة — جرّب صورة تانية'};r.readAsDataURL(f)}
+function removeOrderImage(){ORDER_IMAGE='';try{if($('orderUpload'))$('orderUpload').value='';if($('orderCamera'))$('orderCamera').value=''}catch(e){}try{if($('orderPreview'))$('orderPreview').innerHTML=''}catch(e){}try{if($('e'))$('e').textContent=''}catch(e){}}
 async function toggleOrderRecording(b){try{if(ORDER_RECORDER&&ORDER_RECORDER.state==='recording'){ORDER_RECORDER.stop();b.textContent='🎙️ سجل بصوتك';return}const stream=await navigator.mediaDevices.getUserMedia({audio:true});ORDER_AUDIO_CHUNKS=[];ORDER_RECORDER=new MediaRecorder(stream);ORDER_RECORDER.ondataavailable=e=>{if(e.data.size)ORDER_AUDIO_CHUNKS.push(e.data)};ORDER_RECORDER.onstop=()=>{const blob=new Blob(ORDER_AUDIO_CHUNKS,{type:ORDER_RECORDER.mimeType||'audio/webm'});stream.getTracks().forEach(t=>t.stop());if(blob.size>3*1024*1024){$('voiceState').textContent='التسجيل أكبر من 3 ميجابايت';return}const r=new FileReader();r.onload=()=>{ORDER_AUDIO=r.result;$('voiceState').textContent='✅ التسجيل جاهز للإرسال'};r.readAsDataURL(blob)};ORDER_RECORDER.start();b.textContent='⏹️ إيقاف التسجيل'}catch(e){$('voiceState').textContent='تعذر بدء التسجيل. تحقق من إذن الميكروفون.'}}
 const mode=x=>{MD=x;$('b1').className=x=='delivery'?'':'g';$('b2').className=x=='pickup'?'':'g';const w=$('orderAddrWrap');if(w)w.style.display=x=='delivery'?'':'none'};
 async function corder(b){try{const item=$('it').value.trim(),notes=$('orderNotes').value.trim();if(!item&&!ORDER_IMAGE&&!ORDER_AUDIO)throw 'اكتب الأصناف أو أرفق صورة أو تسجيلًا';if(!MD)throw 'اختار توصيل أو استلام من الصيدلية';b.disabled=1;b.textContent='جاري الإرسال…';await call('corder',{item,mode:MD,image:ORDER_IMAGE,audio:ORDER_AUDIO,notes,addr:($('orderAddr')?$('orderAddr').value.trim():'')});NAV_REPLACE=true;homeV('تم إرسال طلبك ✔ تابعه من عرض طلباتي')}catch(x){$('e').textContent=em(x);b.disabled=0;b.textContent='إرسال الطلب'}}
@@ -155,7 +156,7 @@ if(!GS&&'serviceWorker'in navigator&&location.protocol=='https:')navigator.servi
 ;try{const oc=JSON.parse(localStorage.getItem('shehab_offer_cache')||'[]');if(!OF.length&&Array.isArray(oc))OF=oc}catch(e){}
 const cacheOffersForCart=()=>{if(!OF.length)return;try{localStorage.setItem('shehab_offer_cache',JSON.stringify(OF.map(o=>({id:String(o.id),t:o.t,p:o.p,ic:o.ic,w:o.w}))))}catch(e){};CART=CART.map(x=>{const o=OF.find(v=>String(v.id)==String(x.id))||{};return{...x,t:x.t||o.t,p:x.p??o.p,ic:x.ic||o.ic}});cartPersist()};const loadOCart=loadO;loadO=async function(){await loadOCart();cacheOffersForCart()};cartAdd=function(id){const o=OF.find(v=>String(v.id)==String(id))||{};let x=CART.find(v=>String(v.id)==String(id));if(x)x.qty=(Number(x.qty)||1)+1;else CART.push({id:String(id),qty:1,t:o.t||'',p:o.p??'',ic:o.ic||''});cartPersist();cartBadge()};cartSetQty=function(id,n){n=Math.max(0,Math.min(9999,Math.floor(Number(n)||0)));let x=CART.find(v=>String(v.id)==String(id)),o=OF.find(v=>String(v.id)==String(id))||{};if(n===0)CART=CART.filter(v=>String(v.id)!=String(id));else if(x){x.qty=n;x.t=x.t||o.t;x.p=x.p??o.p;x.ic=x.ic||o.ic}else CART.push({id:String(id),qty:n,t:o.t||'',p:o.p??'',ic:o.ic||''});cartPersist();cartBadge();cartRender()};cartRender=function(){const box=$('cartLines');if(!box)return;box.innerHTML='';if(!CART.length){box.textContent='السلة فاضية. اختار عرضًا واضغط «أضف للسلة».';$('cartEstimate').textContent='';cartBadge();return}let sum=0,known=true;CART.forEach(x=>{const o=OF.find(v=>String(v.id)==String(x.id))||x,qty=Number(x.qty)||1,row=document.createElement('div');row.className='card';if(!o.t){row.textContent='جاري تحميل بيانات الصنف…';known=false;box.appendChild(row);return}const title=document.createElement('b');title.textContent=o.t;row.appendChild(title);const p=Number(String(o.p||'').replace(',','.'));const line=document.createElement('div');line.textContent=o.p?'السعر: '+o.p+' جنيه × '+qty:'السعر يحدده الصيدلي';row.appendChild(line);if(o.p&&Number.isFinite(p))sum+=p*qty;else known=false;row.appendChild(qtyWidget(x.id));box.appendChild(row)});$('cartEstimate').textContent=known?'إجمالي مبدئي من أسعار العروض: '+sum.toFixed(2)+' جنيه':'الإجمالي النهائي يحدده الصيدلي';cartBadge()};const cartVInstant=cartV;cartV=function(){cartVInstant();if(CART.some(x=>!x.t)){callC('offers').then(a=>{OF=a;cacheOffersForCart();if(V==='cart')cartRender()}).catch(()=>{})}};cacheOffersForCart();
 
-let APPLIED_COUPON=null,COUPON_TIMER=null;const cartFingerprint=()=>JSON.stringify(CART.map(x=>[String(x.id),Number(x.qty)]).sort((a,b)=>a[0].localeCompare(b[0])));const renderCartBeforeCoupon=cartRender;cartRender=function(){const before=APPLIED_COUPON;renderCartBeforeCoupon();if(before&&before.fingerprint!==cartFingerprint()){APPLIED_COUPON=null;const s=$('couponState');if(s)s.textContent='اتغيرت الكميات؛ اضغط تطبيق الكود مرة ثانية';return}if(APPLIED_COUPON&&$('cartEstimate'))$('cartEstimate').textContent+=' · خصم '+APPLIED_COUPON.discount.toFixed(2)+' جنيه بكود '+APPLIED_COUPON.code+' · الأصناف المشمولة بعد الخصم '+Math.max(0,APPLIED_COUPON.subtotal-APPLIED_COUPON.discount).toFixed(2)+' جنيه'};const cartViewBeforeCoupon=cartV;cartV=function(){APPLIED_COUPON=null;cartViewBeforeCoupon();const area=document.createElement('div');area.className='profile-field';area.innerHTML='<label for="couponCode">كود خصم إضافي</label><div class="row"><input id="couponCode" autocomplete="off" placeholder="اكتب كود الخصم"><button type="button" class="g" style="flex:0 0 110px" onclick="applyCartCoupon(this)">تطبيق</button></div><small id="couponState">اكتب الكود ثم اضغط تطبيق</small>';const lines=$('cartLines');if(lines)lines.parentNode.insertBefore(area,lines)};async function applyCartCoupon(b){const code=$('couponCode').value.trim();if(!code){$('couponState').textContent='اكتب كود الخصم';return}try{b.disabled=true;const r=await call('couponApply',{code,items:CART.map(x=>({id:String(x.id),qty:Number(x.qty)}))});APPLIED_COUPON={...r,fingerprint:cartFingerprint()};$('couponState').textContent='✅ تم تطبيق '+r.percent+'% · الخصم '+r.discount.toFixed(2)+' جنيه على الأصناف المشمولة';cartRender()}catch(x){APPLIED_COUPON=null;$('couponState').textContent=em(x)}finally{b.disabled=false}}sendCartOrder=async function(b){const e=$('cartError');if(!CART.length){e.textContent='السلة فاضية';return}if(!CART_MODE){e.textContent='اختار توصيل أو استلام من الصيدلية';return}try{b.disabled=true;b.textContent='جاري إرسال الطلب…';await call('cartOrder',{items:CART.map(x=>({id:String(x.id),qty:Number(x.qty)})),mode:CART_MODE,addr:($('cartAddr')?$('cartAddr').value.trim():''),coupon:APPLIED_COUPON?APPLIED_COUPON.code:($('couponCode')?.value.trim()||'')});CART=[];APPLIED_COUPON=null;cartPersist();CART_MODE='';NAV_REPLACE=true;homeV('تم إرسال طلب العروض كأوردر واحد ✔ تابعه من «طلباتي»')}catch(x){e.textContent=em(x);b.disabled=false;b.textContent='إرسال الطلب'}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
+let APPLIED_COUPON=null,COUPON_TIMER=null;const cartFingerprint=()=>JSON.stringify(CART.map(x=>[String(x.id),Number(x.qty)]).sort((a,b)=>a[0].localeCompare(b[0])));const renderCartBeforeCoupon=cartRender;cartRender=function(){const before=APPLIED_COUPON;renderCartBeforeCoupon();if(before&&before.fingerprint!==cartFingerprint()){APPLIED_COUPON=null;const s=$('couponState');if(s)s.textContent='اتغيرت الكميات؛ اضغط تطبيق الكود مرة ثانية';return}if(APPLIED_COUPON&&$('cartEstimate')){const es=$('cartEstimate');const base=String(es.textContent||'').split(' · خصم ')[0];es.textContent=base+' · خصم '+APPLIED_COUPON.discount.toFixed(2)+' جنيه بكود '+APPLIED_COUPON.code+' · الأصناف المشمولة بعد الخصم '+Math.max(0,APPLIED_COUPON.subtotal-APPLIED_COUPON.discount).toFixed(2)+' جنيه'}};const cartViewBeforeCoupon=cartV;cartV=function(){APPLIED_COUPON=null;cartViewBeforeCoupon();const area=document.createElement('div');area.className='profile-field';area.innerHTML='<label for="couponCode">كود خصم (آخر كود تكتبه هو اللي بيتطبق — خصم واحد بس)</label><div class="row"><input id="couponCode" autocomplete="off" placeholder="اكتب كود الخصم"><button type="button" class="g" style="flex:0 0 110px" onclick="applyCartCoupon(this)">تطبيق</button></div><small id="couponState">اكتب الكود ثم اضغط تطبيق</small>';const lines=$('cartLines');if(lines)lines.parentNode.insertBefore(area,lines)};async function applyCartCoupon(b){const code=$('couponCode').value.trim();if(!code){$('couponState').textContent='اكتب كود الخصم';return}try{b.disabled=true;const r=await call('couponApply',{code,items:CART.map(x=>({id:String(x.id),qty:Number(x.qty)}))});APPLIED_COUPON={...r,fingerprint:cartFingerprint()};$('couponState').textContent='✅ تم تطبيق '+r.percent+'% · الخصم '+r.discount.toFixed(2)+' جنيه على الأصناف المشمولة';cartRender()}catch(x){APPLIED_COUPON=null;$('couponState').textContent=em(x)}finally{b.disabled=false}}sendCartOrder=async function(b){const e=$('cartError');if(!CART.length){e.textContent='السلة فاضية';return}if(!CART_MODE){e.textContent='اختار توصيل أو استلام من الصيدلية';return}try{b.disabled=true;b.textContent='جاري إرسال الطلب…';await call('cartOrder',{items:CART.map(x=>({id:String(x.id),qty:Number(x.qty)})),mode:CART_MODE,addr:($('cartAddr')?$('cartAddr').value.trim():''),coupon:APPLIED_COUPON?APPLIED_COUPON.code:($('couponCode')?.value.trim()||'')});CART=[];APPLIED_COUPON=null;cartPersist();CART_MODE='';NAV_REPLACE=true;homeV('تم إرسال طلب العروض كأوردر واحد ✔ تابعه من «طلباتي»')}catch(x){e.textContent=em(x);b.disabled=false;b.textContent='إرسال الطلب'}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
 </script>
 <script>
 // Notification bell, device inbox, and opt-in prompt.
@@ -216,7 +217,7 @@ async function openOfferById(id){id=String(id||'');if(!id)return false;try{if(!A
 async function openOrderById(id){id=String(id||'');try{if(S.r=='customer')await mineV();else await listV();setTimeout(()=>{try{const el=document.querySelector('[data-oid="'+id+'"]');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='3px solid #0b2a6f';el.style.outlineOffset='2px';setTimeout(()=>{el.style.outline=''},2600)}}catch(e){}},220)}catch(e){}}
 homeV=function(m=''){__shHomeBeforeOffer(m);const oid=PENDING_OFFER;if(oid){PENDING_OFFER='';setTimeout(function(){openOfferById(oid)},60)}const rid=PENDING_ORDER;if(rid){PENDING_ORDER='';setTimeout(function(){openOrderById(rid)},90)}const pv=PENDING_VIEW;if(pv){PENDING_VIEW='';setTimeout(function(){try{if(pv==='offers')offV()}catch(e){}},60)}const iid=PENDING_ITEM;if(iid){PENDING_ITEM='';setTimeout(function(){try{if(typeof window.secItemV==='function')window.secItemV(iid)}catch(e){}},60)}};
 /* Refresh the data of whatever screen is open WITHOUT going back to the home screen. */
-async function softRefresh(){try{const v=V||'home';if(v==='home'){bustCaches('offers');OF=await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero();refreshNotificationBadge();try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.loadHomeSections==='function')window.loadHomeSections()}catch(e){}}else if(v==='off'){bustCaches('offers');OF=await callC('offers');drawO()}else if(v==='list'){bustCaches('list');O=await callC('list');draw()}else if(v==='mine'){bustCaches('mine');drawMine(await callC('mine'))}else if(v==='offer'){const id=window.__shLastOfferId;if(id){bustCaches('offers');OF=await callC('offers');if(OF.some(o=>String(o.id)==String(id)))offerV(String(id),true)}}else if(v==='cart'){bustCaches('offers');OF=await callC('offers');cartRender()}else if(v==='notifications'){await notificationCenter()}else if(v==='profile'){await profileV()}else if(v==='notify'){await notifV()}else if(v==='broadcast'){await broadcastV()}
+async function softRefresh(){try{const v=V||'home';if(typeof window.secAdminV==='function'&&document.getElementById('secAdminLayoutBtns')){await window.secAdminV()}else if(v==='home'){bustCaches('offers');OF=await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero();refreshNotificationBadge();try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.loadHomeSections==='function')window.loadHomeSections()}catch(e){}}else if(v==='off'){bustCaches('offers');OF=await callC('offers');drawO()}else if(v==='list'){bustCaches('list');O=await callC('list');draw()}else if(v==='mine'){bustCaches('mine');drawMine(await callC('mine'))}else if(v==='offer'){const id=window.__shLastOfferId;if(id){bustCaches('offers');OF=await callC('offers');if(OF.some(o=>String(o.id)==String(id)))offerV(String(id),true)}}else if(v==='cart'){bustCaches('offers');OF=await callC('offers');cartRender()}else if(v==='notifications'){await notificationCenter()}else if(v==='profile'){await profileV()}else if(v==='notify'){await notifV()}else if(v==='broadcast'){await broadcastV()}
 else if(v==='sec'){try{bustCaches('sections');if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.secScreenV==='function')window.secScreenV(window.__shLastSecId||'')}catch(e){}}
 else if(v==='secItem'){try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(window.__shLastSecItemId&&typeof window.secItemV==='function')window.secItemV(window.__shLastSecItemId)}catch(e){}}
 else if(v==='favorites'){try{bustCaches('favorites');await favoritesV()}catch(e){}}
@@ -224,7 +225,10 @@ else if(v==='monthly'){try{await monthlyV()}catch(e){}}
 else if(v==='monthlyAll'){try{monthlyAdminV()}catch(e){}}
 else if(v==='couponAdmin'){try{couponAdminV()}catch(e){}}
 else if(v==='loyaltySettings'){try{if(typeof window.loyaltySettingsV==='function')await window.loyaltySettingsV()}catch(e){}}
-else if(v==='search'){try{if(typeof window.searchV==='function')window.searchV()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
+else if(v==='search'){try{if(typeof window.searchV==='function')window.searchV()}catch(e){}}
+else if(v==='ord'){try{await loadOrderAddr();try{var don=(typeof window.__shDeliveryOn==='function')?!!window.__shDeliveryOn():true;var b1=$('b1');if(b1){if(don)b1.removeAttribute('hidden');else b1.setAttribute('hidden','')}if(!don)mode('pickup')}catch(e){}}catch(e){}}
+else if(v==='mydata'){try{if(typeof window.myDataV==='function')window.myDataV()}catch(e){}}
+else if(v==='settings'){try{var dv=$('setDelivery');if(dv)dv.checked=!!(window.__shDeliveryOn&&window.__shDeliveryOn());if(typeof window.__shNotifWrap==='function')window.__shNotifWrap()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
 /* ---- Shehab: share an offer + server-backed notification centre ---- */
 async function loadCartAddr(){try{const u=await call('profile');const a=$('cartAddr');if(a&&u&&u.address&&!a.value)a.value=u.address}catch(e){}}
 async function shareOffer(id){id=String(id||'');if(!id)return;const url=BC_LINK_BASE+'?o='+encodeURIComponent(id);if(typeof window.openShareSheet==='function'){try{window.openShareSheet({url:url,text:'شوف العرض ده في صيدليات شهاب',title:'صيدليات شهاب'});return}catch(e){}}try{if(navigator.share){await navigator.share({title:'صيدليات شهاب',text:'شوف العرض ده في صيدليات شهاب',url});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(url);if(typeof showShehabPushToast==='function')showShehabPushToast('تم نسخ رابط العرض ✔');else alert('تم نسخ رابط العرض ✔')}catch(e){try{prompt('انسخ رابط العرض:',url)}catch(e2){}}}
@@ -425,7 +429,7 @@ function heroWire(){var sl=document.getElementById('heroSlide');if(!sl||sl.getAt
 try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(a.length<2)a=(typeof OF!=='undefined'&&OF&&OF.length)?OF.slice(0,10):a;if(!a.length){e.innerHTML='<div class="card">مفيش عروض حاليًا</div>';return}HI=(HI+a.length)%a.length;var list=a.slice(0,10);try{window.__heroList=list}catch(x){}if(!(HSL.i>=0&&HSL.i<list.length))HSL.i=0;HI=HSL.i;e.innerHTML='<div class="hero-slide" id="heroSlide">'+heroCardHTML(list[HSL.i])+'</div>';heroWire();heroAuto();setTimeout(heroMarkDots,0)};stepHero=function(){};window.heroGoto=function(i){try{var list=window.__heroList||[];if(list.length<2)return;i=Number(i);if(!isFinite(i)||i===HSL.i)return;var dir=i>HSL.i?1:-1;HSL.i=i;heroPaint(dir);heroMarkDots();HSL.paused=true;clearTimeout(HSL.pt);HSL.pt=setTimeout(function(){HSL.paused=false},3500)}catch(e){}}}catch(e){}
 
 var OFF_Q='';
-try{var drawOBase=drawO;drawO=function(){if(!OFF_Q){drawOBase();return}var all=OF;try{OF=all.filter(function(o){return String(o.t||'').toLowerCase().indexOf(OFF_Q)>-1||String(o.x||'').toLowerCase().indexOf(OFF_Q)>-1})}catch(e){}drawOBase();OF=all};var offVBase=offV;offV=async function(){await offVBase();var ap=q('app');var hd=ap?ap.querySelector('h2'):null;if(hd&&!q('offSearch')){OFF_Q='';var box=document.createElement('div');box.innerHTML=`<input id='offSearch' placeholder='🔍 دوّر على عرض بالاسم' autocomplete='off'>`;hd.insertAdjacentElement('afterend',box.firstChild);var inp=q('offSearch');inp.value='';inp.addEventListener('input',function(){OFF_Q=String(inp.value||'').trim().toLowerCase();try{drawO()}catch(e){}})}}}catch(e){}
+try{var drawOBase=drawO;drawO=function(){if(!OFF_Q){drawOBase();return}var all=OF;try{OF=all.filter(function(o){return String(o.t||'').toLowerCase().indexOf(OFF_Q)>-1||String(o.x||'').toLowerCase().indexOf(OFF_Q)>-1})}catch(e){}drawOBase();OF=all};var offVBase=offV;offV=async function(){var _p=offVBase.apply(this,arguments),_ins=function(){var ap=q('app');var hd=ap?ap.querySelector('h2'):null;if(!hd||q('offSearch'))return;OFF_Q='';var box=document.createElement('div');box.innerHTML=`<input id='offSearch' placeholder='🔍 دوّر على عرض بالاسم' autocomplete='off'>`;hd.insertAdjacentElement('afterend',box.firstChild);var inp=q('offSearch');inp.value='';inp.addEventListener('input',function(){OFF_Q=String(inp.value||'').trim().toLowerCase();try{drawO()}catch(e){}})};_ins();await _p;_ins()}}catch(e){}
 try{var ovBase=offerV;offerV=function(id,fromCache){ovBase(id,fromCache);try{if(!S||S.r!=='customer')return;var ap=q('app');if(!ap||!ap.querySelector)return;var card=ap.querySelector('.card');if(!card)return;var btns=card.querySelectorAll('button');var cartBtn=null;for(var i=0;i<btns.length;i++){if(String(btns[i].textContent||'').indexOf('سلة')>-1){cartBtn=btns[i];break}}if(!cartBtn)return;var bar=document.createElement('div');bar.className='offer-actionbar';cartBtn.parentNode.removeChild(cartBtn);bar.appendChild(cartBtn);ap.appendChild(bar)}catch(e){}}}catch(e){}
 function boot(){buildNav();watchApp();navSync();themeSyncUI()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
@@ -465,6 +469,14 @@ function appUpdate(){
   }catch(e){}
 }
 window.appUpdate=appUpdate;
+/* حالة النسخة على الجهاز: 'update' لو فيه أحدث، 'none' لو على آخر إصدار، '' لو مش معروف */
+var _updState=undefined;
+function updState(){
+  if(_updState!==undefined)return _updState;
+  _updState='';
+  try{ if(nativeHas('checkUpdate'))_updState=String(window.ShehabAndroid.checkUpdate()||'').trim() }catch(e){_updState=''}
+  return _updState;
+}
 var pvBase=profileV;
 profileV=async function(){
   await pvBase();
@@ -472,12 +484,14 @@ profileV=async function(){
     var p=el('#profile');
     if(!p||el('#appUpdateBox'))return;
     if(!window.ShehabAndroid&&!isAndroid())return;
+    if(updState()==='none')return;
     var box=document.createElement('div');
     box.className='profile-field';
     box.id='appUpdateBox';
     var ver='';
     try{if(nativeHas('appVersion'))ver=String(window.ShehabAndroid.appVersion()||'').trim()}catch(e){}
     box.innerHTML='<h3 style="margin:6px 0">تحديث البرنامج</h3>'+
+      (updState()==='update'?'<small style="display:block;color:#c62828;font-weight:700">فيه نسخة أحدث متاحة — اضغط الزر ⬆️</small>':'')+
       (ver?'<small>النسخة اللي عندك: '+escx(ver)+'</small>':'')+
       '<small>اضغط الزر علشان نشوف لو في نسخة أحدث وننزّلها ونثبّتها لك من جوه التطبيق.</small>';
     var b=document.createElement('button');
@@ -1604,7 +1618,8 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var h='<div class="card item-card" id="secItemDetail">';
     h+='<div class="icard-media"><div class="icard-img">'+(m.ic?'<img class="zoomable" src="'+E(m.ic)+'" alt="'+E(m.t||'')+'">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div><div class="icard-name">'+E(m.t||'')+'</div></div>';
     h+='<div class="item-detail-body">';
-    h+='<div class="icard-price">'+(m.p?'<span class="now">'+E(m.p)+' ج</span>':'')+(m.w?'<span class="was">'+E(m.w)+' ج</span>':'')+'</div>';
+    h+='<div class="icard-price">'+(m.p?'<span class="now">'+E(m.p)+' ج</span>':'')+(m.w?'<span class="was">'+E(m.w)+' ج</span>':'')+(m.oo?'<span class="icard-onorder">بالطلب</span>':'')+'</div>';
+    if(m.oo)h+='<div class="icard-onorder-note">🚚 الصنف ده بالطلب — بيوصلك خلال يوم</div>';
     if(m.x)h+='<div class="item-details">'+E(m.x)+'</div>';
     h+='<div class="item-rate" data-id="'+E(m.id)+'" data-kind="'+(opts.kind||'item')+'"><div class="rate-stars"></div><div class="rating-note">⭐ '+(m.avg?Number(m.avg).toFixed(1):'—')+' · '+(m.count||0)+' تقييم</div><div class="rate-hint">اضغط على النجوم لتقييم '+(opts.kind==='offer'?'العرض':'المنتج')+'</div></div>';
     h+='<div class="item-actions" hidden></div>';
@@ -1725,7 +1740,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   }
   try{window.shItemCardHTML=shItemCardHTML;window.shWireItemCard=shWireItemCard}catch(e){}
   function shItemMeta(x){
-    return {id:x.id,t:x.t,x:x.x,p:x.p,w:x.w,ic:x.ic,avg:x.avg,count:x.count,mine:x.mine};
+    return {id:x.id,t:x.t,x:x.x,p:x.p,w:x.w,ic:x.ic,oo:!!x.oo,q:x.q,avg:x.avg,count:x.count,mine:x.mine};
   }
   function shItemSecId(secId,id){
     if(secId)return secId;
@@ -2015,22 +2030,78 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       });
     })();
   }
+  /* ضغط أي صورة (data URL) لمقاس تحت الحد المسموح في الشيت (45000 حرف) بخلفية بيضا */
+  function fitImg(src,cb){
+    var i=new Image();
+    i.onerror=function(){cb('')};
+    i.onload=function(){
+      var dims=[[560,.75],[460,.66],[380,.6],[320,.55],[260,.5],[200,.45]],n=0;
+      (function tryNext(){
+        var d=dims[n++]||dims[dims.length-1];
+        var s=Math.min(1,d[0]/Math.max(i.width||1,i.height||1));
+        var w=Math.max(40,Math.round((i.width||d[0])*s)),h=Math.max(40,Math.round((i.height||d[0])*s));
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(i,0,0,w,h);
+        var du='';
+        try{du=c.toDataURL('image/jpeg',d[1])}catch(e){du=''}
+        if(du&&du.length<=44000)return cb(du);
+        if(n<dims.length)return tryNext();
+        cb('');
+      })();
+    };
+    i.src=src;
+  }
   function secItemEditor(secId,id){
     (async function(){
       var it=null;
       if(id){try{var l=await call('sectionsAdmin');(l||[]).forEach(function(s){if(String(s.id)===String(secId))(s.items||[]).forEach(function(x){if(String(x.id)===String(id))it=x})})}catch(e){}}
       var m=document.createElement('div');m.className='m';
-      m.innerHTML='<div><b>'+(id?'تعديل صنف':'صنف جديد')+'</b><label>اسم الصنف</label><input id="siT" maxlength="120" value="'+E(it&&it.t||'')+'"><label>تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label>السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label>السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label>صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label>الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div><button class="g" type="button" id="siSave">💾 حفظ</button><button class="g" type="button" id="siCancel">إلغاء</button></div>';
+      m.innerHTML='<div><b>'+(id?'تعديل صنف':'صنف جديد')+'</b><label for="siT">اسم الصنف</label><div class="row"><input id="siT" style="flex:1;min-width:0" maxlength="120" value="'+E(it&&it.t||'')+'"><button class="g" type="button" id="siFind" style="flex:0 0 122px" title="ابحث عن الصنف على النت واملأ التفاصيل والسعر والصورة">🔎 ابحث واملأ</button></div><div id="siFindBox"></div><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div><button class="g" type="button" id="siSave">💾 حفظ</button><button class="g" type="button" id="siCancel">إلغاء</button></div>';
       document.body.appendChild(m);
       m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
       var img=it&&it.ic?it.ic:'';
       G('siImg').addEventListener('change',function(){readImg(this,function(d){img=d;G('siImgPrev').innerHTML='<img class="ic" src="'+E(img)+'">'})});
       G('siCancel').addEventListener('click',function(){m.remove()});
+      /* --- بحث أوتوماتيكي عن بيانات الصنف (يظهر للمدير فقط) --- */
+      (function(){
+        var fb=G('siFind'),box=G('siFindBox');
+        if(!fb)return;
+        function note(msg){ if(box)box.insertAdjacentHTML('beforeend','<div class="rating-note" style="margin-top:6px">'+msg+'</div>') }
+        function fill(r){
+          try{ if(r.price)G('siP').value=r.price }catch(e){}
+          try{ if(r.x)G('siX').value=r.x }catch(e){}
+          if(r.img){
+            try{ fitImg(r.img,function(d){ if(d){ img=d; G('siImgPrev').innerHTML='<img class="ic" src="'+E(d)+'">'; note('🖼️ نزّلت صورة للصنف ✔') } else note('لقيت صورة بس مقدرتش أصغّرها — ارفعها يدوي') }) }catch(e){}
+          }else if(r.imgOk===false){ note('مالقيتش صورة — اضبط «صور جوجل» من إعدادات البرنامج، أو ارفع صورة يدوي') }
+          else{ note('مالقيتش صورة للصنف — ارفعها يدوي') }
+        }
+        async function doFind(pick){
+          var name=G('siT').value.trim();
+          if(name.length<2){G('siErr').textContent='اكتب اسم الصنف الأول';return}
+          if(fb.disabled)return;
+          fb.disabled=true;var lbl=fb.textContent;fb.textContent='⏳ ببحث…';
+          if(box)box.innerHTML='<div class="rating-note" style="margin-top:6px">⏳ ببحث عن «'+E(name)+'» في قاعدة بيانات الأدوية…</div>';
+          try{
+            var r=await call('itemLookup',{name:name,pick:pick||0});
+            var mt=r.matches||[],pk=Number(r.pick)||0;
+            if(box){
+              box.innerHTML='<div class="rating-note" style="margin-top:6px">✅ '+E(r.name||'')+(r.price?(' — سعر الجمهور '+E(String(r.price))+' ج'):'')+'</div>'
+                +(mt.length>1?('<small>مش هو؟ اختار الصنف الصح من القائمة:</small>'+mt.map(function(x,i){return '<button class="g" type="button" data-pk="'+i+'" style="margin-top:4px;text-align:right'+(i===pk?';background:var(--b,#0b2a6f);color:#fff;border-color:var(--b,#0b2a6f)':'')+'">'+E(x.ar||x.en||'')+(x.price?(' — '+E(String(x.price))+' ج'):'')+'</button>'}).join('')):'');
+              var bs=box.querySelectorAll('button[data-pk]');
+              for(var bi=0;bi<bs.length;bi++)(function(b){b.addEventListener('click',function(){doFind(Number(b.getAttribute('data-pk'))||0)})})(bs[bi]);
+            }
+            fill(r);
+            try{window.toast&&window.toast('تم ملء بيانات الصنف ✔','ok')}catch(e){}
+          }catch(x){ if(box)box.innerHTML=''; G('siErr').textContent=EM(x) }
+          finally{ if(document.body.contains(fb)){fb.disabled=false;fb.textContent=lbl} }
+        }
+        fb.addEventListener('click',function(){doFind(0)});
+      })();
       G('siSave').addEventListener('click',async function(){
         var btn=this; if(btn.disabled)return;
         var t=G('siT').value.trim(); if(!t){G('siErr').textContent='اكتب اسم الصنف';return}
         btn.disabled=true;var lbl=btn.textContent;btn.textContent='⏳ جاري الحفظ…';
-        try{ await call('secItemSave',{sec:secId,id:id||'',title:t,x:G('siX').value.trim(),p:G('siP').value,w:G('siW').value,ic:img,sort:Number(G('siSort').value)||0}); m.remove(); TO('تم الحفظ ✔','ok'); afterSecChange() }
+        try{ var ooEl=G('siOO'); await call('secItemSave',{sec:secId,id:id||'',title:t,x:G('siX').value.trim(),p:G('siP').value,w:G('siW').value,ic:img,oo:(ooEl&&ooEl.checked)?'1':'',sort:Number(G('siSort').value)||0}); m.remove(); TO('تم الحفظ ✔','ok'); afterSecChange() }
         catch(e){var er=G('siErr');if(er)er.textContent=EM(e)}
         finally{ if(document.body.contains(btn)){btn.disabled=false;btn.textContent=lbl} }
       });
@@ -2040,11 +2111,11 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   /* ---------- 9) offers screen: layout toggle (رأسي / عرضين جنب بعض) ---------- */
   var offVPrev=(typeof offV==='function')?offV:null;
   if(offVPrev){
-    offV=async function(){ var r=await offVPrev.apply(this,arguments); try{
+    offV=async function(){ var pr=offVPrev.apply(this,arguments); var ins=function(){ try{
       var ap=G('app');
       if(ap){ var h=ap.querySelector('h2'); if(h&&!G('offLayout'))h.insertAdjacentElement('afterend',offLayoutBar()); }
       applyOffLayout();
-    }catch(e){} return r; };
+    }catch(e){} }; ins(); var r=await pr; ins(); return r; };
   }
 
   /* ---------- 10) شاشة المفضلة: أضف أصناف الأقسام المفضّلة ---------- */
@@ -3114,7 +3185,7 @@ html.dark .shdev-btn{background:#1c2744;border-color:#2c3b5f;color:#e8eefc}
     if(typeof d.q==='number'&&d.q===0)head+='<div class="stk out">نفدت الكمية</div>';
     /* نفس كارت الصنف الموحّد بالظبط (وضع الزائر) */
     if(typeof window.shItemCardHTML==='function'){
-      var meta={id:d.id,t:d.t,x:d.x,p:d.p,w:d.w,ic:d.ic,avg:d.avg,count:d.count,mine:0};
+      var meta={id:d.id,t:d.t,x:d.x,p:d.p,w:d.w,ic:d.ic,oo:d.oo,avg:d.avg,count:d.count,mine:0};
       var opts={kind:isItem?'item':'offer',guest:true};
       APPH(head+window.shItemCardHTML(meta,opts));
       try{window.shWireItemCard(G('app'),meta,opts)}catch(e){}
@@ -3200,6 +3271,7 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
       +(staff?'<div class="card set-row"><div class="set-lbl"><b>🛵 زرار التوصيل للعملاء</b><small>لو مفعّل، العميل يقدر يختار «توصيل» وهو بيعمل أوردر. لو مقفول، يبان «استلام من الصيدلية» بس.</small></div><label class="switch"><input type="checkbox" id="setDelivery"'+(deliveryOn?' checked':'')+'><span class="slider"></span></label></div>':'')
       +'<div class="card"><h3 style="margin:6px 0 10px">🎨 لون البرنامج</h3><div class="swatches">'+colors.map(function(c){return '<button type="button" class="swatch" data-c="'+c+'" style="background:'+c+'" aria-label="لون"></button>'}).join('')+'</div><small>الاختيار بيتحفظ على الجهاز.</small></div>'
       +'<button class="g" type="button" id="settingsNotifBtn">🔔 إعدادات الإشعارات</button>'
+      +(staff?'<button class="g" type="button" id="settingsImgBtn">🖼️ إعداد صور الأصناف من جوجل</button>':'')
       +'<button class="g" type="button" id="settingsBack">⬅️ رجوع لحسابي</button>';
     try{app(html)}catch(e){try{run(html)}catch(e2){}}
     var vt=get('setVib');if(vt)vt.addEventListener('change',function(){setVibrate(!!vt.checked)});
@@ -3215,6 +3287,7 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
       });
     });
     var snb=get('settingsNotifBtn');if(snb)snb.addEventListener('click',function(){try{window.notifSettingsV()}catch(e){}});
+    var sib=get('settingsImgBtn');if(sib)sib.addEventListener('click',function(){try{imgCfgDialog()}catch(e){}});
     var bk=get('settingsBack');if(bk)bk.addEventListener('click',function(){try{profileV()}catch(e){}});
     var sws=document.querySelectorAll('#app .swatch');for(var swi=0;swi<sws.length;swi++)(function(sw){sw.addEventListener('click',function(){try{setAccent(sw.getAttribute('data-c'))}catch(e){}})})(sws[swi]);
     try{themeSyncUI()}catch(e){}
@@ -3222,6 +3295,41 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
     try{if(typeof navSync==='function')navSync()}catch(e){}
   }
   window.settingsV=settingsV;
+  /* ضبط صور الأصناف من جوجل (مفتاح API + معرّف محرك البحث CX) — للمدير فقط */
+  function imgCfgDialog(){
+    var m=document.createElement('div');m.className='m';
+    m.innerHTML='<div><b>🖼️ صور الأصناف من جوجل</b>'
+      +'<small>علشان زرار «🔎 ابحث واملأ» وهو بتضيف صنف جديد يجيب صورة واضحة للصنف. الإعداد بيتحفظ في السيرفر ومرة واحدة بس.</small>'
+      +'<div id="imgCfgState"><div class="rating-note">⏳ جاري التحقق…</div></div>'
+      +'<label for="imgKey">مفتاح API (Google Custom Search JSON API)</label><input id="imgKey" dir="ltr" autocomplete="off" placeholder="AIza...">'
+      +'<label for="imgCx">معرّف محرك البحث (CX)</label><input id="imgCx" dir="ltr" autocomplete="off" placeholder="مثال: 1a2b3c4d5e6f7g8h9">'
+      +'<small>طريقة الحصول عليهم: من Google Cloud فعّل Custom Search API واعمل مفتاح، ومن programmablesearchengine.google.com اعمل محرك بحث (صورة).</small>'
+      +'<div class="err" id="imgErr"></div>'
+      +'<button class="g" type="button" id="imgSave">💾 حفظ</button><button class="g" type="button" id="imgClose">إغلاق</button></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
+    function state(r){
+      var st=get('imgCfgState');if(!st)return;
+      st.innerHTML='<div class="rating-note">'+((r&&r.hasKey&&r.hasCx)?'✅ الإعداد مضبوط — الصورة هتتجاب أوتوماتيك':'⚠️ لسه ناقص '+(r&&r.hasKey?'معرّف محرك البحث (CX)':'مفتاح API')+' — هيتملأ السعر والتفاصيل بس')+'</div>';
+    }
+    call('imgCfg',{}).then(state).catch(function(){var st=get('imgCfgState');if(st)st.innerHTML=''});
+    get('imgClose').addEventListener('click',function(){m.remove()});
+    get('imgSave').addEventListener('click',async function(){
+      var b=this;if(b.disabled)return;
+      var er=get('imgErr');if(er)er.textContent='';
+      var k=get('imgKey').value.trim(),c=get('imgCx').value.trim();
+      if(!k&&!c){if(er)er.textContent='اكتب مفتاح API ومعرّف محرك البحث';return}
+      b.disabled=true;
+      try{
+        var d={};if(k)d.key=k;if(c)d.cx=c;
+        var r=await call('imgCfg',d);
+        get('imgKey').value='';get('imgCx').value='';
+        state(r);
+        try{toast('تم حفظ إعداد صور الأصناف ✔','ok')}catch(e){}
+      }catch(e){if(er)er.textContent=em(e)}
+      finally{b.disabled=false}
+    });
+  }
   document.addEventListener('pointerdown',function(e){
     try{
       var t=e.target;
@@ -3404,6 +3512,19 @@ html.dark .sh-actions button.danger{color:#ff8a80}
 .sec-screen-head .sec-screen-main{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
 button.sec-screen-add{width:44px;height:44px;min-width:44px;max-width:44px;flex:0 0 auto;padding:0;border-radius:14px;font-size:25px;font-weight:800;line-height:1;display:grid;place-items:center;background:var(--b,#0b2a6f);color:#fff;border:0;box-shadow:0 10px 20px -12px rgba(11,42,111,.9)}
 html.dark button.sec-screen-add{background:var(--b,#0b2a6f);color:#fff;border:0}
+
+/* ===== شارة «بالطلب» في كارت الصنف (أدام السعر على الشمال) + ملاحظة تحت السعر ===== */
+.item-card .icard-price .icard-onorder{display:inline-flex;align-items:center;order:9;background:#c62828;color:#fff;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:800;line-height:1.6;white-space:nowrap;box-shadow:0 4px 10px -4px rgba(198,40,40,.75)}
+html.dark .item-card .icard-price .icard-onorder{background:#e53935;color:#fff}
+.item-card .icard-onorder-note{display:block;margin:6px 2px 0;color:#c62828;font-size:13px;font-weight:700}
+html.dark .item-card .icard-onorder-note{color:#ff8a80}
+.icard-price .icard-onorder{display:inline-flex;align-items:center;background:#c62828;color:#fff;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:800;margin-top:6px;white-space:nowrap}
+html.dark .icard-price .icard-onorder{background:#e53935;color:#fff}
+
+/* ===== صورة الروشتة في شاشة الطلب: مصغّرة + زرار شيل الصورة ===== */
+.order-shot{margin:8px 0;text-align:center}
+.order-shot img{max-width:100%;max-height:230px;border-radius:14px;border:1px solid var(--line,#e8e2d6);display:block;margin:0 auto 8px}
+.order-shot button{width:auto;min-width:0;padding:10px 16px;font-size:14px;margin:0 auto}
 /* ===== تحسينات: زرار إدارة الأقسام + شادو زرار مشاركة التطبيق + ثبات ارتفاع سلايدر العروض ===== */
 button.sec-admin-btn{background:var(--b,#0b2a6f);color:#fff;border:0;font-size:17px;font-weight:800;padding:16px 14px;box-shadow:0 10px 22px -12px rgba(11,42,111,.9)}
 html.dark button.sec-admin-btn{background:var(--b,#0b2a6f);color:#fff;border:1px solid var(--b,#0b2a6f);box-shadow:0 10px 22px -12px #000}
