@@ -97,7 +97,7 @@ async function go(m){try{if(m=='up'&&$('w').value!==$('w2').value)throw 'كلم�
 if(m=='up'){Object.assign(d,{name:$('n').value,role:$('r').value,code:$('cd').value,addr:$('ad').value,email:$('eml').value,confirmPass:$('w2').value});
 const x=await call('signup',d);if(x.status=='pending'){authV('in');$('e').textContent='تم التسجيل ✔ استنى موافقة المدير على حسابك';return}S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV();return}
 const x=await call('login',d);S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV()}catch(x){$('e').textContent=em(x)}}async function shareApp(){try{if(navigator.share)await navigator.share({title:'صيدليات شهاب',url:location.href});else{await navigator.clipboard.writeText(location.href);alert('تم نسخ رابط التطبيق')}}catch(e){}}
-function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions"><button class="g person notification-btn" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div><img class="lg lit" src="${LOGO}"></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div><div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">🎁 العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint()}
+function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions"><button class="g person notification-btn" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div><img class="lg lit" src="${LOGO}"></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div>${S.r==='manager'?'<button class="g admin-dash-btn" type="button" onclick="adminDashV()">🛠️ الإدارة</button>':''}<div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">🎁 العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint()}
 async function notifV(){V='notify';app(`<h2>🔔 إشعارات الطلبات</h2><small>البريد اختياري. أضفه لو حابب توصلك رسالة عند تسجيل الطلب أو تحديث حالته. يمكنك ربط تيليجرام أيضًا.</small><input id="notifyEmail" type="email" autocomplete="email" placeholder="البريد الإلكتروني (اختياري)"><button onclick="saveNotifyEmail(this)">حفظ البريد</button><div id="ne" class="err"></div><hr><div id="tgstatus">جاري تحميل حالة تيليجرام…</div><button class="g" onclick="makeTelegramLink(this)">ربط حساب Telegram</button><p><a id="tgurl" hidden target="_blank" rel="noopener">افتح رابط الربط في Telegram واضغط Start</a></p><small>لا يمكن للبوت إرسال رسالة قبل أن تبدأه. كل رابط ربط صالح لعشر دقائق ولمرة واحدة.</small>`);try{const s=await call('settings');$('notifyEmail').value=s.email||'';$('tgstatus').textContent=s.telegram?'✅ Telegram مربوط بهذا الحساب':'Telegram غير مربوط'}catch(x){$('tgstatus').textContent=em(x)}}
 async function saveNotifyEmail(b){try{b.disabled=1;await call('setEmail',{email:$('notifyEmail').value});$('ne').textContent='تم حفظ البريد ✔'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}
 async function makeTelegramLink(b){try{b.disabled=1;const x=await call('tgLink');$('tgurl').href=x.url;$('tgurl').hidden=false;$('tgstatus').textContent='اضغط الرابط ثم Start لإتمام الربط'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}async function loadO(){try{const ce=cGet('offers');if(ce){OF=ce.v;if(HI>=featuredOffers().length)HI=0;drawHero()}var _d=null;try{_d=await homeDataOnce()}catch(_e){}OF=(_d&&Array.isArray(_d.offers))?_d.offers:await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero()}catch(x){const e=$('of');if(e&&!OF.length)e.textContent=em(x)}}
@@ -228,7 +228,8 @@ else if(v==='loyaltySettings'){try{if(typeof window.loyaltySettingsV==='function
 else if(v==='search'){try{if(typeof window.searchV==='function')window.searchV()}catch(e){}}
 else if(v==='ord'){try{await loadOrderAddr();try{var don=(typeof window.__shDeliveryOn==='function')?!!window.__shDeliveryOn():true;var b1=$('b1');if(b1){if(don)b1.removeAttribute('hidden');else b1.setAttribute('hidden','')}if(!don)mode('pickup')}catch(e){}}catch(e){}}
 else if(v==='mydata'){try{if(typeof window.myDataV==='function')window.myDataV()}catch(e){}}
-else if(v==='settings'){try{var dv=$('setDelivery');if(dv)dv.checked=!!(window.__shDeliveryOn&&window.__shDeliveryOn());if(typeof window.__shNotifWrap==='function')window.__shNotifWrap()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
+else if(v==='settings'){try{var dv=$('setDelivery');if(dv)dv.checked=!!(window.__shDeliveryOn&&window.__shDeliveryOn());if(typeof window.__shNotifWrap==='function')window.__shNotifWrap()}catch(e){}}
+else if(v==='adminDash'){try{if(typeof window.adminDashV==='function')window.adminDashV()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
 /* ---- Shehab: share an offer + server-backed notification centre ---- */
 async function loadCartAddr(){try{const u=await call('profile');const a=$('cartAddr');if(a&&u&&u.address&&!a.value)a.value=u.address}catch(e){}}
 async function shareOffer(id){id=String(id||'');if(!id)return;const url=BC_LINK_BASE+'?o='+encodeURIComponent(id);if(typeof window.openShareSheet==='function'){try{window.openShareSheet({url:url,text:'شوف العرض ده في صيدليات شهاب',title:'صيدليات شهاب'});return}catch(e){}}try{if(navigator.share){await navigator.share({title:'صيدليات شهاب',text:'شوف العرض ده في صيدليات شهاب',url});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(url);if(typeof showShehabPushToast==='function')showShehabPushToast('تم نسخ رابط العرض ✔');else alert('تم نسخ رابط العرض ✔')}catch(e){try{prompt('انسخ رابط العرض:',url)}catch(e2){}}}
@@ -414,7 +415,7 @@ function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav
 function navGo(t){try{if(t==='home')homeV();else if(t==='off')offV();else if(t==='mine'){if(S.r==='customer')mineV();else listV()}else if(t==='profile')profileV()}catch(e){}navSync()}
 function navFab(){try{if(S.r==='customer')ordV();else addV()}catch(e){}navSync()}
 function navCount(){}
-function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off',secItem:'off',mydata:'profile',notifSettings:'profile',settings:'profile',search:'home'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
+function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off',secItem:'off',mydata:'profile',notifSettings:'profile',settings:'profile',adminDash:'home',search:'home'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
 window.navGo=navGo;window.navFab=navFab;window.navSync=navSync;
 try{var cbBase=cartBadge;cartBadge=function(){cbBase();navCount()}}catch(e){}
 function watchApp(){var ap=q('app');if(!ap||!window.MutationObserver)return;new MutationObserver(function(){navSync()}).observe(ap,{childList:true,subtree:false});var t=0;new MutationObserver(function(){if(t)return;t=setTimeout(function(){t=0;injectRepeat()},90)}).observe(ap,{childList:true,subtree:true})}
@@ -956,11 +957,24 @@ html.dark .pt-card{background:linear-gradient(135deg,#2a2416,#33280f);border-col
   /* ================== 4) إدارة أكواد الخصم (مدير) ================== */
   async function cpLoad(){
     var box=G('cpList'); if(!box) return;
-    var l=null;
+    var l=null,w=null;
     try{ l=await call('couponList') }catch(e){ box.innerHTML='<div class="err">'+E(EM(e))+'</div>'; return }
-    if(!l||!l.length){ box.innerHTML='<div class="card">مفيش أكواد خصم لحد الآن.</div>'; return }
+    if(!Array.isArray(l))l=[];
+    try{ w=await call('settingsGet') }catch(e){}
+    var wcode=(w&&w.welcomeCode)?String(w.welcomeCode).trim().toUpperCase():'WELCOME';
+    var won=!!(w&&w.welcomeOn),wpct=(w&&w.welcomePct)||0;
+    l=l.filter(function(c){return String(c.code||'').trim().toUpperCase()!==wcode});
     var now=Date.now();
-    box.innerHTML=l.map(function(c){
+    var whtml=w?('<div class="card cp-welcome" id="cpWelcome">'
+      +'<div class="cp-code">🎉 الكود الترحيبي: '+E(wcode)+'</div>'
+      +'<div>خصم <b>'+E(String(wpct))+'%</b> — لأول أوردر للعميل الجديد بس</div>'
+      +'<div class="rating-note">الحالة: <b>'+(won?'✅ شغال — بيتطبق تلقائيًا على أول أوردر':'⏸️ موقوف')+'</b></div>'
+      +'<div class="rating-note">لو موقوف، مش هيتطبق أي خصم ترحيبي على العملاء الجدد.</div>'
+      +'<div class="row"><button class="g" data-wact="toggle">'+(won?'⏸️ إيقاف الكود':'▶️ تفعيل الكود')+'</button>'
+      +'<button class="g" data-wact="pct">✏️ تعديل النسبة</button></div>'
+      +'<div id="cpWelcomePct" style="display:none"><label for="cpWPct">نسبة الخصم الترحيبي %</label><input id="cpWPct" type="number" min="1" max="90" value="'+E(String(wpct))+'"><div class="row"><button class="g" id="cpWSave">💾 حفظ النسبة</button><button class="g" id="cpWCancel">إلغاء</button></div></div>'
+      +'</div>'):'';
+    box.innerHTML=whtml+(l.length?l.map(function(c){
       var state=!c.active?'⏸️ موقوف':((c.start&&now<c.start)?'⏳ لسه مش شغال':((c.end&&now>=c.end)?'⌛ منتهي':'✅ شغال'));
       var when=(c.start?('من '+new Date(c.start).toLocaleDateString('ar-EG')):'من غير تاريخ بداية')+' — '+(c.end?('لـ '+new Date(c.end).toLocaleDateString('ar-EG')):'من غير تاريخ نهاية');
       return '<div class="card" data-code="'+E(c.code)+'">'
@@ -974,7 +988,20 @@ html.dark .pt-card{background:linear-gradient(135deg,#2a2416,#33280f);border-col
         +'<div class="row"><button class="g" data-act="edit">✏️ تعديل</button>'
         +'<button class="g" data-act="toggle">'+(c.active?'⏸️ إيقاف':'▶️ تفعيل')+'</button>'
         +'<button class="g" data-act="del">🗑️ حذف</button></div></div>';
-    }).join('');
+    }).join(''):'<div class="card">مفيش أكواد خصم تانية لحد الآن.</div>');
+    /* --- أزرار الكود الترحيبي --- */
+    var wt=box.querySelector('[data-wact="toggle"]');
+    if(wt)wt.addEventListener('click',async function(){
+      try{ await call('welcomeCfg',{on:!won}); TO(won?'تم إيقاف الكود الترحيبي':'تم تفعيل الكود الترحيبي ✔','ok'); cpLoad() }catch(e){ TO(EM(e),'bad') }
+    });
+    var wp=box.querySelector('[data-wact="pct"]');
+    if(wp)wp.addEventListener('click',function(){var f=G('cpWelcomePct');if(f)f.style.display=(f.style.display==='none'?'':'none')});
+    var wsv=G('cpWSave');
+    if(wsv)wsv.addEventListener('click',async function(){
+      try{ await call('welcomeCfg',{pct:Number(G('cpWPct').value)}); TO('تم حفظ نسبة الكود الترحيبي ✔','ok'); cpLoad() }catch(e){ TO(EM(e),'bad') }
+    });
+    var wcn=G('cpWCancel');
+    if(wcn)wcn.addEventListener('click',function(){var f=G('cpWelcomePct');if(f)f.style.display='none'});
     var cards=box.querySelectorAll('.card[data-code]');
     for(var i=0;i<cards.length;i++)(function(card){
       var code=card.getAttribute('data-code');
@@ -3430,6 +3457,7 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
     try{if(typeof navSync==='function')navSync()}catch(e){}
   }
   window.settingsV=settingsV;
+  window.__shImgCfg=imgCfgDialog;
   /* ضبط صور الأصناف من جوجل (مفتاح SerpApi المجاني) — للمدير فقط */
   function imgCfgDialog(){
     var m=document.createElement('div');m.className='m';
@@ -3828,5 +3856,96 @@ html.dark button.imgpick-i{background:#1b2540;border-color:#2c3b5f}
   }
   document.addEventListener('touchend',end,{passive:true});
   document.addEventListener('touchcancel',end,{passive:true});
+})();
+</script>
+<style>
+/* ===== لوحة «الإدارة» (المدير فقط) ===== */
+button.admin-dash-btn{background:linear-gradient(180deg,#143d7d,#0b2a6f);color:#fff;font-weight:800;letter-spacing:.2px;box-shadow:0 8px 18px -12px rgba(11,42,111,.9);margin:12px 0 4px}
+button.admin-dash-btn:active{transform:scale(.985)}
+html.dark button.admin-dash-btn{background:linear-gradient(180deg,#1d3160,#16264a);color:#e9effc}
+.adm-h{margin:18px 0 6px;font-size:15.5px;color:var(--b)}
+html.dark .adm-h{color:var(--btext)}
+button.adm-item{display:flex;align-items:center;gap:11px;text-align:right;width:100%;margin:8px 0;padding:12px 13px;background:#eef2fb;color:var(--b);font-weight:700;border-radius:15px;border:1px solid #dbe3f4;box-shadow:none}
+button.adm-item:active{transform:scale(.99)}
+.adm-item .adm-ic{font-size:21px;line-height:1;flex:0 0 auto}
+.adm-item .adm-tx{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 auto}
+.adm-item .adm-tx b{font-size:14.5px}
+.adm-item .adm-tx small{font-weight:400;opacity:.72;font-size:11.5px;line-height:1.25}
+html.dark button.adm-item{background:#1a2440;color:#dbe7ff;border-color:#2b3555}
+.cp-welcome{border-right-color:#c9a227;background:linear-gradient(135deg,#fffdf6,#fdf6e4)}
+html.dark .cp-welcome{background:linear-gradient(135deg,#241f12,#1c1810);border-right-color:#c9a227}
+</style>
+<script>
+/* ===== لوحة «الإدارة» — للمدير فقط، فيها كل إعدادات الإدارة ===== */
+(function(){
+  function G(id){return document.getElementById(id)}
+  function TO(m,k){try{if(typeof toast==='function')toast(m,k)}catch(e){}}
+  function EM(x){try{return (typeof em==='function')?em(x):String(x&&x.message||x)}catch(e){return String(x&&x.message||x)}}
+  function isMgr(){try{return !!(typeof S!=='undefined'&&S&&S.r==='manager')}catch(e){return false}}
+  function it(ic,t,sub,go){return '<button class="g adm-item" type="button" data-go="'+go+'"><span class="adm-ic">'+ic+'</span><span class="adm-tx"><b>'+t+'</b><small>'+sub+'</small></span></button>'}
+
+  window.adminDashV=function(){
+    if(!isMgr()){TO('الصفحة دي للمدير فقط','bad');return}
+    try{V='adminDash'}catch(e){}
+    var don=false;try{don=!!(window.__shDeliveryOn&&window.__shDeliveryOn())}catch(e){}
+    var html='<div class="list-head"><h2>🛠️ الإدارة</h2></div>'
+      +'<small>لوحة تحكم المدير — كل إعدادات الإدارة من مكان واحد.</small>'
+      +'<h3 class="adm-h">🗂️ الإدارة العامة</h3>'
+      +it('🗂️','إدارة الأقسام','أقسام العروض وأصنافها — قائمة أو كانبان','secAdminV')
+      +it('🗓️','القوائم الشهرية','قوائم علاج العملاء','monthlyAdminV')
+      +it('📊','لوحة الإحصائيات','المبيعات والطلبات والأصناف الناقصة','statsV')
+      +'<h3 class="adm-h">🎟️ الخصومات والعملاء</h3>'
+      +it('🎟️','أكواد الخصم','إنشاء وإيقاف الأكواد + الكود الترحيبي','couponAdminV')
+      +it('⭐','إعدادات نقاط الولاء','نقاط لكل أوردر وطريقة تحويلها لخصم','loyaltySettingsV')
+      +it('📣','إرسال إشعار للعملاء','إشعار بعرض لكل عملاء التطبيق','broadcastV')
+      +'<h3 class="adm-h">⚙️ النظام</h3>'
+      +'<div class="card set-row"><div class="set-lbl"><b>🛵 زرار التوصيل للعملاء</b><small>لو مقفول: العميل يشوف «استلام من الصيدلية» بس.</small></div><label class="switch"><input type="checkbox" id="admDelivery"'+(don?' checked':'')+'><span class="slider"></span></label></div>'
+      +it('🗄️','النسخ الاحتياطي','نسخة على Google Drive + سجل العمليات','backupV')
+      +it('🔔','إعدادات الإشعارات','مستلمو الإشعارات والبريد','notifSettingsV')
+      +it('🖼️','صور الأصناف من جوجل','مفتاح SerpApi لصور الأصناف','imgCfg')
+      +it('⚙️','إعدادات البرنامج','لون البرنامج، الوضع الليلي، الاهتزاز','settingsV')
+      +'<button class="g" type="button" id="admBack" style="margin-top:14px">⬅️ رجوع للرئيسية</button>';
+    try{app(html)}catch(e){var r=G('app');if(r)r.innerHTML=html}
+    var box=G('app');
+    if(box){
+      var its=box.querySelectorAll('.adm-item');
+      for(var i=0;i<its.length;i++)(function(b){
+        b.addEventListener('click',function(){
+          var f=b.getAttribute('data-go');
+          try{
+            if(f==='secAdminV'&&window.secAdminV)window.secAdminV();
+            else if(f==='monthlyAdminV'&&window.monthlyAdminV)window.monthlyAdminV();
+            else if(f==='statsV'&&window.statsV)window.statsV();
+            else if(f==='couponAdminV'&&window.couponAdminV)window.couponAdminV();
+            else if(f==='loyaltySettingsV'&&window.loyaltySettingsV)window.loyaltySettingsV();
+            else if(f==='broadcastV'&&window.broadcastV)window.broadcastV();
+            else if(f==='backupV'&&window.backupV)window.backupV();
+            else if(f==='notifSettingsV'&&window.notifSettingsV){
+              var nrdy=false;try{nrdy=!!window.__shNotifWrap()}catch(e){}
+              if(nrdy){window.notifSettingsV()}
+              else if(typeof profileV==='function'){Promise.resolve(profileV()).then(function(){try{window.notifSettingsV()}catch(e){}})}
+              else{window.notifSettingsV()}
+            }
+            else if(f==='imgCfg'&&window.__shImgCfg)window.__shImgCfg();
+            else if(f==='settingsV'&&window.settingsV)window.settingsV();
+          }catch(e){TO(EM(e),'bad')}
+        });
+      })(its[i]);
+    }
+    var dv=G('admDelivery');
+    if(dv)dv.addEventListener('change',function(){
+      var on=!!dv.checked;
+      try{if(window.__shDeliverySet)window.__shDeliverySet(on)}catch(e){}
+      try{
+        call('setDelivery',{on:on}).then(function(){TO('تم حفظ إعداد التوصيل ✔','ok')}).catch(function(x){
+          try{if(window.__shDeliverySet)window.__shDeliverySet(!on);dv.checked=!on}catch(e){}
+          TO(EM(x),'bad');
+        });
+      }catch(e){}
+    });
+    var bk=G('admBack');
+    if(bk)bk.addEventListener('click',function(){try{homeV()}catch(e){}});
+    try{if(typeof navSync==='function')navSync()}catch(e){}
+  };
 })();
 </script>
