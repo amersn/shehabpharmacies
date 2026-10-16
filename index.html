@@ -344,7 +344,8 @@ h1,h2,h3,.sec-head h2,.lux-title{font-family:'El Messiri',Almarai,system-ui,Taho
 .hero-slide .hero-price .now{display:block;font-size:22px;font-weight:800;color:#F3DFB2}
 .hero-slide .hero-price .was{display:block;font-size:12px;color:rgba(255,255,255,.78);text-decoration:line-through;margin-top:1px}
 .hero-slide .hero-off{position:absolute;top:12px;right:12px;z-index:4;background:linear-gradient(135deg,#EFDCAD,#C39A57);color:#241A03;font-weight:800;font-size:12px;padding:5px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.22)}
-.hero-slide .hero-card>.offer-cd,.hero-slide .hero-card>.stk{display:inline-block;margin:7px 8px 0 0}
+.hero-slide .hero-chips{position:absolute;top:10px;left:10px;z-index:4;display:flex;flex-direction:column;align-items:flex-start;gap:4px;max-width:56%}
+.hero-slide .hero-chips .offer-cd,.hero-slide .hero-chips .stk{display:inline-block;margin:0;box-shadow:0 3px 10px rgba(0,0,0,.18)}
 .hero-note{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 2px;color:var(--muted);font-size:13px}
 .hero-mini{width:34px;height:34px;min-width:34px;padding:0;margin:0;font-size:20px;line-height:1;border-radius:50%}
 #nav{max-width:520px;margin:0 auto;position:fixed;left:0;right:0;bottom:0;z-index:55;display:flex;justify-content:center;align-items:center;gap:6px;height:62px;padding:0 6px env(safe-area-inset-bottom);background:var(--card);border-top:1px solid var(--line);box-shadow:0 -3px 14px #0000001f}
@@ -2056,7 +2057,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var it=null;
       if(id){try{var l=await call('sectionsAdmin');(l||[]).forEach(function(s){if(String(s.id)===String(secId))(s.items||[]).forEach(function(x){if(String(x.id)===String(id))it=x})})}catch(e){}}
       var m=document.createElement('div');m.className='m';
-      m.innerHTML='<div><b>'+(id?'تعديل صنف':'صنف جديد')+'</b><label for="siT">اسم الصنف</label><div class="row"><input id="siT" style="flex:1;min-width:0" maxlength="120" value="'+E(it&&it.t||'')+'"><button class="g" type="button" id="siFind" style="flex:0 0 122px" title="ابحث عن الصنف على النت واملأ التفاصيل والسعر والصورة">🔎 ابحث واملأ</button></div><div id="siFindBox"></div><button class="g" type="button" id="siGimg" style="width:auto;display:inline-block;padding:8px 14px;font-size:14px;margin:2px 0 8px">🖼️ شوف صور في جوجل</button><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div><button class="g" type="button" id="siSave">💾 حفظ</button><button class="g" type="button" id="siCancel">إلغاء</button></div>';
+      m.innerHTML='<div><b>'+(id?'تعديل صنف':'صنف جديد')+'</b><label for="siT">اسم الصنف</label><div class="row"><input id="siT" style="flex:1;min-width:0" maxlength="120" value="'+E(it&&it.t||'')+'"><button class="g" type="button" id="siFind" style="flex:0 0 122px" title="ابحث عن الصنف على النت واملأ التفاصيل والسعر والصورة">🔎 ابحث واملأ</button></div><div id="siFindBox"></div><button class="g" type="button" id="siGimg" style="width:auto;display:inline-block;padding:8px 14px;font-size:14px;margin:2px 0 8px">🖼️ اختر صورة من جوجل</button><div id="siPickBox"></div><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div><button class="g" type="button" id="siSave">💾 حفظ</button><button class="g" type="button" id="siCancel">إلغاء</button></div>';
       document.body.appendChild(m);
       m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
       var img=it&&it.ic?it.ic:'';
@@ -2064,21 +2065,48 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       G('siCancel').addEventListener('click',function(){m.remove()});
       /* --- بحث أوتوماتيكي عن بيانات الصنف (يظهر للمدير فقط) --- */
       (function(){
-        var fb=G('siFind'),box=G('siFindBox');
+        var fb=G('siFind'),box=G('siFindBox'),pb=G('siPickBox');
         if(!fb)return;
-        var gb=G('siGimg');
-        if(gb)gb.addEventListener('click',function(){
+        /* اختيار صورة من صور جوجل جوه التطبيق — بنعرض المصغرات والمدير يختار، مش محتاج تحميل ولا متصفح */
+        function pickImg(){
           var n=G('siT').value.trim();
-          var url='https://www.google.com/search?tbm=isch&safe=active&q='+encodeURIComponent(n||'دواء');
-          try{ window.open(url,'_blank','noopener') }catch(e){ try{ location.href=url }catch(e2){} }
-        });
+          if(n.length<2){G('siErr').textContent='اكتب اسم الصنف الأول';return}
+          if(!pb)return;
+          pb.innerHTML='<div class="rating-note" style="margin-top:6px">⏳ ببحث عن صور «'+E(n)+'»…</div>';
+          call('imgSearch',{q:n}).then(function(r){
+            var imgs=(r&&r.imgs)||[];
+            if(!imgs.length){pb.innerHTML='<div class="rating-note" style="margin-top:6px">مالقيتش صور للاسم ده — جرّب تكتب الاسم بالإنجليزي أو ارفع صورة من جهازك</div>';return}
+            var h='<div class="rating-note" style="margin-top:6px">اختار صورة للصنف'+(r.src==='google'?' (من صور جوجل)':' (مصدر صور عام — راجع إنها مناسبة)')+':</div><div class="imgpick">';
+            for(var i=0;i<imgs.length;i++)h+='<button type="button" class="imgpick-i" data-i="'+i+'" title="استخدم الصورة دي"><img src="'+E(imgs[i].t||imgs[i].o)+'" alt="" loading="lazy"></button>';
+            h+='</div><div class="rating-note"><a href="#" id="siPickOpen" style="color:var(--b,#0b2a6f);font-weight:700">🌐 مش لاقي اللي عايزه؟ افتح بحث صور جوجل</a></div>';
+            pb.innerHTML=h;
+            var op=G('siPickOpen');
+            if(op)op.addEventListener('click',function(ev){ev.preventDefault();var u='https://www.google.com/search?tbm=isch&safe=active&q='+encodeURIComponent(n);try{window.open(u,'_blank','noopener')}catch(e){try{location.href=u}catch(e2){}}});
+            var bs=pb.querySelectorAll('.imgpick-i');
+            for(var k=0;k<bs.length;k++)(function(b){
+              b.addEventListener('click',function(){
+                var x=imgs[Number(b.getAttribute('data-i'))||0];if(!x)return;
+                pb.innerHTML='<div class="rating-note" style="margin-top:6px">⏳ بنزّل الصورة ونضغطها…</div>';
+                call('imgFetch',{urls:[x.o,x.t]}).then(function(r2){
+                  fitImg(r2.img,function(d){
+                    if(!d){pb.innerHTML='<div class="rating-note" style="margin-top:6px">مقدرتش أصغّر الصورة دي، جرّب واحدة تانية</div>';return}
+                    img=d;G('siImgPrev').innerHTML='<img class="ic" src="'+E(d)+'">';
+                    pb.innerHTML='<div class="rating-note" style="margin-top:6px">✅ تم اختيار الصورة — دوس 💾 حفظ</div>';
+                  });
+                }).catch(function(e){pb.innerHTML='<div class="rating-note" style="margin-top:6px">'+E(EM(e))+'</div>'});
+              });
+            })(bs[k]);
+          }).catch(function(e){pb.innerHTML='<div class="rating-note" style="margin-top:6px">'+E(EM(e))+'</div>'});
+        }
+        var gb=G('siGimg');
+        if(gb)gb.addEventListener('click',pickImg);
         function note(msg){ if(box)box.insertAdjacentHTML('beforeend','<div class="rating-note" style="margin-top:6px">'+msg+'</div>') }
         function fill(r){
           try{ if(r.price)G('siP').value=r.price }catch(e){}
           try{ if(r.x)G('siX').value=r.x }catch(e){}
           if(r.img){
-            try{ fitImg(r.img,function(d){ if(d){ img=d; G('siImgPrev').innerHTML='<img class="ic" src="'+E(d)+'">'; note(r.imgSrc==='google'?'🖼️ نزّلت صورة من صور جوجل ✔':'🖼️ نزّلت صورة عامة — راجع إنها مناسبة للصنف، ولو مش مناسبة دوس «🖼️ شوف صور في جوجل»') } else note('لقيت صورة بس مقدرتش أصغّرها — ارفعها يدوي') }) }catch(e){}
-          }else{ note('مالقيتش صورة — دوس «🖼️ شوف صور في جوجل»، احفظ الصورة وارفعها من زرار الصورة فوق') }
+            try{ fitImg(r.img,function(d){ if(d){ img=d; G('siImgPrev').innerHTML='<img class="ic" src="'+E(d)+'">'; note(r.imgSrc==='google'?'🖼️ نزّلت صورة من صور جوجل ✔':'🖼️ نزّلت صورة عامة — راجع إنها مناسبة للصنف، ولو مش مناسبة دوس «🖼️ اختر صورة من جوجل»') } else note('لقيت صورة بس مقدرتش أصغّرها — ارفعها يدوي') }) }catch(e){}
+          }else{ note('مالقيتش صورة — دوس «🖼️ اختر صورة من جوجل» واختار الصورة المناسبة') }
         }
         async function doFind(pick){
           var name=G('siT').value.trim();
@@ -2884,7 +2912,20 @@ html.dark .pt-log{border-color:#232d49}
         if(c.classList.contains('hero-card'))id=String(c.getAttribute('data-oid')||'');
         else{var mm=(c.getAttribute('onclick')||'').match(/'([^']+)'/);id=mm?mm[1]:''}
         var o=findOffer(id);if(!o)continue;
-        var b=offerBadges(o,false);if(b){var cw=c.querySelector('.ocard-chips');var tgt=cw||c;tgt.insertAdjacentHTML('beforeend',b)}
+        var b=offerBadges(o,false);
+        if(b){
+          if(c.classList.contains('hero-card')){
+            /* كارت السلايدر: الشارات تتحط فوق الصورة جوه .hero-media بدل ما تعمل سطر أبيض تحت الكارت */
+            var hm=c.querySelector('.hero-media');
+            if(hm){
+              var hc=hm.querySelector('.hero-chips');
+              if(!hc){hc=document.createElement('div');hc.className='hero-chips';hm.appendChild(hc)}
+              hc.insertAdjacentHTML('beforeend',b);
+            }
+          }else{
+            var cw=c.querySelector('.ocard-chips');var tgt=cw||c;tgt.insertAdjacentHTML('beforeend',b);
+          }
+        }
         var st=offerState(o);if(st.expired||st.future)c.style.opacity='.6';
       }
       var det=document.querySelector('.offer-detail');
@@ -3304,9 +3345,9 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
   function imgCfgDialog(){
     var m=document.createElement('div');m.className='m';
     m.innerHTML='<div><b>🖼️ صور الأصناف من جوجل</b>'
-      +'<small>زرار «🔎 ابحث واملأ» وهو بتضيف صنف جديد بيجيب <b>السعر والتفاصيل</b> دايمًا. وصورة الصنف بتتجرّب من المصادر دي بالترتيب:</small>'
+      +'<small>زرار «🔎 ابحث واملأ» وهو بتضيف صنف جديد بيجيب <b>السعر والتفاصيل</b> دايمًا، والصورة بتتجرّب من: صور جوجل ← ويكيميديا ← Openverse.</small>'
       +'<div id="imgCfgState"><div class="rating-note">⏳ جاري التحقق…</div></div>'
-      +'<small>1) <b>صور جوجل</b> — دقيق ويجيب المنتج بخلفية بيضا (محتاج مفتاح تحت).<br>2) <b>ويكيميديا كومنز</b> — مجاني بدون مفتاح.<br>3) <b>Openverse</b> — مجاني بدون مفتاح.<br>يعني من غير مفتاح الشغل هيمشي، بس الصورة ممكن ماتكونش المنتج نفسه — وفي الحالة دي استخدم زرار «🖼️ شوف صور في جوجل» جوه شاشة الصنف.</small>'
+      +'<small>وفي شاشة إضافة/تعديل الصنف فيه زرار «🖼️ اختر صورة من جوجل» بيوريك صور المنتج جوه التطبيق وتختار اللي تعجبك بضغطة واحدة — من غير تحميل ولا متصفح.</small>'
       +'<label for="imgKey">مفتاح SerpApi (اختياري — بيخلي الصورة من صور جوجل)</label><input id="imgKey" dir="ltr" autocomplete="off" placeholder="مثال: 3f9a1b2c...">'
       +'<button class="g" type="button" id="imgGet">🔗 اعمل مفتاح مجاني (250 بحث/شهر — بدون كارت بنك)</button>'
       +'<small>المفتاح بيتحفظ في السيرفر ومش بيظهر للعميل ولا بيخرج من التطبيق.</small>'
@@ -3539,8 +3580,15 @@ button.sec-admin-btn{background:var(--b,#0b2a6f);color:#fff;border:0;font-size:1
 html.dark button.sec-admin-btn{background:var(--b,#0b2a6f);color:#fff;border:1px solid var(--b,#0b2a6f);box-shadow:0 10px 22px -12px #000}
 button.share-app-btn{box-shadow:0 8px 16px -8px rgba(11,42,111,.45)}
 html.dark button.share-app-btn{box-shadow:0 8px 16px -8px #000}
-/* ارتفاع ثابت لكارت سلايدر العروض: الشارات (الخصم الوقتي/المتبقي) كانت بتكبر الكارت وتخلي الصفحة تهتز */
-.hero-slide .hero-card{min-height:calc(228px + 31px)}
+/* اختيار صورة الصنف من صور جوجل: شبكة مصغرات جوه شاشة الصنف */
+.imgpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin:8px 0}
+button.imgpick-i{position:relative;padding:0;margin:0;border:1.5px solid var(--line,#e8e2d6);border-radius:12px;background:#fff;height:84px;overflow:hidden;display:grid;place-items:center;cursor:pointer}
+button.imgpick-i::before{content:'🖼️';font-size:26px;opacity:.3}
+button.imgpick-i img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#fff}
+button.imgpick-i:active{border-color:var(--b,#0b2a6f)}
+html.dark button.imgpick-i{background:#1b2540;border-color:#2c3b5f}
+/* شارات العروض (الخصم الوقتي/المتبقي) بقت فوق الصورة نفسها — مفيش شريط أبيض تحت الكارت ولا اهتزاز */
+.hero-slide .hero-card{min-height:0}
 </style>
 
 <script>
