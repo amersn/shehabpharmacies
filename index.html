@@ -2056,7 +2056,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var it=null;
       if(id){try{var l=await call('sectionsAdmin');(l||[]).forEach(function(s){if(String(s.id)===String(secId))(s.items||[]).forEach(function(x){if(String(x.id)===String(id))it=x})})}catch(e){}}
       var m=document.createElement('div');m.className='m';
-      m.innerHTML='<div><b>'+(id?'تعديل صنف':'صنف جديد')+'</b><label for="siT">اسم الصنف</label><div class="row"><input id="siT" style="flex:1;min-width:0" maxlength="120" value="'+E(it&&it.t||'')+'"><button class="g" type="button" id="siFind" style="flex:0 0 122px" title="ابحث عن الصنف على النت واملأ التفاصيل والسعر والصورة">🔎 ابحث واملأ</button></div><div id="siFindBox"></div><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div><button class="g" type="button" id="siSave">💾 حفظ</button><button class="g" type="button" id="siCancel">إلغاء</button></div>';
+      m.innerHTML='<div><b>'+(id?'تعديل صنف':'صنف جديد')+'</b><label for="siT">اسم الصنف</label><div class="row"><input id="siT" style="flex:1;min-width:0" maxlength="120" value="'+E(it&&it.t||'')+'"><button class="g" type="button" id="siFind" style="flex:0 0 122px" title="ابحث عن الصنف على النت واملأ التفاصيل والسعر والصورة">🔎 ابحث واملأ</button></div><div id="siFindBox"></div><button class="g" type="button" id="siGimg" style="width:auto;display:inline-block;padding:8px 14px;font-size:14px;margin:2px 0 8px">🖼️ شوف صور في جوجل</button><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div><button class="g" type="button" id="siSave">💾 حفظ</button><button class="g" type="button" id="siCancel">إلغاء</button></div>';
       document.body.appendChild(m);
       m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
       var img=it&&it.ic?it.ic:'';
@@ -2066,14 +2066,19 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       (function(){
         var fb=G('siFind'),box=G('siFindBox');
         if(!fb)return;
+        var gb=G('siGimg');
+        if(gb)gb.addEventListener('click',function(){
+          var n=G('siT').value.trim();
+          var url='https://www.google.com/search?tbm=isch&safe=active&q='+encodeURIComponent(n||'دواء');
+          try{ window.open(url,'_blank','noopener') }catch(e){ try{ location.href=url }catch(e2){} }
+        });
         function note(msg){ if(box)box.insertAdjacentHTML('beforeend','<div class="rating-note" style="margin-top:6px">'+msg+'</div>') }
         function fill(r){
           try{ if(r.price)G('siP').value=r.price }catch(e){}
           try{ if(r.x)G('siX').value=r.x }catch(e){}
           if(r.img){
-            try{ fitImg(r.img,function(d){ if(d){ img=d; G('siImgPrev').innerHTML='<img class="ic" src="'+E(d)+'">'; note('🖼️ نزّلت صورة للصنف ✔') } else note('لقيت صورة بس مقدرتش أصغّرها — ارفعها يدوي') }) }catch(e){}
-          }else if(r.imgOk===false){ note('مالقيتش صورة — اضبط «صور جوجل» من إعدادات البرنامج، أو ارفع صورة يدوي') }
-          else{ note('مالقيتش صورة للصنف — ارفعها يدوي') }
+            try{ fitImg(r.img,function(d){ if(d){ img=d; G('siImgPrev').innerHTML='<img class="ic" src="'+E(d)+'">'; note(r.imgSrc==='google'?'🖼️ نزّلت صورة من صور جوجل ✔':'🖼️ نزّلت صورة عامة — راجع إنها مناسبة للصنف، ولو مش مناسبة دوس «🖼️ شوف صور في جوجل»') } else note('لقيت صورة بس مقدرتش أصغّرها — ارفعها يدوي') }) }catch(e){}
+          }else{ note('مالقيتش صورة — دوس «🖼️ شوف صور في جوجل»، احفظ الصورة وارفعها من زرار الصورة فوق') }
         }
         async function doFind(pick){
           var name=G('siT').value.trim();
@@ -3295,37 +3300,41 @@ html.dark .switch input:focus-visible + .slider{outline-color:#bcd0ff}
     try{if(typeof navSync==='function')navSync()}catch(e){}
   }
   window.settingsV=settingsV;
-  /* ضبط صور الأصناف من جوجل (مفتاح API + معرّف محرك البحث CX) — للمدير فقط */
+  /* ضبط صور الأصناف من جوجل (مفتاح SerpApi المجاني) — للمدير فقط */
   function imgCfgDialog(){
     var m=document.createElement('div');m.className='m';
     m.innerHTML='<div><b>🖼️ صور الأصناف من جوجل</b>'
-      +'<small>علشان زرار «🔎 ابحث واملأ» وهو بتضيف صنف جديد يجيب صورة واضحة للصنف. الإعداد بيتحفظ في السيرفر ومرة واحدة بس.</small>'
+      +'<small>زرار «🔎 ابحث واملأ» وهو بتضيف صنف جديد بيجيب <b>السعر والتفاصيل</b> دايمًا. وصورة الصنف بتتجرّب من المصادر دي بالترتيب:</small>'
       +'<div id="imgCfgState"><div class="rating-note">⏳ جاري التحقق…</div></div>'
-      +'<label for="imgKey">مفتاح API (Google Custom Search JSON API)</label><input id="imgKey" dir="ltr" autocomplete="off" placeholder="AIza...">'
-      +'<label for="imgCx">معرّف محرك البحث (CX)</label><input id="imgCx" dir="ltr" autocomplete="off" placeholder="مثال: 1a2b3c4d5e6f7g8h9">'
-      +'<small>طريقة الحصول عليهم: من Google Cloud فعّل Custom Search API واعمل مفتاح، ومن programmablesearchengine.google.com اعمل محرك بحث (صورة).</small>'
+      +'<small>1) <b>صور جوجل</b> — دقيق ويجيب المنتج بخلفية بيضا (محتاج مفتاح تحت).<br>2) <b>ويكيميديا كومنز</b> — مجاني بدون مفتاح.<br>3) <b>Openverse</b> — مجاني بدون مفتاح.<br>يعني من غير مفتاح الشغل هيمشي، بس الصورة ممكن ماتكونش المنتج نفسه — وفي الحالة دي استخدم زرار «🖼️ شوف صور في جوجل» جوه شاشة الصنف.</small>'
+      +'<label for="imgKey">مفتاح SerpApi (اختياري — بيخلي الصورة من صور جوجل)</label><input id="imgKey" dir="ltr" autocomplete="off" placeholder="مثال: 3f9a1b2c...">'
+      +'<button class="g" type="button" id="imgGet">🔗 اعمل مفتاح مجاني (250 بحث/شهر — بدون كارت بنك)</button>'
+      +'<small>المفتاح بيتحفظ في السيرفر ومش بيظهر للعميل ولا بيخرج من التطبيق.</small>'
       +'<div class="err" id="imgErr"></div>'
       +'<button class="g" type="button" id="imgSave">💾 حفظ</button><button class="g" type="button" id="imgClose">إغلاق</button></div>';
     document.body.appendChild(m);
     m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
     function state(r){
       var st=get('imgCfgState');if(!st)return;
-      st.innerHTML='<div class="rating-note">'+((r&&r.hasKey&&r.hasCx)?'✅ الإعداد مضبوط — الصورة هتتجاب أوتوماتيك':'⚠️ لسه ناقص '+(r&&r.hasKey?'معرّف محرك البحث (CX)':'مفتاح API')+' — هيتملأ السعر والتفاصيل بس')+'</div>';
+      st.innerHTML='<div class="rating-note">'+((r&&r.hasKey)?'✅ مفتاح صور جوجل مضبوط — الصورة هتتجاب من صور جوجل':'ℹ️ بدون مفتاح — هيستخدم صور عامة مجانية (ويكيميديا / Openverse)')+'</div>';
     }
     call('imgCfg',{}).then(state).catch(function(){var st=get('imgCfgState');if(st)st.innerHTML=''});
     get('imgClose').addEventListener('click',function(){m.remove()});
+    var gp=get('imgGet');if(gp)gp.addEventListener('click',function(){
+      var u='https://serpapi.com/users/sign_up';
+      try{ window.open(u,'_blank','noopener') }catch(e){ try{ location.href=u }catch(e2){} }
+    });
     get('imgSave').addEventListener('click',async function(){
       var b=this;if(b.disabled)return;
       var er=get('imgErr');if(er)er.textContent='';
-      var k=get('imgKey').value.trim(),c=get('imgCx').value.trim();
-      if(!k&&!c){if(er)er.textContent='اكتب مفتاح API ومعرّف محرك البحث';return}
+      var k=get('imgKey').value.trim();
+      if(!k){if(er)er.textContent='اكتب المفتاح الأول';return}
       b.disabled=true;
       try{
-        var d={};if(k)d.key=k;if(c)d.cx=c;
-        var r=await call('imgCfg',d);
-        get('imgKey').value='';get('imgCx').value='';
+        var r=await call('imgCfg',{key:k});
+        get('imgKey').value='';
         state(r);
-        try{toast('تم حفظ إعداد صور الأصناف ✔','ok')}catch(e){}
+        try{toast('تم حفظ مفتاح صور الأصناف ✔','ok')}catch(e){}
       }catch(e){if(er)er.textContent=em(e)}
       finally{b.disabled=false}
     });
