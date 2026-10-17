@@ -2175,171 +2175,19 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       G('siImg').addEventListener('change',function(){readImg(this,function(d){img=d;G('siImgPrev').innerHTML='<img class="ic" src="'+E(img)+'">'})});
       try{ if(window.shSheetDrag)window.shSheetDrag(m) }catch(e){}
       G('siCancel').addEventListener('click',function(){m.remove()});
-      /* --- بحث أوتوماتيكي عن بيانات الصنف (يظهر للمدير فقط) --- */
+      /* --- العدسة الصغيرة جنب اسم الصنف: تفتح صور الصنف في جوجل على متصفح الموبايل --- */
       (function(){
         var gimg=G('siGimg');
-        if(gimg)gimg.addEventListener('click',openGooglePop);
-        /* ---------- نافذة «نتائج جوجل»: صور الصنف + تفاصيله ----------
-           بتتفتح من الزرار اللي جنب اسم الصنف (🔍 جوجل).
-           بتعرض صور منتجات من جوجل — تدوس على الصورة تتنزّل وتتحفظ في الصنف،
-           وفيها التفاصيل في مربع تقدر تنسخه أو تنقله للصنف مباشرة. */
-        function copyText(txt){
-          function manual(){
-            try{
-              var ta=document.createElement('textarea');ta.value=txt;
-              ta.style.position='fixed';ta.style.top='-1000px';ta.style.opacity='0';
-              document.body.appendChild(ta);ta.focus();ta.select();
-              var ok=document.execCommand('copy');ta.parentNode.removeChild(ta);return ok;
-            }catch(e){return false}
-          }
-          try{
-            if(navigator.clipboard&&navigator.clipboard.writeText)
-              return navigator.clipboard.writeText(txt).then(function(){return true}).catch(function(){return manual()});
-          }catch(e){}
-          return Promise.resolve(manual());
-        }
-        function toImgBytes(dataUrl){
-          try{
-            var p=String(dataUrl).split(',');
-            var mime=(p[0].match(/data:([^;]+)/)||[])[1]||'image/jpeg';
-            var bin=atob(p[1]||'');var u=new Uint8Array(bin.length);
-            for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-            return {blob:new Blob([u],{type:mime}),mime:mime};
-          }catch(e){return null}
-        }
-        function openGooglePop(){
-          var name=G('siT').value.trim();
-          if(name.length<2){G('siErr').textContent='اكتب اسم الصنف الأول';return}
-          var pop=document.createElement('div');pop.className='m';pop.style.zIndex='80';
-          pop.innerHTML='<div><b>🔍 نتائج البحث: '+E(name)+'</b>'
-            +'<div class="rating-note" id="shgpState">⏳ ببحث في جوجل عن صور الصنف…</div>'
-            +'<div id="shgpImgs"></div>'
-            +'<div id="shgpShareWrap" style="display:none"><button class="g" type="button" id="shgpShare">📤 حفظ / مشاركة الصورة</button><div class="rating-note" id="shgpShareNote"></div></div>'
-            +'<label for="shgpDet">التفاصيل</label>'
-            +'<textarea id="shgpDet" rows="6" readonly placeholder="⏳ بيجيب التفاصيل… (لو طوّلت، اضغط جواها وحدّد وانسخ)"></textarea>'
-            +'<div class="row"><button class="g" type="button" id="shgpCopy">📋 انسخ التفاصيل</button><button class="g" type="button" id="shgpUse">📥 استخدم التفاصيل والسعر</button></div>'
-            +'<button class="g" type="button" id="shgpOpen">🌐 افتح بحث صور جوجل في المتصفح</button>'
-            +'<div class="err" id="shgpErr"></div>'
-            +'<button class="g" type="button" id="shgpClose">إغلاق</button></div>';
-          /* بنحطها قبل محرر الصنف عشان زرار الرجوع في الأندرويد يقفل النافذة دي الأول */
-          document.body.insertBefore(pop,document.body.firstChild);
-          function P(id){return pop.querySelector('#'+id)}
-          var picked='';
-          pop.addEventListener('click',function(ev){if(ev.target===pop)pop.remove()});
-          P('shgpClose').addEventListener('click',function(){pop.remove()});
-          P('shgpOpen').addEventListener('click',function(){var u='https://www.google.com/search?tbm=isch&safe=active&q='+encodeURIComponent(name);try{ window.shOpenExternal?window.shOpenExternal(u):window.open(u,'_blank','noopener') }catch(e){try{location.href=u}catch(e2){}}});
-          /* التفاصيل من قاعدة بيانات الأدوية */
-          call('itemLookup',{name:name,pick:0}).then(function(r){
-            pop.__det=r||{};
-            var txt=String((r&&r.x)||'');
-            if(r&&r.price)txt='سعر الجمهور: '+r.price+' ج\n'+txt;
-            var dt=P('shgpDet');if(dt)dt.value=txt.trim();
-          }).catch(function(e){var dt=P('shgpDet');if(dt)dt.value='';var er=P('shgpErr');if(er)er.textContent=EM(e)});
-          P('shgpCopy').addEventListener('click',function(){
-            var dt=P('shgpDet');var txt=dt?String(dt.value||'').trim():'';
-            var er=P('shgpErr');
-            if(!txt){if(er)er.textContent='مفيش تفاصيل لسه';return}
-            if(er)er.textContent='';
-            copyText(txt).then(function(ok){try{window.toast&&window.toast(ok?'تم نسخ التفاصيل ✔':'مقدرتش أنسخ — حدّد النص جوه المربع وانسخه يدوي','ok')}catch(e){}});
-          });
-          P('shgpUse').addEventListener('click',function(){
-            var r=pop.__det||{};
-            try{ if(r.x)G('siX').value=r.x }catch(e){}
-            try{ if(r.price)G('siP').value=r.price }catch(e){}
-            try{window.toast&&window.toast('تم نقل التفاصيل والسعر ✔','ok')}catch(e){}
-            pop.remove();
-          });
-          /* صور الصنف */
-          var imgsEl=P('shgpImgs'),stEl=P('shgpState');
-          function setState(t){if(stEl)stEl.textContent=t}
-          call('imgSearch',{q:name}).then(function(r){
-            var list=(r&&r.imgs)||[];
-            if(!list.length){setState('مالقيتش صور للاسم ده — جرّب الاسم بالإنجليزي أو ارفع صورة من جهازك');return}
-            setState('اختار صورة للصنف'+(r.src==='google'?' (من صور جوجل)':' (مصدر صور عام — راجع إنها مناسبة)')+' — دوس عليها تتنزّل وتتحفظ في الصنف');
-            var h='<div class="imgpick">';
-            for(var i=0;i<list.length;i++)h+='<button type="button" class="imgpick-i" data-i="'+i+'" title="استخدم الصورة دي"><img src="'+E(list[i].t||list[i].o)+'" alt="" loading="lazy"></button>';
-            h+='</div>';
-            imgsEl.innerHTML=h;
-            var bs=imgsEl.querySelectorAll('.imgpick-i');
-            for(var k=0;k<bs.length;k++)(function(b){
-              var x=list[Number(b.getAttribute('data-i'))||0]||null;
-              /* الضغط المطوّل على الصورة = تحميلها على الجهاز */
-              var lp=null,lpFired=false;
-              function lpCancel(){ if(lp){clearTimeout(lp);lp=null} }
-              b.addEventListener('touchstart',function(){ lpFired=false; lpCancel(); lp=setTimeout(function(){ lp=null; lpFired=true; if(x)try{saveImgNow(x)}catch(e){} },550); },{passive:true});
-              b.addEventListener('touchend',lpCancel);
-              b.addEventListener('touchcancel',lpCancel);
-              b.addEventListener('touchmove',lpCancel,{passive:true});
-              b.addEventListener('click',function(){
-                if(lpFired){lpFired=false;return}
-                if(!x)return;
-                setState('⏳ بنزّل الصورة وأضغطها…');
-                call('imgFetch',{urls:[x.o,x.t]}).then(function(r2){
-                  fitImg(r2.img,function(d){
-                    if(!d){setState('مقدرتش أصغّر الصورة دي، جرّب واحدة تانية');return}
-                    img=d;G('siImgPrev').innerHTML='<img class="ic" src="'+E(d)+'">';
-                    picked=d;
-                    var all=imgsEl.querySelectorAll('.imgpick-i');
-                    for(var z=0;z<all.length;z++)all[z].classList.remove('on');
-                    b.classList.add('on');
-                    setState('✅ الصورة اتحفظت في الصنف — دوس 💾 حفظ تحت');
-                    var sw=P('shgpShareWrap');if(sw)sw.style.display='block';
-                  });
-                }).catch(function(e){setState(EM(e))});
-              });
-            })(bs[k]);
-          }).catch(function(e){setState(EM(e))});
-          /* حفظ الصورة: الأول جسر الأندرويد (استوديو الصور)، وبعدين قائمة المشاركة */
-          function saveDataUrl(d){
-            var sn=P('shgpShareNote');
-            try{
-              if(window.ShehabAndroid&&typeof ShehabAndroid.saveImage==='function'){
-                var rr=ShehabAndroid.saveImage(d,String(name||'image'));
-                if(String(rr)==='ok'){ setState('✅ اتحفظت في صور الجهاز'); try{window.toast&&window.toast('اتحفظت في الاستوديو ✔','ok')}catch(e){} return; }
-              }
-            }catch(e){}
-            try{
-              var ob=toImgBytes(d);
-              if(ob&&navigator.canShare){
-                var f=new File([ob.blob],String(name||'image')+'.jpg',{type:ob.mime});
-                if(navigator.canShare({files:[f]})){
-                  navigator.share({files:[f],title:name}).catch(function(){});
-                  if(sn)sn.textContent='اختار «حفظ في الصور» من قائمة المشاركة.';
-                  setState('اختار «حفظ في الصور»');
-                  return;
-                }
-              }
-            }catch(e){}
-            if(sn)sn.textContent='الحفظ المباشر مش مدعوم في النسخة الحالية — دوس «🌐 حمّل الصورة من المتصفح».';
-            setState('مقدرتش أحفظها هنا — دوس 🌐');
-          }
-          function saveImgNow(x){
-            setState('⏳ بجهّز الصورة للتحميل…');
-            call('imgFetch',{urls:[x.o,x.t]}).then(function(r2){
-              var d=r2&&r2.img; if(!d){setState('مقدرتش أجيب الصورة دي');return}
-              saveDataUrl(d);
-            }).catch(function(e){setState(EM(e))});
-          }
-          var sh=P('shgpShare');
-          if(sh)sh.addEventListener('click',function(){
-            var er=P('shgpErr'),sn=P('shgpShareNote');
-            if(!picked){if(er)er.textContent='اختار صورة الأول';return}
-            if(er)er.textContent='';
-            try{
-              var o=toImgBytes(picked);
-              if(o&&navigator.canShare){
-                var f=new File([o.blob],(name||'image')+'.jpg',{type:o.mime});
-                if(navigator.canShare({files:[f]})){
-                  navigator.share({files:[f],title:name}).catch(function(){});
-                  if(sn)sn.textContent='اختار «حفظ في الصور» أو ابعت الصورة لنفسك.';
-                  return;
-                }
-              }
-            }catch(e){}
-            if(sn)sn.textContent='حفظ الصورة في الجهاز مش مدعوم في نسخة التطبيق الحالية — الصورة بتتحفظ في الصنف نفسه. لو محتاجها بره، استخدم «افتح بحث صور جوجل» وحدّث البرنامج.';
-          });
-        }
-
+        if(!gimg)return;
+        gimg.addEventListener('click',function(){
+          var t=((G('siT')&&G('siT').value)||'').trim();
+          var er=G('siErr');
+          if(t.length<2){ if(er)er.textContent='اكتب اسم الصنف الأول'; return }
+          if(er)er.textContent='';
+          var u='https://www.google.com/search?tbm=isch&safe=active&q='+encodeURIComponent(t);
+          try{ if(window.shOpenExternal){ window.shOpenExternal(u); return } }catch(e){}
+          try{ location.href=u }catch(e){}
+        });
       })();
       G('siSave').addEventListener('click',async function(){
         var btn=this; if(btn.disabled)return;
@@ -3800,17 +3648,6 @@ button.sec-admin-btn{background:var(--b,#0b2a6f);color:#fff;border:0;font-size:1
 html.dark button.sec-admin-btn{background:var(--b,#0b2a6f);color:#fff;border:1px solid var(--b,#0b2a6f);box-shadow:0 10px 22px -12px #000}
 button.share-app-btn{box-shadow:0 8px 16px -8px rgba(11,42,111,.45)}
 html.dark button.share-app-btn{box-shadow:0 8px 16px -8px #000}
-/* اختيار صورة الصنف من صور جوجل: شبكة مصغرات جوه شاشة الصنف */
-.imgpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin:8px 0}
-button.imgpick-i{position:relative;padding:0;margin:0;border:1.5px solid var(--line,#e8e2d6);border-radius:12px;background:#fff;height:84px;overflow:hidden;display:grid;place-items:center;cursor:pointer}
-button.imgpick-i::before{content:'🖼️';font-size:26px;opacity:.3}
-button.imgpick-i img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#fff}
-button.imgpick-i:active{border-color:var(--b,#0b2a6f)}
-button.imgpick-i.on{border-color:var(--b,#0b2a6f);box-shadow:inset 0 0 0 3px var(--b,#0b2a6f)}
-button.imgpick-i.on::after{content:'✓';position:absolute;top:2px;left:2px;z-index:2;background:var(--b,#0b2a6f);color:#fff;font-size:12px;font-weight:800;width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%}
-textarea#shgpDet{font-size:13px;line-height:1.6;background:#FBF9F4}
-html.dark textarea#shgpDet{background:#101a30;color:#e8eefc}
-html.dark button.imgpick-i{background:#1b2540;border-color:#2c3b5f}
 /* شارات العروض (الخصم الوقتي/المتبقي) بقت فوق الصورة نفسها — مفيش شريط أبيض تحت الكارت ولا اهتزاز */
 .hero-slide .hero-card{min-height:0}
 </style>
