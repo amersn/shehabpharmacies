@@ -59,7 +59,7 @@ function lsGet(a){try{const s=localStorage.getItem('shc_'+a);if(!s)return null;c
 function lsSet(a,o){try{const s=JSON.stringify(o);if(s&&s.length<2500000)localStorage.setItem('shc_'+a,s)}catch(e){}}
 function lsDel(a){try{localStorage.removeItem('shc_'+a)}catch(e){}}
 function cGet(a){return RC[a]||lsGet(a)}
-function bustCaches(a){const cls=[];if(['corder','cartOrder','add','upd','cancelOrder','deleteOrder','reset','broadcast'].indexOf(a)>-1)cls.push('list','mine');if(['osave','odel','feature','rate','offerToSec'].indexOf(a)>-1)cls.push('offers');if(['secSave','secItemSave','secDel','secSetActive','secItemMove','secItemDel','offerToSec','rateItem'].indexOf(a)>-1)cls.push('sections');if(a=='mine'||a=='list'||a=='offers'||a=='sections')cls.push(a);if(cls.indexOf('offers')>-1||cls.indexOf('sections')>-1){try{window.__shBustHome&&window.__shBustHome()}catch(e){}}cls.forEach(k=>{delete RC[k];lsDel(k)})}
+function bustCaches(a){const cls=[];if(['corder','cartOrder','add','upd','cancelOrder','deleteOrder','reset','broadcast'].indexOf(a)>-1)cls.push('list','mine');if(['osave','odel','feature','rate','offerToSec','secItemOffer'].indexOf(a)>-1)cls.push('offers');if(['secSave','secItemSave','secDel','secSetActive','secItemMove','secItemDel','secItemOffer','offerToSec','rateItem'].indexOf(a)>-1)cls.push('sections');if(a=='mine'||a=='list'||a=='offers'||a=='sections')cls.push(a);if(cls.indexOf('offers')>-1||cls.indexOf('sections')>-1){try{window.__shBustHome&&window.__shBustHome()}catch(e){}}cls.forEach(k=>{delete RC[k];lsDel(k)})}
 function refreshMine(){bustCaches('mine');mineV()}
 async function callC(a,o){const e=cGet(a);if(e&&Date.now()-e.t<45000)return e.v;try{const v=await call(a,o);const ent={t:Date.now(),v};RC[a]=ent;lsSet(a,ent);return v}catch(x){if(e)return e.v;throw x}}
 /* perf: نداء واحد لبيانات الرئيسية (تحقّق الجلسة + العروض + الأقسام + المفضلة) — بدل 4 نداءات، لتقليل زمن الفتح */
@@ -1727,6 +1727,35 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       for(var j=0;j<bs2.length;j++)bs2[j].disabled=false;
     }
   }
+  /* زرار «في العروض»: الصنف هو المحور — يندرج في العروض أو يخرج منها بنفس الـ ID */
+  function shOfferToggleBtn(m){
+    var b=document.createElement('button');
+    b.type='button';b.className='g';
+    var paint=function(){ b.textContent=m.off?'🎁 شيل من العروض':'🎁 ضيف للعروض' };
+    paint();
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(b.disabled)return;
+      var want=!m.off;
+      if(!confirm(want?'ضيف الصنف «'+(m.t||'')+'» للعروض؟':'شيل الصنف «'+(m.t||'')+'» من العروض؟ (هيفضل في أقسامه عادي)'))return;
+      b.disabled=true;
+      (async function(){
+        try{
+          await call('secItemOffer',{id:m.id,on:want?'1':''});
+          m.off=want;
+          paint();
+          TO(want?'الصنف بقى في العروض 🎁':'الصنف اتشال من العروض ✔','ok');
+          try{bustCaches('secItemOffer')}catch(e){}
+          try{OF=await callC('offers')}catch(e){}
+          try{if(typeof drawHero==='function')drawHero()}catch(e){}
+          try{if(typeof loadHomeSections==='function')loadHomeSections()}catch(e){}
+          try{if(V==='off'&&typeof drawO==='function')drawO()}catch(e){}
+        }catch(x){ TO(EM(x),'bad') }
+        finally{ b.disabled=false }
+      })();
+    });
+    return b;
+  }
   async function shPublishToChannel(btn,kind,id){
     if(btn)btn.disabled=true;
     try{var r=await call('tgChannelTest',{id:id,kind:kind});if(r&&r.ok)TO('تم النشر على قناة تيليجرام ✔','ok');else TO('فشل النشر'+((r&&r.last)?': '+r.last:''),'bad')}
@@ -1795,6 +1824,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         acts.appendChild(mkItemAct('📥 نقل إلى أقسام',function(){try{offerMoveToSec(m.id)}catch(e){}}));
         acts.appendChild(mkItemAct('🗑 حذف',function(){shDeleteCurrent('offer',m.id)}));
       }else{
+        acts.appendChild(shOfferToggleBtn(m));
         acts.appendChild(mkItemAct('✏️ تعديل',function(){try{secItemEditor(shItemSecId(opts.secId,m.id),m.id)}catch(e){}}));
         acts.appendChild(mkItemAct('📥 نقل إلى قسم',function(){try{secItemMoveDialog(m.id)}catch(e){}}));
         acts.appendChild(mkItemAct('🗑 حذف',function(){shDeleteCurrent('item',m.id)}));
@@ -1819,7 +1849,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   }
   try{window.shItemCardHTML=shItemCardHTML;window.shWireItemCard=shWireItemCard}catch(e){}
   function shItemMeta(x){
-    return {id:x.id,t:x.t,x:x.x,p:x.p,w:x.w,ic:x.ic,oo:!!x.oo,q:x.q,avg:x.avg,count:x.count,mine:x.mine};
+    return {id:x.id,t:x.t,x:x.x,p:x.p,w:x.w,ic:x.ic,oo:!!x.oo,off:!!x.off,q:x.q,avg:x.avg,count:x.count,mine:x.mine};
   }
   function shItemSecId(secId,id){
     if(secId)return secId;
@@ -3909,8 +3939,10 @@ html.dark #iaList .ia-sec{background:#1a2440;color:#bcd0ff}
 #iaList .ia-tag{border-radius:9px;padding:2px 8px;font-size:11.5px;font-weight:800}
 #iaList .ia-tag.off{background:#eceff5;color:#5a6478}
 #iaList .ia-tag.oo{background:#ffe3e3;color:#a30000}
+#iaList .ia-tag.gift{background:#e3f7e9;color:#0b6b33}
 html.dark #iaList .ia-tag.off{background:#26304a;color:#b9c4da}
 html.dark #iaList .ia-tag.oo{background:#4a1f1f;color:#ffb3b3}
+html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 #iaList .ia-empty{color:var(--muted,#7b8495);font-weight:700;text-align:center;padding:16px 6px}
 </style>
 
@@ -3943,6 +3975,7 @@ html.dark #iaList .ia-tag.oo{background:#4a1f1f;color:#ffb3b3}
     var badges=secs.length?secs.map(function(s){return '<span class="ia-sec">🗂️ '+E2(s.name)+'</span>'}).join(''):'<span class="ia-sec none">مفيش قسم</span>';
     var tags='';
     if(it.active===false)tags+='<span class="ia-tag off">مخفي</span>';
+    if(it.off)tags+='<span class="ia-tag gift">🎁 في العروض</span>';
     if(it.oo)tags+='<span class="ia-tag oo">بالطلب</span>';
     return '<div class="ia-card" data-id="'+E2(it.id)+'">'
       +(it.ic?('<img class="ia-img" src="'+E2(it.ic)+'" alt="" loading="lazy">'):'<div class="ia-img">💊</div>')
