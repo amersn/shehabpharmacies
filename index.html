@@ -2736,6 +2736,7 @@ html.dark .pt-log{border-color:#232d49}
   function stepsHTML(o){
     var st=String(o.s||'new');
     if(st==='unavailable')return '<div class="ord-steps"><span class="ord-step bad on">✕ '+esc((ST.unavailable||['مش متوفر'])[0])+'</span></div>';
+    if(st==='cancelled')return '<div class="ord-steps"><span class="ord-step bad on">✕ '+esc((ST.cancelled||['ملغي'])[0])+'</span></div>';
     var flow=FLOW.slice();
     if(o.m!=='delivery')flow=flow.filter(function(x){return x!=='delivering'});
     var cur=flow.indexOf(st); if(cur<0)cur=0;
