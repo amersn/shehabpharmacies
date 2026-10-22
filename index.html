@@ -4144,9 +4144,14 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 .sh-save-row{display:flex;gap:8px;margin-top:10px}
 .sh-save-row .g{min-width:0;padding:12px 10px;font-size:17px;border-radius:14px}
 .sh-close-x{position:absolute;top:12px;left:12px;width:32px;height:32px;min-width:32px;border-radius:50%;border:1px solid var(--line,#E6DFD2);background:#fff;color:#4a5a75;font-size:14px;line-height:1;padding:0;z-index:6;box-shadow:0 1px 5px rgba(11,42,111,.18);cursor:pointer}
-.sh-md-bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.sh-md-bar button{flex:1 1 44%;min-width:0;font-size:13px;padding:10px 6px;border-radius:12px;text-align:center;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sh-md-bar button[title*="حفظ"]{flex:1 1 100%;font-size:17px;padding:12px 10px}
+/* شاشة الأوردر: شريط زراير فيكتور — صف رباعي مربعات زيزي الحجم */
+.sh-md-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.sh-md-bar button{flex:none;height:46px;min-width:0;font-size:14px;padding:0;border-radius:12px;text-align:center;margin:0;display:inline-flex;align-items:center;justify-content:center}
+.sh-md-bar button.sh-vbtn svg,.sh-md-bar button svg{width:20px;height:20px}
+.sh-bon{background:#fff;border:1.5px dashed #c9b892;border-radius:12px;padding:10px 12px!important}
+.sh-bon .bon-r{display:flex;justify-content:space-between;gap:10px;margin:6px 0;font-size:14px}
+.sh-bon .bon-hr{border-top:1px dashed #c9b892;margin:8px 0}
+.sh-md-bar button[title*="حفظ"]{flex:none}
 /* سلايدر العروض: حركته جوه الصندوق بس — مش بيهز الشاشة */
 .hero-slide{overflow:hidden;border-radius:16px}
 .hero-slide .hero-card{transition:transform .22s ease,opacity .22s ease}
@@ -4162,13 +4167,23 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
 <script>
 /* ===== زرار إكس فوق في أي نافذة + زراير صغيرة متوزعة (كارت الصنف وشاشة الحالة) ===== */
 (function(){
+  function escx2(v){try{if(typeof esc==="function")return esc(v)}catch(e){}return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+  /* أيقونات فيكتور ملونة لشاشة الأوردر */
+  var SHOV={
+    save:'<svg viewBox="0 0 24 24"><path fill="#0b2a6f" d="M5 2h11.6L21 6.4V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#ffffff" d="M6.5 2h8.4v6.3a1.2 1.2 0 0 1-1.2 1.2H7.7a1.2 1.2 0 0 1-1.2-1.2z"/><path fill="#0b2a6f" d="M8.7 3.2h2.4v3.5H8.7z"/><path fill="#ffffff" d="M6 12h12v8H6z"/><path fill="#9fb7e0" d="M8 14.2h8v1.1H8zm0 2.4h8v1.1H8zm0 2.4h5v1.1H8z"/></svg>',
+    print:'<svg viewBox="0 0 24 24"><path fill="#3e5f86" d="M6 3h12v5H6z"/><path fill="#3e5f86" d="M2 10.5A2.5 2.5 0 0 1 4.5 8h15A2.5 2.5 0 0 1 22 10.5v4a2.5 2.5 0 0 1-2.5 2.5H19v-1.6H5V17h-.5A2.5 2.5 0 0 1 2 14.5z"/><circle cx="18.6" cy="10.7" r="1.1" fill="#7cf295"/><path fill="#eef3fa" d="M5 15h14v7H5z"/><path stroke="#9db2cc" stroke-width="1.2" stroke-linecap="round" d="M8 17.4h8M8 19.6h8"/></svg>',
+    img:'<svg viewBox="0 0 24 24" fill="none" stroke="#1e5fd6" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5-9 9"/></svg>',
+    play:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#2e9e4f"/><path fill="#fff" d="M10 8.2l7 3.8-7 3.8z"/></svg>',
+    wa:'<svg viewBox="0 0 24 24"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.24-.596-.48-.501-.66-.511-.174-.008-.372-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>',
+    del:'<svg viewBox="0 0 24 24"><path fill="#d32f2f" d="M9 3h6l1 1h4a.9.9 0 0 1 0 1.8h-.9l-.85 11.9A2.2 2.2 0 0 1 16.05 20H7.95a2.2 2.2 0 0 1-2.2-2.3L4.9 6.8H4A.9.9 0 0 1 4 5h4z"/><path fill="#fff" opacity=".5" d="M10 9.5h1.6v8.6H10zm2.4 0H14v8.6h-1.6z"/></svg>'
+  };
+  function setIc(bt,svg,t){bt.title=t;bt.setAttribute("aria-label",t);bt.textContent="";var tp=document.createElement("span");tp.innerHTML=svg;while(tp.firstChild)bt.appendChild(tp.firstChild)}
   function dec(bt){
     var tx=(bt.textContent||"").trim(); if(!tx)return;
-    if(tx.indexOf("حفظ")>-1){ bt.title=tx; bt.textContent="💾" }
-    else if(tx==="🖨️ طباعة البون"){ bt.title=tx; bt.textContent="🖨️" }
-    else if(tx==="عرض الصورة"){ bt.title=tx; bt.textContent="🖼️" }
-    else if(tx.indexOf("تشغيل تسجيل")>-1){ bt.title=tx; bt.textContent="▶️" }
-    else if(tx.indexOf("صورة مرفقة")>-1){ bt.title=tx; bt.textContent="🖼️" }
+    if(tx.indexOf("حفظ")>-1){ setIc(bt,SHOV.save,tx) }
+    else if(tx.indexOf("طباعة")>-1){ setIc(bt,SHOV.print,tx) }
+    else if(tx==="عرض الصورة"||tx.indexOf("صورة مرفقة")>-1){ setIc(bt,SHOV.img,tx) }
+    else if(tx.indexOf("تشغيل تسجيل")>-1){ setIc(bt,SHOV.play,tx) }
   }
   function ensureX(m){
     if(!m||m.nodeType!==1||!m.classList.contains("m"))return;
@@ -4187,7 +4202,7 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
       var t=(sv[s2].textContent||"").replace(/\s+/g,"");
       if(t==="إلغاء")sv[s2].style.display="none";
     }
-    /* شاشة الحالة (الأوردر): الزراير صغيرة جنب بعض */
+    /* شاشة الأوردر: زراير فيكتور جنب بعض + واتساب + حذف الطلب */
     if(m.id==="md"){
       try{
         var btns=[],ch=panel.children;
@@ -4195,6 +4210,55 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
           var el=ch[k];
           if(el&&el.tagName==="BUTTON"&&!el.classList.contains("sh-close-x"))btns.push(el);
         }
+        var oid="";
+        for(var kb=0;kb<btns.length;kb++){
+          var oc=btns[kb].getAttribute("onclick")||"";
+          var mtoc=oc.match(/upd\('([^']+)'/);
+          if(mtoc){oid=mtoc[1];break}
+        }
+        /* رقم الطلبي مش مطلوب من العميل — مطلوب من الصيدلي أو المدير */
+        (function(){
+          if(!oid)return;
+          var _wa=null,_del=null;
+          if(!panel.querySelector(".sh-ord-wa")){
+            var wab=document.createElement("button");wab.type="button";wab.className="g sh-vbtn sh-ord-wa";
+            var tpw=document.createElement("span");tpw.innerHTML=SHOV.wa;while(tpw.firstChild)wab.appendChild(tpw.firstChild);
+            wab.title="تواصل واتساب";wab.setAttribute("aria-label","تواصل واتساب");
+            wab.addEventListener("click",function(){
+              var o=null;try{o=(typeof O!=="undefined"&&O)?O.find(function(x){return String(x.id)===String(oid)}):null}catch(_e){}
+              var cust=false;try{cust=(typeof S!=="undefined"&&S.r==="customer")}catch(_e){}
+              var num="";
+              if(!cust&&o&&o.p)num="20"+String(o.p).replace(/\D/g,"").replace(/^0+/,"");
+              if(!num)num="201154017470";
+              var t=(cust?"بخصوص طلبي رقم ":"بخصوص الطلب رقم ")+oid;
+              var u="https://wa.me/"+num+"?text="+encodeURIComponent(t);
+              try{window.open(u,"_blank","noopener")}catch(e){try{location.href=u}catch(_e){}}
+            });
+            panel.appendChild(wab);btns.push(wab);
+          }
+          var staff=true;try{staff=(typeof S!=="undefined"&&S.r&&S.r!=="customer")}catch(_e){}
+          if(staff&&!panel.querySelector(".sh-ord-del")){
+            var dlb=document.createElement("button");dlb.type="button";dlb.className="g sh-vbtn sh-ord-del";
+            var tpd=document.createElement("span");tpd.innerHTML=SHOV.del;while(tpd.firstChild)dlb.appendChild(tpd.firstChild);
+            dlb.title="حذف الطلب";dlb.setAttribute("aria-label","حذف الطلب");
+            dlb.addEventListener("click",function(){
+              if(!confirm("حذف الطلب نهائيًا؟"))return;
+              dlb.disabled=true;
+              try{
+                call("deleteOrder",{id:oid}).then(function(){
+                  try{m.remove()}catch(_e){}
+                  try{bustCaches("deleteOrder")}catch(_e){}
+                  try{if(typeof toast==="function")toast("تم حذف الطلب ✔","ok");else if(typeof T==="function")T("تم حذف الطلب ✔","ok")}catch(_e){}
+                  try{if(V==="list")draw()}catch(_e){}
+                }).catch(function(x){
+                  dlb.disabled=false;
+                  try{toast(em(x),"bad")}catch(_e){try{alert(em(x))}catch(e2){}}
+                });
+              }catch(_e){dlb.disabled=false;try{toast(em(_e),"bad")}catch(e2){}}
+            });
+            panel.appendChild(dlb);btns.push(dlb);
+          }
+        })();
         if(btns.length>1){
           var bar=document.createElement("div");bar.className="sh-md-bar";
           var hint=panel.querySelector("small");
@@ -4204,6 +4268,32 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
       }catch(e){}
     }
   }
+  /* معاينة الريسيت بدل فتح الطباعة على طول + زرار مشاركة */
+  try{
+    var basePrintOne=window.printOneOrder;
+    window.printOneOrder=function(id){
+      try{
+        var o=(typeof O!=="undefined"&&O)?O.find(function(x){return String(x.id)===String(id)}):null;
+        if(!o){try{basePrintOne(id)}catch(e){}return}
+        var t=ST[o.s]||ST.new;
+        var rows=[["رقم الطلب",o.id],["الصنف",o.i],["العميل",o.c],["التليفون",o.p],["الحالة",t[0]],["الطريقة",o.m=="delivery"?"توصيل":"استلام من الصيدلية"]];
+        if(o.a)rows.push(["العنوان",o.a]);
+        if(o.total)rows.push(["الإجمالي",o.total+" جنيه"]);
+        rows.push(["التاريخ",o.d?new Date(o.d).toLocaleString("ar-EG"):""]);
+        var body=rows.map(function(r){return '<div class="bon-r"><span>'+escx2(r[0])+'</span><b>'+(r[0]==="التليفون"?'<span dir="ltr">'+escx2(r[1])+'</span>':escx2(r[1]))+'</b></div>'}).join('');
+        var m2=document.createElement("div");m2.className="m";m2.id="shBon";
+        m2.innerHTML='<div style="position:relative"><b style="display:block;text-align:center;font-size:18px">صيدليات شهاب</b><small style="display:block;text-align:center;color:#8a7a5c;margin-bottom:8px">بون الطلب — معاينة</small><div class="sh-bon">'+body+'<div class="bon-hr"></div><div style="text-align:center;color:#667">شكرًا لتعاملكم معنا</div></div><div class="row" style="margin-top:10px"><button class="g" id="shBonShare" style="flex:1" type="button">📤 مشاركة</button><button class="g" id="shBonPrint" style="flex:1" type="button">🖨️ طباعة</button></div></div>';
+        document.body.appendChild(m2);
+        var text=rows.map(function(r){return r[0]+": "+r[1]}).join("\n");
+        G("shBonShare").addEventListener("click",function(){
+          if(navigator.share){navigator.share({title:"بون الطلب "+o.id,text:"صيدليات شهاب\n"+text}).catch(function(){})}
+          else{var u="https://wa.me/?text="+encodeURIComponent("صيدليات شهاب\n"+text);try{window.open(u,"_blank","noopener")}catch(e){}}
+        });
+        G("shBonPrint").addEventListener("click",function(){try{m2.remove()}catch(e){};try{basePrintOne(id)}catch(e){}});
+      }catch(e){try{basePrintOne(id)}catch(_e){}}
+    };
+  }catch(e){}
+
   function scan(m){ try{ ensureX(m) }catch(e){} }
   try{ var es=document.querySelectorAll(".m"); for(var i=0;i<es.length;i++)scan(es[i]) }catch(e){}
   try{
