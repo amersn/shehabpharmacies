@@ -1615,8 +1615,12 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         if(!got||!SEC_READY){ try{ var ssg=cGet('sections'); if(ssg&&ssg.v&&ssg.v.length&&!SEC_READY){SEC_CACHE=ssg.v;SEC_READY=true;got=true} }catch(e){} }
         if(got){
           try{drawHero()}catch(e){}
-          renderHomeSections(box,SEC_CACHE);
-          try{shSecChips(box,SEC_CACHE)}catch(e){}
+          if(Array.isArray(SEC_CACHE)&&SEC_CACHE.length){
+            renderHomeSections(box,SEC_CACHE);
+            try{shSecChips(box,SEC_CACHE)}catch(e){}
+          }else{
+            box.innerHTML='<div class="card">سجّل دخول عشان تشوف كل الأقسام والمفضلة 👇</div><button class="g" onclick="authV()">🧾 دخول / حساب جديد</button>';
+          }
         }else{
           box.innerHTML='<div class="card">سجّل دخول عشان تشوف كل العروض والأقسام والمفضلة 👇</div><button class="g" onclick="authV()">🧾 دخول / حساب جديد</button>';
           var _of0=G('of'); if(_of0&&!OF.length)_of0.innerHTML='<div class="card">🎁 سجّل دخول عشان تشوف العروض</div>';
@@ -4372,7 +4376,7 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
 
   /* ===== زائر: طلباتي و حسابي و طلب و جو شهري و منبه الدواء = طلب تسجيل دخول ===== */
   try{ var _shNavGoPrev=navGo; navGo=function(t){
-      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      var _lg=false; try{_lg=!!(typeof S!=='undefined'&&S&&S.t)}catch(e){}
       if(!_lg&&(t==='mine'||t==='profile')){
         try{V=(t==='mine')?'mine':'profile'}catch(e){}
         app('<h2>🔒 لازم تسجل دخول</h2><div class="card">'+(t==='mine'?'سجّل دخول عشان تشوف طلباتك وتتبعها خطوة بخطوة.':'سجّل دخول عشان تدير بياناتك وتشوف إعداداتك.')+'</div><button onclick="authV()">🧾 دخول / حساب جديد</button><button class="g" onclick="try{homeV()}catch(e){}">🏠 الرئيسية</button>');
@@ -4382,22 +4386,22 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
       return _shNavGoPrev.apply(this,arguments);
   } }catch(e){}
   try{ var _shLoadOPrev=loadO; loadO=function(){
-      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      var _lg=false; try{_lg=!!(typeof S!=='undefined'&&S&&S.t)}catch(e){}
       if(!_lg){ return }
       return _shLoadOPrev.apply(this,arguments);
   } }catch(e){}
   try{ var _shOrdPrev=ordV; ordV=function(){
-      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      var _lg=false; try{_lg=!!(typeof S!=='undefined'&&S&&S.t)}catch(e){}
       if(!_lg){ try{window.__shGuestOrder&&window.__shGuestOrder()}catch(e){} return }
       return _shOrdPrev.apply(this,arguments);
   } }catch(e){}
   try{ var _shMoPrev=monthlyV; monthlyV=function(){
-      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      var _lg=false; try{_lg=!!(typeof S!=='undefined'&&S&&S.t)}catch(e){}
       if(!_lg){ try{window.__shGuestOrder&&window.__shGuestOrder()}catch(e){} return }
       return _shMoPrev.apply(this,arguments);
   } }catch(e){}
   try{ var _shCartAddPrev=cartAdd; cartAdd=function(){
-      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      var _lg=false; try{_lg=!!(typeof S!=='undefined'&&S&&S.t)}catch(e){}
       if(!_lg){ try{window.__shGuestOrder&&window.__shGuestOrder()}catch(e){} return }
       try{ var ce=gg('cartError'); if(ce)ce.textContent='' }catch(_e){}
       return _shCartAddPrev.apply(this,arguments);
