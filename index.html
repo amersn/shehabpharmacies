@@ -4168,6 +4168,7 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
 /* ===== زرار إكس فوق في أي نافذة + زراير صغيرة متوزعة (كارت الصنف وشاشة الحالة) ===== */
 (function(){
   function escx2(v){try{if(typeof esc==="function")return esc(v)}catch(e){}return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+  function gg(id){return document.getElementById(id)}
   /* أيقونات فيكتور ملونة لشاشة الأوردر */
   var SHOV={
     save:'<svg viewBox="0 0 24 24"><path fill="#0b2a6f" d="M5 2h11.6L21 6.4V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#ffffff" d="M6.5 2h8.4v6.3a1.2 1.2 0 0 1-1.2 1.2H7.7a1.2 1.2 0 0 1-1.2-1.2z"/><path fill="#0b2a6f" d="M8.7 3.2h2.4v3.5H8.7z"/><path fill="#ffffff" d="M6 12h12v8H6z"/><path fill="#9fb7e0" d="M8 14.2h8v1.1H8zm0 2.4h8v1.1H8zm0 2.4h5v1.1H8z"/></svg>',
@@ -4235,18 +4236,18 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
         m2.innerHTML='<div style="position:relative"><b style="display:block;text-align:center;font-size:18px">صيدليات شهاب</b><small style="display:block;text-align:center;color:#8a7a5c;margin-bottom:8px">بون الطلب — معاينة</small><div class="sh-bon">'+body+'<div class="bon-hr"></div><div style="text-align:center;color:#667">شكرًا لتعاملكم معنا</div></div><div class="row" style="margin-top:10px"><button class="g" id="shBonShare" style="flex:1" type="button">📤 مشاركة</button><button class="g" id="shBonPrint" style="flex:1" type="button">🖨️ طباعة</button></div></div>';
         document.body.appendChild(m2);
         var text=rows.map(function(r){return r[0]+": "+r[1]}).join("\n");
-        G("shBonShare").addEventListener("click",function(){
+        gg("shBonShare").addEventListener("click",function(){
           if(navigator.share){navigator.share({title:"بون الطلب "+o.id,text:"صيدليات شهاب\n"+text}).catch(function(){})}
           else{var u="https://wa.me/?text="+encodeURIComponent("صيدليات شهاب\n"+text);try{window.open(u,"_blank","noopener")}catch(e){}}
         });
-        G("shBonPrint").addEventListener("click",function(){try{m2.remove()}catch(e){};try{basePrintOne(id)}catch(e){}});
+        gg("shBonPrint").addEventListener("click",function(){try{m2.remove()}catch(e){};try{basePrintOne(id)}catch(e){}});
       }catch(e){try{basePrintOne(id)}catch(_e){}}
     };
   }catch(e){}
 
   /* شاشة الأوردر: شريط واحد دائم — تمسح أي نسخ متكررة قبل البناء (بدون زراير متناثرة تحت) */
   function shOrdBarRebuild(){
-    var md=G("md"); if(!md)return;
+    var md=gg("md"); if(!md)return;
     var panel=md.firstElementChild; if(!panel)return;
     var ob2=panel.querySelector(".sh-md-bar");
     if(ob2){while(ob2.firstChild)panel.insertBefore(ob2.firstChild,ob2);ob2.remove()}
