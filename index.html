@@ -150,7 +150,7 @@ m.innerHTML=`<div><div class="swipe-handle" title="اسحب لأسفل للإغ�
 const dy=k=>{const d=new Date(Date.now()+k*864e5),p=n=>String(n).padStart(2,'0'),t=($('me').value||'T17:00').split('T')[1];$('me').value=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${t}`};
 async function upd(id,b){try{b.disabled=1;const s=$('ms').value,e=$('me').value,sr=$('sr').value;await call('upd',{id,s,e,sr});const md=$('md');if(md)md.remove();const o=(O||[]).find(x=>String(x.id)==String(id));if(o){o.s=s;o.e=e;o.sr=sr}bustCaches('list');if(V=='list')draw()}catch(x){alert(em(x));b.disabled=0}}
 /* Swipe a bottom sheet down from its top to close it (any user, no close button). */
-function attachSwipeClose(m){try{const panel=m.firstElementChild;if(!panel)return;let sy=0,on=false;m.addEventListener('touchstart',e=>{const t=e.touches[0];if(!t)return;sy=t.clientY;on=(panel.scrollTop||0)<=0;panel.style.transition=''},{passive:true});m.addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0];if(!t)return;const dy=t.clientY-sy;if(dy>0){panel.style.transform='translateY('+dy+'px)';if(e.cancelable)e.preventDefault()}},{passive:false});const end=e=>{if(!on)return;on=false;const t=(e.changedTouches&&e.changedTouches[0])||{clientY:sy};const dy=t.clientY-sy;panel.style.transition='transform .18s ease';if(dy>90){panel.style.transform='translateY(105%)';setTimeout(()=>{try{m.remove()}catch(x){}},180)}else{panel.style.transform=''}};m.addEventListener('touchend',end);m.addEventListener('touchcancel',end)}catch(e){}}
+function attachSwipeClose(m){try{const panel=m.firstElementChild;if(!panel)return;let sy=0,on=false;m.addEventListener('touchstart',e=>{const t=e.touches[0];if(!t)return;sy=t.clientY;on=(panel.scrollTop||0)<=0;try{if(window.shPullLock)window.shPullLock(!0)}catch(_x){};panel.style.transition=''},{passive:true});m.addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0];if(!t)return;const dy=t.clientY-sy;if(dy>0){panel.style.transform='translateY('+dy+'px)';if(e.cancelable)e.preventDefault()}},{passive:false});const end=e=>{if(!on)return;on=false;try{if(window.shPullLock)window.shPullLock(!1)}catch(_x){};const t=(e.changedTouches&&e.changedTouches[0])||{clientY:sy};const dy=t.clientY-sy;panel.style.transition='transform .18s ease';if(dy>90){panel.style.transform='translateY(105%)';setTimeout(()=>{try{m.remove()}catch(x){}},180)}else{panel.style.transform=''}};m.addEventListener('touchend',end);m.addEventListener('touchcancel',end)}catch(e){}}
 async function orderAttachment(id,type,b){b.textContent='جاري التحميل…';try{const src=await call('photo',{id});b.outerHTML=type==='audio'?`<audio controls src="${src}" style="width:100%;margin:8px 0"></audio>`:`<img src="${src}" style="width:100%;border-radius:10px;margin:6px 0">`}catch(x){b.textContent=em(x)}}
 async function pic(id,b){b.textContent='…';try{b.outerHTML=`<img src="${await call('photo',{id})}" style="width:100%;border-radius:10px;margin:6px 0">`}catch(x){b.textContent=em(x)}}
 
@@ -2124,7 +2124,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var sec=null;
       if(id){try{var l=await call('sectionsAdmin');sec=(l||[]).find(function(s){return String(s.id)===String(id)})||null}catch(e){}}
       var m=document.createElement('div');m.className='m';
-      m.innerHTML='<div><b>'+(id?'تعديل قسم':'قسم جديد')+'</b><label>اسم القسم</label><input id="secName" maxlength="120" placeholder="مثال: علاج تساقط الشعر" value="'+E(sec&&sec.name||'')+'"><label>صورة القسم (اختياري)</label><input id="secImg" type="file" accept="image/*"><div id="secImgPrev">'+(sec&&sec.img?('<img class="ic" src="'+E(sec.img)+'">'):'')+'</div><label>الترتيب</label><input id="secSort" type="number" value="'+(sec?(sec.sort||0):0)+'"><div class="err" id="secErr"></div><button class="g" type="button" id="secSaveBtn">💾 حفظ</button><button class="g" type="button" id="secCancel">إلغاء</button></div>';
+      m.innerHTML='<div><b>'+(id?'تعديل قسم':'قسم جديد')+'</b><label>اسم القسم</label><input id="secName" maxlength="120" placeholder="مثال: علاج تساقط الشعر" value="'+E(sec&&sec.name||'')+'"><label>صورة القسم (اختياري)</label><input id="secImg" type="file" accept="image/*"><div id="secImgPrev">'+(sec&&sec.img?('<img class="ic" src="'+E(sec.img)+'">'):'')+'</div><label>الترتيب</label><input id="secSort" type="number" value="'+(sec?(sec.sort||0):0)+'"><div class="err" id="secErr"></div><button class="g" type="button" id="secSaveBtn" title="حفظ">💾</button><button class="g" type="button" id="secCancel">إلغاء</button></div>';
       document.body.appendChild(m);
       m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
       var img=sec&&sec.img?sec.img:'';
@@ -2133,10 +2133,10 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       G('secSaveBtn').addEventListener('click',async function(){
         var btn=this; if(btn.disabled)return;
         var name=G('secName').value.trim(); if(!name){G('secErr').textContent='اكتب اسم القسم';return}
-        btn.disabled=true;var lbl=btn.textContent;btn.textContent='⏳ جاري الحفظ…';
+        btn.disabled=true;var lbl=btn.innerHTML;btn.innerHTML='⏳';
         try{ await call('secSave',{id:id||'',name:name,img:img,sort:Number(G('secSort').value)||0}); m.remove(); TO('تم الحفظ ✔','ok'); afterSecChange() }
         catch(e){var er=G('secErr');if(er)er.textContent=EM(e)}
-        finally{ if(document.body.contains(btn)){btn.disabled=false;btn.textContent=lbl} }
+        finally{ if(document.body.contains(btn)){btn.disabled=false;btn.innerHTML=lbl} }
       });
     })();
   }
@@ -2170,7 +2170,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         (all||[]).forEach(function(s){(s.items||[]).forEach(function(x){ if(String(x.id)===String(id)){ it=x; var sid=String(s.id); if(cur.indexOf(sid)<0)cur.push(sid) } })});
       }else if(secId){cur=[String(secId)]}
       var m=document.createElement('div');m.className='m';
-      m.innerHTML='<div class="sheet"><div class="sheet-h"><span class="sheet-grab"></span><b>'+(id?'تعديل صنف':'صنف جديد')+'</b></div><div class="sheet-b"><label for="siT">اسم الصنف</label><div class="row" style="margin-top:2px;gap:8px;flex-wrap:nowrap;align-items:center"><input id="siT" maxlength="120" style="flex:1;min-width:0" value="'+E(it&&it.t||'')+'"><button class="g" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:20px;line-height:1" type="button" id="siGimg" title="ابحث في جوجل — صور الصنف وتفاصيله">🔍</button></div><label>الأقسام (تقدر تختار أكتر من قسم)</label><div id="siSecs"></div><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div>'+(id?'<div id="siOfferWrap" style="margin-top:8px"></div>':'')+'<button class="g" type="button" id="siSave">💾 حفظ</button>'+(id?'<button class="g" type="button" id="siDel" style="color:#c62828">🗑️ حذف الصنف</button>':'')+'<button class="g" type="button" id="siCancel">إلغاء</button></div></div>';
+      m.innerHTML='<div class="sheet"><div class="sheet-h"><span class="sheet-grab"></span><b>'+(id?'تعديل صنف':'صنف جديد')+'</b></div><div class="sheet-b"><label for="siT">اسم الصنف</label><div class="row" style="margin-top:2px;gap:8px;flex-wrap:nowrap;align-items:center"><input id="siT" maxlength="120" style="flex:1;min-width:0" value="'+E(it&&it.t||'')+'"><button class="g" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:20px;line-height:1" type="button" id="siGimg" title="ابحث في جوجل — صور الصنف وتفاصيله">🔍</button></div><label>الأقسام (تقدر تختار أكتر من قسم)</label><div id="siSecs"></div><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div>'+(id?'<div id="siOfferWrap" style="margin-top:8px"></div>':'')+'<button class="g" type="button" id="siSave" title="حفظ" style="flex:1.3;min-width:0">💾</button>'+(id?'<button class="g" type="button" id="siDel" title="حذف الصنف" style="flex:0 0 auto;width:auto;color:#c62828">🗑️</button>':'')+'<button class="g" type="button" id="siCancel">إلغاء</button></div></div>';
       document.body.appendChild(m);
       m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
       /* ---- الأقسام: علّم على الأقسام اللي الصنف يظهر فيها (أكتر من قسم مسموح) ---- */
@@ -2208,9 +2208,14 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       (function(){
         var ow=G('siOfferWrap'); if(!ow)return;
         try{
-          var ob=shOfferToggleBtn({id:id,off:!!(it&&it.off),t:(it&&it.t)||''});
-          ob.style.width='100%';
+          var ob=shOfferToggleBtn({id:id,off:!!(it&&it.off),t:(it&&(it.t||''))||''});
+          ob.style.flex='1';ob.style.minWidth='0';
           ow.appendChild(ob);
+          /* صف واحد صغير: 🎁 + 💾 + 🗑️ */
+          ow.className='sh-save-row';
+          var sv=G('siSave'),dl=G('siDel');
+          if(sv)ow.appendChild(sv);
+          if(dl)ow.appendChild(dl);
         }catch(e){}
       })();
       try{ if(window.shSheetDrag)window.shSheetDrag(m) }catch(e){}
@@ -2235,10 +2240,10 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         var secs=[];
         try{var bx=G('siSecs').querySelectorAll('input[data-sec]');for(var i=0;i<bx.length;i++)if(bx[i].checked)secs.push(bx[i].value)}catch(e){}
         if(!secs.length){G('siErr').textContent='اختار قسم واحد على الأقل';return}
-        btn.disabled=true;var lbl=btn.textContent;btn.textContent='⏳ جاري الحفظ…';
+        btn.disabled=true;var lbl=btn.innerHTML;btn.innerHTML='⏳';
         try{ var ooEl=G('siOO'); await call('secItemSave',{secs:secs,sec:secs[0],id:id||'',title:t,x:G('siX').value.trim(),p:G('siP').value,w:G('siW').value,ic:img,oo:(ooEl&&ooEl.checked)?'1':'',sort:Number(G('siSort').value)||0}); m.remove(); TO('تم الحفظ ✔','ok'); afterSecChange(); try{if(window.__shItemsReload)window.__shItemsReload()}catch(e){} }
         catch(e){var er=G('siErr');if(er)er.textContent=EM(e)}
-        finally{ if(document.body.contains(btn)){btn.disabled=false;btn.textContent=lbl} }
+        finally{ if(document.body.contains(btn)){btn.disabled=false;btn.innerHTML=lbl} }
       });
     })();
   }
@@ -4091,14 +4096,17 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
     if(!w){ try{ location.href=url }catch(e){} }
     return true;
   };
+  window.shPullLock=function(on){
+    try{ if(window.ShehabAndroid&&typeof ShehabAndroid.setPullEnabled==="function"){ ShehabAndroid.setPullEnabled(!!on); } }catch(e){}
+  };
   window.shSheetDrag=function(m,sheet){
     try{
       if(!sheet)sheet=m&&m.firstElementChild;
       var h=sheet&&sheet.querySelector(".sheet-h"); if(!h)return;
       var sy=0,dy=0,on=false;
-      h.addEventListener("touchstart",function(e){ if(e.touches.length!==1)return; sy=e.touches[0].clientY; dy=0; on=true; sheet.classList.add("dragging"); },{passive:true});
+      h.addEventListener("touchstart",function(e){ if(e.touches.length!==1)return; sy=e.touches[0].clientY; dy=0; on=true; try{if(window.shPullLock)window.shPullLock(!0)}catch(_x){} sheet.classList.add("dragging"); },{passive:true});
       h.addEventListener("touchmove",function(e){ if(!on)return; dy=Math.max(0,e.touches[0].clientY-sy); sheet.style.transform="translateY("+dy+"px)"; if(e.cancelable)e.preventDefault(); },{passive:false});
-      function fin(){ if(!on)return; on=false; sheet.classList.remove("dragging");
+      function fin(){ if(!on)return; on=false; try{if(window.shPullLock)window.shPullLock(!1)}catch(_x){} sheet.classList.remove("dragging");
         if(dy>90){ sheet.style.transform="translateY(110%)"; setTimeout(function(){ try{m.remove()}catch(e){} },170); }
         else{ sheet.style.transform=""; }
         dy=0; }
@@ -4106,5 +4114,80 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
       h.addEventListener("touchcancel",fin);
     }catch(e){}
   };
+})();
+</script>
+
+<style>
+/* ===== زراير اظبط: صغيرة موزعة بجنب بعض ===== */
+/* الشيت بنصل لأول الشاشة من فوق */
+.m>div.sheet{margin:0 auto}
+#md>div{margin:0 auto}
+.item-actions{gap:6px;padding-top:10px;margin-top:10px}
+.item-actions button{flex:1 1 46%;min-width:0;font-size:13px;padding:9px 6px;border-radius:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-actions button:only-child{flex:1 1 100%}
+.sh-save-row{display:flex;gap:8px;margin-top:10px}
+.sh-save-row .g{min-width:0;padding:12px 10px;font-size:17px;border-radius:14px}
+.sh-close-x{position:absolute;top:12px;left:12px;width:32px;height:32px;min-width:32px;border-radius:50%;border:1px solid var(--line,#E6DFD2);background:#fff;color:#4a5a75;font-size:14px;line-height:1;padding:0;z-index:6;box-shadow:0 1px 5px rgba(11,42,111,.18);cursor:pointer}
+.sh-md-bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sh-md-bar button{flex:1 1 44%;min-width:0;font-size:13px;padding:10px 6px;border-radius:12px;text-align:center;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-md-bar button[title*="حفظ"]{flex:1 1 100%;font-size:17px;padding:12px 10px}
+</style>
+
+<script>
+/* ===== زرار إكس فوق في أي نافذة + زراير صغيرة متوزعة (كارت الصنف وشاشة الحالة) ===== */
+(function(){
+  function dec(bt){
+    var tx=(bt.textContent||"").trim(); if(!tx)return;
+    if(tx.indexOf("حفظ")>-1){ bt.title=tx; bt.textContent="💾" }
+    else if(tx==="🖨️ طباعة البون"){ bt.title=tx; bt.textContent="🖨️" }
+    else if(tx==="عرض الصورة"){ bt.title=tx; bt.textContent="🖼️" }
+    else if(tx.indexOf("تشغيل تسجيل")>-1){ bt.title=tx; bt.textContent="▶️" }
+    else if(tx.indexOf("صورة مرفقة")>-1){ bt.title=tx; bt.textContent="🖼️" }
+  }
+  function ensureX(m){
+    if(!m||m.nodeType!==1||!m.classList.contains("m"))return;
+    var panel=m.firstElementChild; if(!panel)return;
+    try{ if(!panel.style.position)panel.style.position="relative" }catch(e){}
+    /* زرار الإكس فوق في أي نافذة */
+    if(!panel.querySelector(".sh-close-x")){
+      var b=document.createElement("button");
+      b.type="button";b.className="sh-close-x";b.setAttribute("aria-label","إغلاق");b.title="إغلاق";b.textContent="✕";
+      b.addEventListener("click",function(e){e.stopPropagation();try{m.remove()}catch(_e){}});
+      panel.insertBefore(b,panel.firstChild);
+    }
+    /* «إلغاء» في أي نافذة بقى مكرر بعد وجود الإكس: نخبيه */
+    var sv=panel.querySelectorAll("button");
+    for(var s2=0;s2<sv.length;s2++){
+      var t=(sv[s2].textContent||"").replace(/\s+/g,"");
+      if(t==="إلغاء")sv[s2].style.display="none";
+    }
+    /* شاشة الحالة (الأوردر): الزراير صغيرة جنب بعض */
+    if(m.id==="md"){
+      try{
+        var btns=[],ch=panel.children;
+        for(var k=0;k<ch.length;k++){
+          var el=ch[k];
+          if(el&&el.tagName==="BUTTON"&&!el.classList.contains("sh-close-x"))btns.push(el);
+        }
+        if(btns.length>1){
+          var bar=document.createElement("div");bar.className="sh-md-bar";
+          var hint=panel.querySelector("small");
+          panel.insertBefore(bar,hint);
+          for(var q=0;q<btns.length;q++){dec(btns[q]);bar.appendChild(btns[q])}
+        }else if(btns.length===1){dec(btns[0])}
+      }catch(e){}
+    }
+  }
+  function scan(m){ try{ ensureX(m) }catch(e){} }
+  try{ var es=document.querySelectorAll(".m"); for(var i=0;i<es.length;i++)scan(es[i]) }catch(e){}
+  try{
+    var mo=new MutationObserver(function(muts){
+      for(var i=0;i<muts.length;i++){
+        var nl=muts[i].addedNodes||[];
+        for(var j=0;j<nl.length;j++)scan(nl[j]);
+      }
+    });
+    mo.observe(document.body,{childList:true,subtree:false});
+  }catch(e){}
 })();
 </script>
