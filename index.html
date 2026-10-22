@@ -1695,13 +1695,12 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     opts=opts||{}; m=m||{};
     var disc=0;try{var _p=Number(String(m.p||'').replace(',','.')),_w=Number(String(m.w||'').replace(',','.'));if(m.p&&m.w&&isFinite(_p)&&isFinite(_w)&&_w>_p&&_p>=0)disc=Math.round((_w-_p)/_w*100)}catch(e){}
     var h='<div class="card item-card" id="secItemDetail">';
-    h+='<div class="icard-media"><div class="icard-img">'+(m.ic?'<img class="zoomable" src="'+E(m.ic)+'" alt="'+E(m.t||'')+'">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div><div class="icard-name">'+E(m.t||'')+'</div></div>';
+    h+='<div class="icard-media"><div class="icard-img">'+(m.ic?'<img class="zoomable" src="'+E(m.ic)+'" alt="'+E(m.t||'')+'">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div><div class="icard-name">'+E(m.t||'')+'</div><div class="item-actions under-img" hidden></div></div>';
     h+='<div class="item-detail-body">';
     h+='<div class="icard-price">'+(m.p?'<span class="now">'+E(m.p)+' ج</span>':'')+(m.w?'<span class="was">'+E(m.w)+' ج</span>':'')+(m.oo?'<span class="icard-onorder">بالطلب</span>':'')+'</div>';
     if(m.oo)h+='<div class="icard-onorder-note">🚚 الصنف ده بالطلب — بيوصلك خلال يوم</div>';
     if(m.x)h+='<div class="item-details">'+E(m.x)+'</div>';
     h+='<div class="item-rate" data-id="'+E(m.id)+'" data-kind="'+(opts.kind||'item')+'"><div class="rate-stars"></div><div class="rating-note">⭐ '+(m.avg?Number(m.avg).toFixed(1):'—')+' · '+(m.count||0)+' تقييم</div><div class="rate-hint">اضغط على النجوم لتقييم '+(opts.kind==='offer'?'العرض':'المنتج')+'</div></div>';
-    h+='<div class="item-actions" hidden></div>';
     h+='</div></div>';
     h+='<div class="item-addbar" id="itemAddBar"></div>';
     return h;
@@ -1712,6 +1711,14 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     return out;
   }
   function mkItemAct(label,fn){var b=document.createElement('button');b.type='button';b.className='g';b.textContent=label;b.addEventListener('click',function(e){e.stopPropagation();fn(b)});return b}
+  var shIc={
+    mega:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="2"/><path d="M7.8 12.2a6 6 0 1 1 8.4 0"/><path d="M4.9 15.1a10 10 0 0 1 14.2 0"/><path d="M12 15v7"/></svg>',
+    edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    move:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
+    del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>',
+    gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v9H5v-9"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>'
+  };
+  function mkIconAct(svg,title,fn){var b=document.createElement('button');b.type='button';b.className='g ia-act';b.title=title;b.setAttribute('aria-label',title);b.innerHTML=svg;b.addEventListener('click',function(e){e.stopPropagation();fn(b)});return b}
   async function shRate(kind,id,stars,rw){
     try{
       var b=rw&&rw.querySelector('.rate-stars'),bs=b?b.querySelectorAll('button'):[];
@@ -1728,10 +1735,10 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     }
   }
   /* زرار «في العروض»: الصنف هو المحور — يندرج في العروض أو يخرج منها بنفس الـ ID */
-  function shOfferToggleBtn(m){
+  function shOfferToggleBtn(m,io){
     var b=document.createElement('button');
-    b.type='button';b.className='g';
-    var paint=function(){ b.textContent=m.off?'🎁 شيل من العروض':'🎁 ضيف للعروض' };
+    b.type='button';b.className=io?'g ia-act':'g';
+    var paint=function(){ if(io){ b.innerHTML=shIc.gift; b.title=m.off?'شيل من العروض':'ضيف للعروض'; b.setAttribute('aria-label',b.title) } else { b.textContent=m.off?'🎁 شيل من العروض':'🎁 ضيف للعروض' } };
     paint();
     b.addEventListener('click',function(e){
       e.stopPropagation();
@@ -1818,16 +1825,16 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var acts=d.querySelector('.item-actions');
     if(acts&&!guest&&isStaff()){
       acts.hidden=false;
-      acts.appendChild(mkItemAct('📢 انشر على القناة',function(b){shPublishToChannel(b,opts.kind,m.id)}));
+      acts.appendChild(mkIconAct(shIc.mega,'انشر على القناة',function(b){shPublishToChannel(b,opts.kind,m.id)}));
       if(opts.kind==='offer'){
-        acts.appendChild(mkItemAct('✏️ تعديل',function(){try{offE(m.id)}catch(e){}}));
-        acts.appendChild(mkItemAct('📥 نقل إلى أقسام',function(){try{offerMoveToSec(m.id)}catch(e){}}));
-        acts.appendChild(mkItemAct('🗑 حذف',function(){shDeleteCurrent('offer',m.id)}));
+        acts.appendChild(mkIconAct(shIc.edit,'تعديل العرض',function(){try{offE(m.id)}catch(e){}}));
+        acts.appendChild(mkIconAct(shIc.move,'نقل إلى أقسام',function(){try{offerMoveToSec(m.id)}catch(e){}}));
+        acts.appendChild(mkIconAct(shIc.del,'حذف',function(){shDeleteCurrent('offer',m.id)}));
       }else{
-        acts.appendChild(shOfferToggleBtn(m));
-        acts.appendChild(mkItemAct('✏️ تعديل',function(){try{secItemEditor(shItemSecId(opts.secId,m.id),m.id)}catch(e){}}));
-        acts.appendChild(mkItemAct('📥 نقل إلى قسم',function(){try{secItemMoveDialog(m.id)}catch(e){}}));
-        acts.appendChild(mkItemAct('🗑 حذف',function(){shDeleteCurrent('item',m.id)}));
+        acts.appendChild(shOfferToggleBtn(m,!0));
+        acts.appendChild(mkIconAct(shIc.edit,'تعديل الصنف',function(){try{secItemEditor(shItemSecId(opts.secId,m.id),m.id)}catch(e){}}));
+        acts.appendChild(mkIconAct(shIc.move,'نقل إلى قسم',function(){try{secItemMoveDialog(m.id)}catch(e){}}));
+        acts.appendChild(mkIconAct(shIc.del,'حذف',function(){shDeleteCurrent('item',m.id)}));
       }
     }
     /* الشريط الثابت أسفل الشاشة */
@@ -4122,7 +4129,13 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 /* الشيت بنصل لأول الشاشة من فوق */
 .m>div.sheet{margin:0 auto}
 #md>div{margin:0 auto}
-.item-actions{gap:6px;padding-top:10px;margin-top:10px}
+  /* أزرار الكارت: أيقونات صغيرة في صفوف رباعية — أضفها تحت الصورة مباشرة */
+  .item-actions.under-img{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 10px 10px;margin:0;border-top:0}
+  .item-actions.under-img button{min-width:0;flex:none;font-size:14px;padding:10px 0;border-radius:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
+  .item-actions.under-img button:only-child{grid-column:1/-1}
+  .ia-act{display:inline-flex;align-items:center;justify-content:center;gap:4px}
+  .ia-act svg{width:20px;height:20px}
+  .item-actions{gap:6px;padding-top:10px;margin-top:10px}
 .item-actions button{flex:1 1 46%;min-width:0;font-size:13px;padding:9px 6px;border-radius:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item-actions button:only-child{flex:1 1 100%}
 .sh-save-row{display:flex;gap:8px;margin-top:10px}
