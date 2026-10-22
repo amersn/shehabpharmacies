@@ -1617,7 +1617,11 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         if(OF.length){try{drawHero()}catch(e){}}
         if(!SEC_READY||!OF.length){
           try{
-            var gd=await Promise.race([call('pubBrowse',{}).catch(function(){return null}),new Promise(function(res){setTimeout(function(){res(null)},8000)})]);
+            var gd=null;
+            for(var _rt=0;_rt<2&&!gd;_rt++){
+              try{ gd=await Promise.race([call('pubBrowse',{}).catch(function(){return null}),new Promise(function(res){setTimeout(function(){res(null)},8000)})]) }catch(e){ gd=null }
+              if(!gd)try{await new Promise(function(res){setTimeout(res,600)})}catch(e){}
+            }
             if(gd&&typeof gd==='object'){
               if(Array.isArray(gd.offers)&&gd.offers.length&&!OF.length){OF=gd.offers;got=true}
               if(Array.isArray(gd.sections)&&gd.sections.length&&!SEC_READY){SEC_CACHE=gd.sections;SEC_READY=true;got=true}
