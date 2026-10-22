@@ -1612,6 +1612,9 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         var got=false;
         try{ var so=cGet('offers'); if(so&&so.v&&so.v.length&&!OF.length){OF=so.v;got=true} }catch(e){}
         try{ var ssg=cGet('sections'); if(ssg&&ssg.v&&ssg.v.length&&!SEC_READY){SEC_CACHE=ssg.v;SEC_READY=true;got=true} }catch(e){}
+        /* رسم فوري من الكاش قبل أي انتظار للخادم */
+        if(SEC_READY&&Array.isArray(SEC_CACHE)&&SEC_CACHE.length){renderHomeSections(box,SEC_CACHE);try{shSecChips(box,SEC_CACHE)}catch(e){}}
+        if(OF.length){try{drawHero()}catch(e){}}
         if(!SEC_READY||!OF.length){
           try{
             var gd=await Promise.race([call('pubBrowse',{}).catch(function(){return null}),new Promise(function(res){setTimeout(function(){res(null)},8000)})]);
