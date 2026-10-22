@@ -1682,6 +1682,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var _from=(typeof V!=='undefined')?String(V||''):'';
     V='secItem'; try{window.__shLastSecItemId=String(id||'')}catch(e){}
     try{window.__shSecItemFrom=(_from==='favorites')?'favorites':((_from==='sec')?'sec':'')}catch(e){}
+    try{window.__shAdminCard='0'}catch(e){}
     run('<div id="secItemBox">جاري التحميل…</div>');
     var f=findSecItem(id);
     if(f){renderSecItem(f.it,f.sec);return}
@@ -1695,8 +1696,9 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     opts=opts||{}; m=m||{};
     var disc=0;try{var _p=Number(String(m.p||'').replace(',','.')),_w=Number(String(m.w||'').replace(',','.'));if(m.p&&m.w&&isFinite(_p)&&isFinite(_w)&&_w>_p&&_p>=0)disc=Math.round((_w-_p)/_w*100)}catch(e){}
     var h='<div class="card item-card" id="secItemDetail">';
-    h+='<div class="icard-media"><div class="icard-img">'+(m.ic?'<img class="zoomable" src="'+E(m.ic)+'" alt="'+E(m.t||'')+'">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div><div class="icard-name">'+E(m.t||'')+'</div><div class="item-actions under-img" hidden></div></div>';
+    h+='<div class="icard-media"><div class="icard-img">'+(m.ic?'<img class="zoomable" src="'+E(m.ic)+'" alt="'+E(m.t||'')+'">':'')+'</div>'+(disc>0?'<span class="icard-badge">خصم '+disc+'٪</span>':'')+'<div class="icard-tools"></div><div class="icard-name">'+E(m.t||'')+'</div></div>';
     h+='<div class="item-detail-body">';
+    h+='<div class="item-actions under-img" hidden></div>';
     h+='<div class="icard-price">'+(m.p?'<span class="now">'+E(m.p)+' ج</span>':'')+(m.w?'<span class="was">'+E(m.w)+' ج</span>':'')+(m.oo?'<span class="icard-onorder">بالطلب</span>':'')+'</div>';
     if(m.oo)h+='<div class="icard-onorder-note">🚚 الصنف ده بالطلب — بيوصلك خلال يوم</div>';
     if(m.x)h+='<div class="item-details">'+E(m.x)+'</div>';
@@ -1823,7 +1825,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     }
     /* أزرار المدير: نشر على القناة + تعديل + نقل + حذف */
     var acts=d.querySelector('.item-actions');
-    if(acts&&!guest&&isStaff()){
+    if(acts&&!guest&&isStaff()&&opts.admin){
       acts.hidden=false;
       acts.appendChild(mkIconAct(shIc.mega,'انشر على القناة',function(b){shPublishToChannel(b,opts.kind,m.id)}));
       if(opts.kind==='offer'){
@@ -1872,7 +1874,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   function renderSecItem(it,sec){
     var box=G('secItemBox'); if(!box)return;
     if(!it){ box.innerHTML='<div class="err">الصنف مش موجود.</div>'; return; }
-    var m=shItemMeta(it),opts={kind:'item',secId:sec&&sec.id};
+    var m=shItemMeta(it),opts={kind:'item',secId:sec&&sec.id,admin:window.__shAdminCard==='1'};
     box.innerHTML=shItemCardHTML(m,opts);
     shWireItemCard(box,m,opts);
   }
@@ -1884,7 +1886,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var o=(typeof OF!=='undefined'?OF:[]).find(function(x){return String(x.id)==String(id)});
       if(!o)return _shOfferVPrev.apply(this,arguments);
       V='offer';try{window.__shLastOfferId=String(id)}catch(e){}
-      var m=shItemMeta(o),opts={kind:'offer'};
+      var m=shItemMeta(o),opts={kind:'offer',admin:isStaff()};
       app(shItemCardHTML(m,opts));
       shWireItemCard(G('app'),m,opts);
     }catch(e){return _shOfferVPrev.apply(this,arguments)}
@@ -4060,7 +4062,7 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
       var o=null; for(var i=0;i<ALL.length;i++)if(String(ALL[i].it.id)===String(id)){o=ALL[i];break}
       if(!o)return;
       var first=(o.secs&&o.secs[0])?o.secs[0].id:'';
-      try{ if(typeof window.secItemEditor==='function')window.secItemEditor(first,id); }catch(e){}
+    try{ window.__shAdminCard='1'; if(typeof window.secItemV==='function')window.secItemV(id); else window.secItemEditor(first,id); }catch(e){}
     });
     var bk=G('iaBack');
     if(bk)bk.addEventListener('click',function(){try{if(typeof adminDashV==='function')adminDashV();else homeV()}catch(e){}});
@@ -4130,8 +4132,8 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 .m>div.sheet{margin:0 auto}
 #md>div{margin:0 auto}
   /* أزرار الكارت: أيقونات صغيرة في صفوف رباعية — أضفها تحت الصورة مباشرة */
-  .item-actions.under-img{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 10px 10px;margin:0;border-top:0}
-  .item-actions.under-img button{min-width:0;flex:none;font-size:14px;padding:10px 0;border-radius:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
+  .item-actions.under-img{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 0 4px;margin:0;border-top:0;align-items:stretch}
+  .item-actions.under-img button{min-width:0;flex:none;height:46px;font-size:14px;padding:0;border-radius:12px;text-align:center;margin:0}
   .item-actions.under-img button:only-child{grid-column:1/-1}
   .ia-act{display:inline-flex;align-items:center;justify-content:center;gap:4px}
   .ia-act svg{width:20px;height:20px}
