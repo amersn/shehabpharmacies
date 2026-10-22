@@ -1604,26 +1604,30 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   async function loadHomeSections(){
     var box=G('homeSections'); if(!box)return;
     if(!logged()){
-      /* ===== مسار الزائر: بيحاول البيانات العامة من الخادم، وأول مجرد ما مفيش، يجيب من الكاش المحلي ===== */
+      /* ===== مسار الزائر: الكاش فورًا (سرعة)، والخادم العام (pubBrowse) خلفية لو الكاش ناقص ===== */
       try{
         try{box.innerHTML=secSkeletonHTML()}catch(e){box.innerHTML='<div class="card">جاري تحميل العروض والأقسام…</div>'}
         var _gr=document.querySelector('.greet-row');
         if(_gr)try{_gr.innerHTML='<h2 style="margin:0">مرحبًا بيك في صيدليات شهاب 👋</h2><button type="button" class="g" onclick="authV()">🧾 دخول / حساب جديد</button><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">'+themeBtnHTML()+'</button>'}catch(e){}
         var got=false;
-        try{ var gd=await call('pubBrowse',{}); if(gd&&typeof gd==='object'){ if(Array.isArray(gd.offers)&&gd.offers.length){OF=gd.offers;got=got||!!gd.offers.length} if(Array.isArray(gd.sections)&&gd.sections.length){SEC_CACHE=gd.sections;SEC_READY=true;got=got||!!gd.sections.length} } }catch(e){}
-        if(!got||!OF.length){ try{ var so=cGet('offers'); if(so&&so.v&&so.v.length&&!OF.length){OF=so.v;got=true} }catch(e){} }
-        if(!got||!SEC_READY){ try{ var ssg=cGet('sections'); if(ssg&&ssg.v&&ssg.v.length&&!SEC_READY){SEC_CACHE=ssg.v;SEC_READY=true;got=true} }catch(e){} }
-        if(got){
-          try{drawHero()}catch(e){}
-          if(Array.isArray(SEC_CACHE)&&SEC_CACHE.length){
-            renderHomeSections(box,SEC_CACHE);
-            try{shSecChips(box,SEC_CACHE)}catch(e){}
-          }else{
-            box.innerHTML='<div class="card">سجّل دخول عشان تشوف كل الأقسام والمفضلة 👇</div><button class="g" onclick="authV()">🧾 دخول / حساب جديد</button>';
-          }
-        }else{
-          box.innerHTML='<div class="card">سجّل دخول عشان تشوف كل العروض والأقسام والمفضلة 👇</div><button class="g" onclick="authV()">🧾 دخول / حساب جديد</button>';
-          var _of0=G('of'); if(_of0&&!OF.length)_of0.innerHTML='<div class="card">🎁 سجّل دخول عشان تشوف العروض</div>';
+        try{ var so=cGet('offers'); if(so&&so.v&&so.v.length&&!OF.length){OF=so.v;got=true} }catch(e){}
+        try{ var ssg=cGet('sections'); if(ssg&&ssg.v&&ssg.v.length&&!SEC_READY){SEC_CACHE=ssg.v;SEC_READY=true;got=true} }catch(e){}
+        if(!SEC_READY||!OF.length){
+          try{
+            var gd=await Promise.race([call('pubBrowse',{}).catch(function(){return null}),new Promise(function(res){setTimeout(function(){res(null)},8000)})]);
+            if(gd&&typeof gd==='object'){
+              if(Array.isArray(gd.offers)&&gd.offers.length&&!OF.length){OF=gd.offers;got=true}
+              if(Array.isArray(gd.sections)&&gd.sections.length&&!SEC_READY){SEC_CACHE=gd.sections;SEC_READY=true;got=true}
+            }
+          }catch(e){}
+        }
+        if(SEC_READY&&Array.isArray(SEC_CACHE)&&SEC_CACHE.length){got=true;renderHomeSections(box,SEC_CACHE);try{shSecChips(box,SEC_CACHE)}catch(e){}}
+        if(got){ try{drawHero()}catch(e){} }
+        if(!SEC_CACHE||!SEC_CACHE.length){
+          box.innerHTML='<div class="card">سجّل دخول عشان تشوف كل الأقسام والمفضلة 👇</div><button class="g" onclick="authV()">🧾 دخول / حساب جديد</button>';
+        }
+        if(!got&&!OF.length){
+          var _of0=G('of'); if(_of0)_of0.innerHTML='<div class="card">🎁 سجّل دخول عشان تشوف العروض</div>';
         }
       }catch(e){ try{box.innerHTML=''}catch(e2){} }
       return;
