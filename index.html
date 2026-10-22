@@ -1603,7 +1603,29 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   }
   async function loadHomeSections(){
     var box=G('homeSections'); if(!box)return;
-    if(!logged()){box.innerHTML='';return}
+    if(!logged()){
+      /* ===== مسار الزائر: بيحاول البيانات العامة من الخادم، وأول مجرد ما مفيش، يجيب من الكاش المحلي ===== */
+      try{
+        try{box.innerHTML=secSkeletonHTML()}catch(e){box.innerHTML='<div class="card">جاري تحميل العروض والأقسام…</div>'}
+        var _gr=document.querySelector('.greet-row');
+        if(_gr)try{_gr.innerHTML='<h2 style="margin:0">مرحبًا بيك في صيدليات شهاب 👋</h2><button type="button" class="g" onclick="authV()">🧾 دخول / حساب جديد</button><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">'+themeBtnHTML()+'</button>'}catch(e){}
+        var got=false;
+        try{ var gd=await call('pubBrowse',{}); if(gd&&typeof gd==='object'){ if(Array.isArray(gd.offers)&&gd.offers.length){OF=gd.offers;got=got||!!gd.offers.length} if(Array.isArray(gd.sections)&&gd.sections.length){SEC_CACHE=gd.sections;SEC_READY=true;got=got||!!gd.sections.length} } }catch(e){}
+        if(!got||!OF.length){ try{ var so=cGet('offers'); if(so&&so.v&&so.v.length&&!OF.length){OF=so.v;got=true} }catch(e){} }
+        if(!got||!SEC_READY){ try{ var ssg=cGet('sections'); if(ssg&&ssg.v&&ssg.v.length&&!SEC_READY){SEC_CACHE=ssg.v;SEC_READY=true;got=true} }catch(e){} }
+        if(got){
+          try{drawHero()}catch(e){}
+          renderHomeSections(box,SEC_CACHE);
+          try{shSecChips(box,SEC_CACHE)}catch(e){}
+        }else{
+          box.innerHTML='<div class="card">سجّل دخول عشان تشوف كل العروض والأقسام والمفضلة 👇</div><button class="g" onclick="authV()">🧾 دخول / حساب جديد</button>';
+          var _of0=G('of'); if(_of0&&!OF.length)_of0.innerHTML='<div class="card">🎁 سجّل دخول عشان تشوف العروض</div>';
+        }
+      }catch(e){ try{box.innerHTML=''}catch(e2){} }
+      return;
+    }
+    /*hydrat فوري من الكاش المحفوظ (بدل سكلتون فاضي لحد ما الخادم يرد) */
+    if(!SEC_READY){ try{ var _c=cGet('sections'); if(_c&&Array.isArray(_c.v)&&_c.v.length){SEC_CACHE=_c.v;SEC_READY=true} }catch(e){} }
     if(SEC_READY)renderHomeSections(box,SEC_CACHE); else box.innerHTML=secSkeletonHTML();
     var favP=ensureFavs();                       /* المفضلة بتحمّل بالتوازي، مش بتوقف الأقسام */
     var list;
@@ -1698,7 +1720,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     var _from=(typeof V!=='undefined')?String(V||''):'';
     V='secItem'; try{window.__shLastSecItemId=String(id||'')}catch(e){}
     try{window.__shSecItemFrom=(_from==='favorites')?'favorites':((_from==='sec')?'sec':'')}catch(e){}
-    try{window.__shAdminCard='0'}catch(e){}
+    try{window.__shAdminCard=isStaff()?'1':'0'}catch(e){}
     run('<div id="secItemBox">جاري التحميل…</div>');
     var f=findSecItem(id);
     if(f){renderSecItem(f.it,f.sec);return}
@@ -1966,11 +1988,16 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
 
   /* ---------- 8) sections admin ---------- */
     window.secAdminV=async function(){
-    run('<h2>🗂️ الأقسام</h2><small>أضف أقسام تظهر أسفل شاشة العروض، وضيف داخل كل قسم أصناف. اختار «قائمة» أو «كانبان».</small><div class="sec-admin-top"><button id="secNewBtn" type="button">＋ قسم جديد</button><div id="secAdminLayout"></div></div><div id="secAdminList">جاري التحميل…</div><button class="g" onclick="offV()">⬅️ رجوع للعروض</button>');
+    V='secadmin';
+    run('<h2>🗂️ الأقسام</h2><small>أضف أقسام تظهر أسفل شاشة العروض، وضيف داخل كل قسم أصناف. اختار «قائمة» أو «كانبان».</small><div class="sec-admin-top"><button id="secNewBtn" type="button">＋ قسم جديد</button><div id="secAdminLayout"></div></div><div id="secAdminList">جاري التحميل…</div><button class="g" onclick="try{history.back()}catch(e){profileV()}">⬅️ رجوع</button>');
     var nb=G('secNewBtn'); if(nb)nb.addEventListener('click',function(){secEditor()});
     var lb=G('secAdminLayout'); if(lb){ lb.innerHTML=''; lb.appendChild(secAdminLayoutBar()) }
     var box=G('secAdminList');
-    var list=[];try{list=await call('sectionsAdmin')}catch(e){if(box)box.innerHTML='<div class="err">'+E(EM(e))+'</div>';return}
+    /* رسم فوري من الكاش المحفوظ ثم تحديث من الخادم */
+    var ce=cGet('sectionsAdmin');
+    if(ce&&Array.isArray(ce.v)&&ce.v.length)try{renderSecAdmin(ce.v)}catch(e){}
+    var list=[];try{list=await callC('sectionsAdmin')}catch(e){if(box&&!list.length)box.innerHTML='<div class="err">'+E(EM(e))+'</div>';return}
+    try{const _ent={t:Date.now(),v:list};RC['sectionsAdmin']=_ent;lsSet('sectionsAdmin',_ent)}catch(e){}
     renderSecAdmin(list);
   };
   /* ---------- عرض منبثق: زرار طلب المنتج بالكمية ---------- */
@@ -3410,8 +3437,9 @@ html.dark .shdev-btn{background:#1c2744;border-color:#2c3b5f;color:#e8eefc}
     var url=(kind==='item')?(base+'?i='+encodeURIComponent(id)):(base+'?o='+encodeURIComponent(id));
     window.openShareSheet({url:url,text:'شوف ده في صيدليات شهاب',title:'صيدليات شهاب'});
   };
-  /* شاشة «تصفح كزائر»: تعريف التطبيق + زراير التواصل + دعوة للتسجيل */
+  /* «تصفح كزائر»: يدخل الرئيسية عادي — طلباتي وحسابي فيها زرار تسجيل دخول */
   window.shGuestBrowse=function(){
+    try{ if(typeof homeV==='function'){ homeV(); return } }catch(e){}
     try{ if(typeof V!=='undefined')V='guest' }catch(e){}
     window.__shGuestKind=''; window.__shGuestId='';
     APPH('<img class="lg" src="'+LOGOURL()+'"><h2>مرحبًا بيك في صيدليات شهاب 👋</h2>'
@@ -3419,8 +3447,7 @@ html.dark .shdev-btn{background:#1c2744;border-color:#2c3b5f;color:#e8eefc}
       +'<button onclick="authV()">🧾 دخول / حساب جديد</button>'
       +'<button class="g" onclick="shGuestAddress()">📍 عنواننا</button>'
       +'<button class="g" onclick="shGuestFollow()">🌐 تابعونا</button>'
-      +'<button class="g" onclick="whatsapp()">💬 استفسار واتساب</button>'
-      +'<small>ولما توصلنا لينك عرض أو صنف على واتساب؟ افتحه من غير حساب — بيفتح هنا مباشرة.</small>');
+      +'<button class="g" onclick="whatsapp()">💬 استفسار واتساب</button>');
     try{ if(window.__shTop)window.__shTop() }catch(e){}
   };
   window.shGuestAddress=function(){ try{ window.shehabAddress&&window.shehabAddress() }catch(e){ try{ whatsapp() }catch(_e){} } };
@@ -4335,14 +4362,46 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
     panel.insertBefore(bar,hint);
     for(var b3=0;b3<list.length;b3++)bar.appendChild(list[b3]);
   }
-  try{
-    var _shOpenO=openO;
+  try{ var _shOpenO=openO;
     openO=function(id){
       var r=_shOpenO.apply(this,arguments);
       try{shOrdBarRebuild()}catch(e){}
       return r;
     };
   }catch(e){}
+
+  /* ===== زائر: طلباتي و حسابي و طلب و جو شهري و منبه الدواء = طلب تسجيل دخول ===== */
+  try{ var _shNavGoPrev=navGo; navGo=function(t){
+      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      if(!_lg&&(t==='mine'||t==='profile')){
+        try{V=(t==='mine')?'mine':'profile'}catch(e){}
+        app('<h2>🔒 لازم تسجل دخول</h2><div class="card">'+(t==='mine'?'سجّل دخول عشان تشوف طلباتك وتتبعها خطوة بخطوة.':'سجّل دخول عشان تدير بياناتك وتشوف إعداداتك.')+'</div><button onclick="authV()">🧾 دخول / حساب جديد</button><button class="g" onclick="try{homeV()}catch(e){}">🏠 الرئيسية</button>');
+        try{navSync&&navSync()}catch(e){}
+        return;
+      }
+      return _shNavGoPrev.apply(this,arguments);
+  } }catch(e){}
+  try{ var _shLoadOPrev=loadO; loadO=function(){
+      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      if(!_lg){ return }
+      return _shLoadOPrev.apply(this,arguments);
+  } }catch(e){}
+  try{ var _shOrdPrev=ordV; ordV=function(){
+      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      if(!_lg){ try{window.__shGuestOrder&&window.__shGuestOrder()}catch(e){} return }
+      return _shOrdPrev.apply(this,arguments);
+  } }catch(e){}
+  try{ var _shMoPrev=monthlyV; monthlyV=function(){
+      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      if(!_lg){ try{window.__shGuestOrder&&window.__shGuestOrder()}catch(e){} return }
+      return _shMoPrev.apply(this,arguments);
+  } }catch(e){}
+  try{ var _shCartAddPrev=cartAdd; cartAdd=function(){
+      var _lg=true; try{_lg=(typeof logged==='function')?logged():true}catch(e){}
+      if(!_lg){ try{window.__shGuestOrder&&window.__shGuestOrder()}catch(e){} return }
+      try{ var ce=gg('cartError'); if(ce)ce.textContent='' }catch(_e){}
+      return _shCartAddPrev.apply(this,arguments);
+  } }catch(e){}
   window.__shOrdBarRebuild=shOrdBarRebuild;
 
   /* ===== بوابة الطلب للعميل: شيت تفاصيل أورده + إلغاء الطلب + واتساب ===== */
