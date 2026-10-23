@@ -4392,11 +4392,10 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
     }
      var wide=[],icons=[];
  for(var d3=0;d3<list.length;d3++){
-  dec(list[d3]);
-  try{
-    var st=String(list[d3].textContent||'').trim().length;
-    if(st>12){wide.push(list[d3])}else{icons.push(list[d3])}
-  }catch(_e){icons.push(list[d3])}
+  var tx0=String(list[d3].textContent||'').trim();
+  if(tx0.length>12){wide.push(list[d3]);continue}
+  try{dec(list[d3])}catch(_e){}
+  icons.push(list[d3]);
  }
    var bar=document.createElement("div");bar.className="sh-md-bar";
    var hint=panel.querySelector("small");
