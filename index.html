@@ -4245,8 +4245,8 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 .sh-close-x{position:absolute;top:12px;left:12px;width:32px;height:32px;min-width:32px;border-radius:50%;border:1px solid var(--line,#E6DFD2);background:#fff;color:#4a5a75;font-size:14px;line-height:1;padding:0;z-index:6;box-shadow:0 1px 5px rgba(11,42,111,.18);cursor:pointer}
 /* شاشة الأوردر: شريط زراير فيكتور — صف رباعي مربعات زيزي الحجم */
 .sh-md-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-top:12px}
-.sh-md-bar button{flex:none;height:auto;min-height:46px;min-width:0;font-size:14px;padding:6px 4px;border-radius:12px;text-align:center;margin:0;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:normal;line-height:1.25}
-.sh-md-bar button.sh-vbtn svg,.sh-md-bar button svg{width:20px;height:20px}
+.sh-md-bar button{flex:none;height:auto;min-height:50px;min-width:0;font-size:14px;padding:6px 4px;border-radius:12px;text-align:center;margin:0;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:normal;line-height:1.25}
+.sh-md-bar button.sh-vbtn svg,.sh-md-bar button svg{width:24px;height:24px}
 .sh-bon{background:#fff;border:1.5px dashed #c9b892;border-radius:12px;padding:10px 12px!important}
 .sh-bon .bon-r{display:flex;justify-content:space-between;gap:10px;margin:6px 0;font-size:14px}
 .sh-bon .bon-hr{border-top:1px dashed #c9b892;margin:8px 0}
@@ -4350,6 +4350,17 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
   function shOrdBarRebuild(){
     var md=gg("md"); if(!md)return;
     var panel=md.firstElementChild; if(!panel)return;
+    /* مودال قديم سايب من أول مرة؟ نشيله وهو ورا */
+    try{
+      var mds=document.querySelectorAll("#md");
+      if(mds.length>1){for(var q1=0;q1<mds.length-1;q1++){try{mds[q1].remove()}catch(_e1){}}}
+      md=gg("md");panel=md.firstElementChild;if(!panel)return;
+    }catch(_e2){}
+    /* لو فيه أكتر من شريط زراير، ندمجهم في شريط واحد */
+    try{
+      var allBars=panel.querySelectorAll(".sh-md-bar");
+      if(allBars.length>1){var b0=allBars[0];for(var z1=1;z1<allBars.length;z1++){var cbs=allBars[z1].querySelectorAll("button");for(var z2=0;z2<cbs.length;z2++)b0.appendChild(cbs[z2]);allBars[z1].remove()}}
+    }catch(_e3){}
     var ob2=panel.querySelector(".sh-md-bar");
     if(ob2){while(ob2.firstChild)panel.insertBefore(ob2.firstChild,ob2);ob2.remove()}
     var dups=panel.querySelectorAll(".sh-ord-wa,.sh-ord-del");
@@ -4361,6 +4372,13 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
         list.push(e3);
         if(/upd\(/.test(e3.getAttribute("onclick")||""))save=e3;
       }
+    }
+    /* مفيش تكرار: لو واتساب أو حذف موجودين بالفعل ما نعملهمش تاني */
+    var hasWa=false,hasDel=false;
+    for(var h1=0;h1<list.length;h1++){
+      var ltx=String(list[h1].textContent||"")+" "+String(list[h1].title||"")+" "+String(list[h1].getAttribute("aria-label")||"");
+      if(/واتس/.test(ltx))hasWa=true;
+      if(/حذف/.test(ltx))hasDel=true;
     }
     var oid=save?((save.getAttribute("onclick").match(/upd\('([^']+)'/)||[])[1]||""):"";
     var wab=document.createElement("button");wab.type="button";wab.className="g sh-ord-wa";
@@ -4374,7 +4392,7 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
       var u="https://wa.me/"+num+"?text="+encodeURIComponent(t);
       try{window.open(u,"_blank","noopener")}catch(e){try{location.href=u}catch(_e){}}
     });
-    list.push(wab);
+    if(!hasWa)list.push(wab);
     var staff=true;try{staff=(typeof S!=="undefined"&&S&&S.r&&S.r!=="customer")}catch(_e){}
     if(staff){
       var dlb=document.createElement("button");dlb.type="button";dlb.className="g sh-ord-del";
@@ -4392,7 +4410,7 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
           }).catch(function(x){dlb.disabled=false;try{toast(em(x),"bad")}catch(_e){}});
         }catch(_e){dlb.disabled=false;try{toast(em(_e),"bad")}catch(e2){}}
       });
-      list.push(dlb);
+      if(!hasDel)list.push(dlb);
     }
      var icons=[];
  for(var d3=0;d3<list.length;d3++){
@@ -4420,6 +4438,11 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
    var hint=panel.querySelector("small");
    try{if(hint&&hint.parentNode===panel){panel.insertBefore(bar,hint)}else{panel.appendChild(bar)}}catch(_e3){panel.appendChild(bar)}
    for(var b3=0;b3<icons.length;b3++)bar.appendChild(icons[b3]);
+   /* اندق نهائي: أي واتساب/حذف بره الشريط يتشال */
+   try{
+    var str=panel.querySelectorAll(".sh-ord-wa,.sh-ord-del");
+    for(var s3=0;s3<str.length;s3++){var sdb=str[s3];if(sdb.parentNode!==bar){sdb.remove()}}
+   }catch(_e7){}
   try{
    if(!panel.dataset.shBarWatch){
     panel.dataset.shBarWatch='1';
