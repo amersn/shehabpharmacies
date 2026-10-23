@@ -1790,7 +1790,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     del:'<svg viewBox="0 0 24 24"><path fill="#d32f2f" d="M9 3h6l1 1h4a.9.9 0 0 1 0 1.8h-.9l-.85 11.9A2.2 2.2 0 0 1 16.05 20H7.95a2.2 2.2 0 0 1-2.2-2.3L4.9 6.8H4A.9.9 0 0 1 4 5h4z"/><path fill="#fff" opacity=".5" d="M10 9.5h1.6v8.6H10zm2.4 0H14v8.6h-1.6z"/></svg>',
     gift:'<svg viewBox="0 0 24 24"><path fill="#e91e63" d="M20 11.9v8.2a1.9 1.9 0 0 1-1.9 1.9H5.9A1.9 1.9 0 0 1 4 20.1v-8.2z"/><path fill="#fff" opacity=".85" d="M10.9 11.9h2.2v10.1h-2.2z"/><path fill="#f06292" d="M2 6.8a1.8 1.8 0 0 1 1.8-1.8h16.4A1.8 1.8 0 0 1 22 6.8v3a1.2 1.2 0 0 1-1.2 1.2H3.2A1.2 1.2 0 0 1 2 9.8z"/><path fill="#fff" opacity=".85" d="M10.9 5h2.2v6h-2.2z"/><path fill="#f8bbd0" d="M12 5.8C10 3 6 2.6 5 4.2c-.8 1.3.3 2.9 2.6 2.9zM12 5.8c2-2.8 6-3.2 7-1.6.8 1.3-.3 2.9-2.6 2.9z"/><circle cx="12" cy="5.6" r="1.5" fill="#ad1457"/></svg>'
   };
-  function mkIconAct(svg,title,fn){var b=document.createElement('button');b.type='button';b.className='g ia-act';b.title=title;b.setAttribute('aria-label',title);b.innerHTML=svg;var lb=document.createElement('span');lb.className='ia-lb';lb.textContent=title;lb.style.cssText='font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:88px';b.appendChild(lb);b.addEventListener('click',function(e){e.stopPropagation();fn(b)});return b}
+  function mkIconAct(svg,title,fn){var b=document.createElement('button');b.type='button';b.className='g ia-act';b.title=title;b.setAttribute('aria-label',title);b.innerHTML=svg;b.addEventListener('click',function(e){e.stopPropagation();fn(b)});return b}
   async function shRate(kind,id,stars,rw){
     try{
       var b=rw&&rw.querySelector('.rate-stars'),bs=b?b.querySelectorAll('button'):[];
@@ -2254,7 +2254,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         (all||[]).forEach(function(s){(s.items||[]).forEach(function(x){ if(String(x.id)===String(id)){ it=x; var sid=String(s.id); if(cur.indexOf(sid)<0)cur.push(sid) } })});
       }else if(secId){cur=[String(secId)]}
       var m=document.createElement('div');m.className='m';
-      m.innerHTML='<div class="sheet"><div class="sheet-h"><span class="sheet-grab"></span><b>'+(id?'تعديل صنف':'صنف جديد')+'</b></div><div class="sheet-b"><label for="siT">اسم الصنف</label><div class="row" style="margin-top:2px;gap:8px;flex-wrap:nowrap;align-items:center"><input id="siT" maxlength="120" style="flex:1;min-width:0" value="'+E(it&&it.t||'')+'"><button class="g" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:20px;line-height:1" type="button" id="siGimg" title="ابحث في جوجل — صور الصنف وتفاصيله">🔍</button></div><label>الأقسام (تقدر تختار أكتر من قسم)</label><div id="siSecs"></div><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div>'+(id?'<div id="siOfferWrap" style="margin-top:8px"></div>':'')+'<button class="g" type="button" id="siSave" title="حفظ" style="min-width:0;display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="#0b2a6f" d="M5 2h11.6L21 6.4V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#ffffff" d="M6.5 2h8.4v6.3a1.2 1.2 0 0 1-1.2 1.2H7.7a1.2 1.2 0 0 1-1.2-1.2z"/><path fill="#0b2a6f" d="M8.7 3.2h2.4v3.5H8.7z"/><path fill="#ffffff" d="M6 12h12v8H6z"/><path fill="#9fb7e0" d="M8 14.2h8v1.1H8zm0 2.4h8v1.1H8zm0 2.4h5v1.1H8z"/></svg></button>'+(id?'<button class="g" type="button" id="siDel" title="حذف الصنف" style="min-width:0;color:#c62828;display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="#d32f2f" d="M9 3h6l1 1h4a.9.9 0 0 1 0 1.8h-.9l-.85 11.9A2.2 2.2 0 0 1 16.05 20H7.95a2.2 2.2 0 0 1-2.2-2.3L4.9 6.8H4A.9.9 0 0 1 4 5h4z"/><path fill="#fff" opacity=".5" d="M10 9.5h1.6v8.6H10zm2.4 0H14v8.6h-1.6z"/></svg></button>':'')+'<button class="g" type="button" id="siCancel">إلغاء</button></div></div>';
+      m.innerHTML='<div class="sheet"><div class="sheet-h"><span class="sheet-grab"></span><b>'+(id?'تعديل صنف':'صنف جديد')+'</b></div><div class="sheet-b"><label for="siT">اسم الصنف</label><div class="row" style="margin-top:2px;gap:8px;flex-wrap:nowrap;align-items:center"><input id="siT" maxlength="120" style="flex:1;min-width:0" value="'+E(it&&it.t||'')+'"><button class="g" style="flex:0 0 auto;width:auto;padding:8px 14px;font-size:20px;line-height:1" type="button" id="siGimg" title="ابحث في جوجل — صور الصنف وتفاصيله">🔍</button></div><label>الأقسام (تقدر تختار أكتر من قسم)</label><div id="siSecs"></div><label for="siX">تفاصيل (اختياري)</label><textarea id="siX" rows="3">'+E(it&&it.x||'')+'</textarea><label for="siP">السعر (جنيه)</label><input id="siP" type="number" min="0" step="0.01" value="'+E(it&&it.p||'')+'"><label for="siW">السعر قبل الخصم (اختياري)</label><input id="siW" type="number" min="0" step="0.01" value="'+E(it&&it.w||'')+'"><label for="siImg">صورة (اختياري)</label><input id="siImg" type="file" accept="image/*"><div id="siImgPrev">'+(it&&it.ic?('<img class="ic" src="'+E(it.ic)+'">'):'')+'</div><label style="display:flex;align-items:center;gap:10px;margin:12px 0 4px;cursor:pointer"><input type="checkbox" id="siOO" style="width:22px;height:22px;min-width:22px;flex:0 0 auto"'+(it&&it.oo?' checked':'')+'><span>بالطلب — مش موجود دلوقتي، بيتطلب ويوصل خلال يوم</span></label><label for="siSort">الترتيب</label><input id="siSort" type="number" value="'+(it?(it.sort||0):0)+'"><div class="err" id="siErr"></div>'+(id?'<div id="siOfferWrap" style="margin-top:8px"></div>':'')+'<div class="ed-btns"><button class="g" type="button" id="siSave" title="حفظ" style="min-width:0;display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="#0b2a6f" d="M5 2h11.6L21 6.4V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path fill="#ffffff" d="M6.5 2h8.4v6.3a1.2 1.2 0 0 1-1.2 1.2H7.7a1.2 1.2 0 0 1-1.2-1.2z"/><path fill="#0b2a6f" d="M8.7 3.2h2.4v3.5H8.7z"/><path fill="#ffffff" d="M6 12h12v8H6z"/><path fill="#9fb7e0" d="M8 14.2h8v1.1H8zm0 2.4h8v1.1H8zm0 2.4h5v1.1H8z"/></svg></button>'+(id?'<button class="g" type="button" id="siDel" title="حذف الصنف" style="min-width:0;color:#c62828;display:inline-flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="#d32f2f" d="M9 3h6l1 1h4a.9.9 0 0 1 0 1.8h-.9l-.85 11.9A2.2 2.2 0 0 1 16.05 20H7.95a2.2 2.2 0 0 1-2.2-2.3L4.9 6.8H4A.9.9 0 0 1 4 5h4z"/><path fill="#fff" opacity=".5" d="M10 9.5h1.6v8.6H10zm2.4 0H14v8.6h-1.6z"/></svg></button>':'')+'<button class="g" type="button" id="siCancel">إلغاء</button></div></div></div>';
       document.body.appendChild(m);
       m.addEventListener('click',function(ev){if(ev.target===m)m.remove()});
       /* ---- الأقسام: علّم على الأقسام اللي الصنف يظهر فيها (أكتر من قسم مسموح) ---- */
@@ -4230,6 +4230,8 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 #md>div{margin:0 auto}
   /* أزرار الكارت: أيقونات صغيرة في صفوف رباعية — أضفها تحت الصورة مباشرة */
   .item-actions.under-img{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;padding:10px 0 4px;margin:0;border-top:0;align-items:stretch}
+.ed-btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-top:10px}
+.ed-btns button{width:auto;min-width:0;height:46px;padding:0;display:inline-flex;align-items:center;justify-content:center;justify-self:stretch}
   .item-actions.under-img button{min-width:0;flex:none;height:46px;font-size:14px;padding:0;border-radius:12px;text-align:center;margin:0}
   .item-actions.under-img button:only-child{grid-column:1/-1}
   .ia-act{display:inline-flex;align-items:center;justify-content:center;gap:4px}
@@ -4249,6 +4251,8 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 .sh-bon .bon-r{display:flex;justify-content:space-between;gap:10px;margin:6px 0;font-size:14px}
 .sh-bon .bon-hr{border-top:1px dashed #c9b892;margin:8px 0}
 .sh-md-bar button[title*="حفظ"]{flex:none}
+.sh-md-bar .sh-upd-save{background:#1565c0!important;color:#fff}
+.sh-md-bar .sh-upd-save svg{filter:brightness(0) invert(1)}
 /* سلايدر العروض: حركته جوه الصندوق بس — مش بيهز الشاشة */
 .hero-slide{overflow:hidden;border-radius:16px}
 .hero-slide .hero-card{transition:transform .22s ease,opacity .22s ease}
@@ -4390,18 +4394,19 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
       });
       list.push(dlb);
     }
-     var wide=[],icons=[];
+     var icons=[];
  for(var d3=0;d3<list.length;d3++){
-  var tx0=String(list[d3].textContent||'').trim();
-  if(tx0.length>12){wide.push(list[d3]);continue}
-  try{dec(list[d3])}catch(_e){}
+  try{
+    if(/upd\(/.test(list[d3].getAttribute('onclick')||'')){
+      list[d3].classList.add('sh-upd-save');list[d3].title='حفظ';list[d3].setAttribute('aria-label','حفظ');
+      var sp1=document.createElement('span');sp1.innerHTML=SHOV.save;list[d3].textContent='';
+      while(sp1.firstChild)list[d3].appendChild(sp1.firstChild);
+    }else{try{dec(list[d3])}catch(_e){}}
+  }catch(_e){}
   icons.push(list[d3]);
  }
    var bar=document.createElement("div");bar.className="sh-md-bar";
    var hint=panel.querySelector("small");
-   for(var w4=0;w4<wide.length;w4++){
-     try{wide[w4].setAttribute('data-sh-wide','1');wide[w4].style.cssText+=';width:100%;max-width:none;flex-direction:row;white-space:nowrap;min-height:44px;margin:0 0 8px';panel.insertBefore(wide[w4],hint)}catch(_e){}
-   }
    panel.insertBefore(bar,hint);
    for(var b3=0;b3<icons.length;b3++)bar.appendChild(icons[b3]);
   }
