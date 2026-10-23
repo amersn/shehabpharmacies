@@ -4401,7 +4401,18 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
       list[d3].classList.add('sh-upd-save');list[d3].title='حفظ';list[d3].setAttribute('aria-label','حفظ');
       var sp1=document.createElement('span');sp1.innerHTML=SHOV.save;list[d3].textContent='';
       while(sp1.firstChild)list[d3].appendChild(sp1.firstChild);
-    }else{try{dec(list[d3])}catch(_e){}}
+    }else{
+      try{dec(list[d3])}catch(_e){}
+      try{
+        if(!list[d3].querySelector('svg')){
+          var t2=String(list[d3].textContent||'')+' '+(list[d3].title||'');
+          var icn=null;
+          if(/حذف/.test(t2))icn=SHOV.del;
+          else if(/واتس/.test(t2))icn=SHOV.wa;
+          if(icn){list[d3].title=list[d3].title||t2.trim();list[d3].setAttribute('aria-label',list[d3].title);var sp2=document.createElement('span');sp2.innerHTML=icn;list[d3].textContent='';while(sp2.firstChild)list[d3].appendChild(sp2.firstChild)}
+        }
+      }catch(_e){}
+    }
   }catch(_e){}
   icons.push(list[d3]);
  }
