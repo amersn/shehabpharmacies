@@ -4306,7 +4306,7 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
         var btns=[],ch=panel.children;
         for(var k=0;k<ch.length;k++){
           var el=ch[k];
-          if(el&&el.tagName==="BUTTON"&&!el.classList.contains("sh-close-x"))btns.push(el);
+          if(el&&el.tagName==="BUTTON"&&!el.classList.contains("sh-close-x")&&el.getAttribute("data-sh-wide")!=="1")btns.push(el);
         }
         if(btns.length){
           var bar=panel.querySelector(".sh-md-bar");
@@ -4400,7 +4400,7 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
    var bar=document.createElement("div");bar.className="sh-md-bar";
    var hint=panel.querySelector("small");
    for(var w4=0;w4<wide.length;w4++){
-     try{wide[w4].style.cssText+=';width:100%;max-width:none;flex-direction:row;white-space:nowrap;min-height:44px;margin:0 0 8px';panel.insertBefore(wide[w4],hint)}catch(_e){}
+     try{wide[w4].setAttribute('data-sh-wide','1');wide[w4].style.cssText+=';width:100%;max-width:none;flex-direction:row;white-space:nowrap;min-height:44px;margin:0 0 8px';panel.insertBefore(wide[w4],hint)}catch(_e){}
    }
    panel.insertBefore(bar,hint);
    for(var b3=0;b3<icons.length;b3++)bar.appendChild(icons[b3]);
