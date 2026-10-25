@@ -2249,7 +2249,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     (async function(){
       var it=null,cur=[],all=[];
       try{var _e=cGet('sectionsAdmin');if(_e&&_e.v)all=(_e.v||[])}catch(e){}
-      try{if(!all.length)all=await call('sectionsAdmin')||[]}catch(e){all=[]}
+      /* فورًا: الكاش المحلي بس — السيرفر بيتجاب في الخلفية بعد ما الشاشة تفتح */
       if(id){
         (all||[]).forEach(function(s){(s.items||[]).forEach(function(x){ if(String(x.id)===String(id)){ it=x; var sid=String(s.id); if(cur.indexOf(sid)<0)cur.push(sid) } })});
       }else if(secId){cur=[String(secId)]}
@@ -2328,6 +2328,31 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         catch(e){var er=G('siErr');if(er)er.textContent=EM(e)}
         finally{ if(document.body.contains(btn)){btn.disabled=false;btn.innerHTML=lbl} }
       });
+      /* ---- الكاش فاضٍ؟ (أول تشغيل): جيب البيانات من الخادم في الخلفية واملأ الشاشة زي مانا ---- */
+      (function(){
+        if(!String(id||''))return;
+        (async function(){
+          try{
+            var _all2=await call('sectionsAdmin')||[];
+            try{var _ent={t:Date.now(),v:_all2};RC['sectionsAdmin']=_ent;lsSet('sectionsAdmin',_ent)}catch(e){}
+            var _it2=null; var _cur2=[];
+            (_all2||[]).forEach(function(s){(s.items||[]).forEach(function(x){ if(x && String(x.id)===String(id)){ _it2=x; var _sid=String(s.id); if(_cur2.indexOf(_sid)<0)_cur2.push(_sid) } })});
+            if(!_it2)return;
+            it=_it2; img=_it2.ic||''; cur.length=0; _cur2.forEach(function(z){cur.push(z)});
+            var _f=function(q,v){ try{ var el=G(q); if(el && String(el.value||'')==='') el.value=(v===undefined||v===null)?'':String(v) }catch(e){} };
+            _f('siT',it.t||'');_f('siX',it.x||'');_f('siP',it.p||'');_f('siW',it.w||'');_f('siSort',it.sort||0);
+            try{ if(it.oo){var oo2=document.getElementById('siOO'); if(oo2)oo2.checked=true} }catch(e){}
+            try{ var pv2=G('siImgPrev'); if(pv2 && !pv2.querySelector('img') && it.ic) pv2.innerHTML='<img class="ic" src="'+E(it.ic)+'">' }catch(e){}
+            (function(){ var bx2=G('siSecs'); if(!bx2)return; var l2=(_all2||[]).filter(function(s){return s&&s.id}); if(!l2.length)return; bx2.innerHTML=''; l2.forEach(function(s){
+              var lab2=document.createElement('label'); lab2.className='featured-toggle'; lab2.style.cssText='display:flex;align-items:center;gap:10px;margin:6px 0;padding:8px 10px;border:1.5px solid var(--line,#E6DFD2);border-radius:12px;cursor:pointer';
+              var cb2=document.createElement('input'); cb2.type='checkbox';cb2.value=String(s.id);cb2.setAttribute('data-sec','1'); cb2.style.cssText='width:22px;height:22px;min-width:22px;flex:0 0 auto';
+              if(cur.indexOf(String(s.id))>-1)cb2.checked=true;
+              var sp2=document.createElement('span');sp2.textContent='🗂️ '+String(s.name||'')+(s.active===false?' (مخفي)':'');
+              lab2.appendChild(cb2);lab2.appendChild(sp2);bx2.appendChild(lab2);
+            }); })();
+          }catch(_e){}
+        })();
+      })();
     })();
   }
 
