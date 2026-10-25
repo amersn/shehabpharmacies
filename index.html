@@ -2294,11 +2294,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
         try{
           var ob=shOfferToggleBtn({id:id,off:!!(it&&it.off),t:(it&&(it.t||''))||''},!0);
           ow.appendChild(ob);
-          /* صف واحد صغير: 🎁 + 💾 + 🗑️ — كلهم أيقونات مربعة موحدة */
-          ow.className='sh-save-row';
-          var sv=G('siSave'),dl=G('siDel');
-          if(sv)ow.appendChild(sv);
-          if(dl)ow.appendChild(dl);
+          /* زراير حفظ/حذف/إلغاء بقيت في .ed-btns — سطر واحد أزري متساوي تحت (مطابقة للمطلوب) */
         }catch(e){}
       })();
       try{ if(window.shSheetDrag)window.shSheetDrag(m) }catch(e){}
@@ -4323,11 +4319,14 @@ html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
       b.addEventListener("click",function(e){e.stopPropagation();try{m.remove()}catch(_e){}});
       panel.insertBefore(b,panel.firstChild);
     }
-    /* «إلغاء» في أي نافذة بقى مكرر بعد وجود الإكس: نخبيه */
+    /* «إلغاء» في أي نافذة بقى مكرر بعد وجود الإكس: نخبيه — إلا صف أزرار التعديل (المطلوب ظاهر بالسطر) */
     var sv=panel.querySelectorAll("button");
     for(var s2=0;s2<sv.length;s2++){
       var t=(sv[s2].textContent||"").replace(/\s+/g,"");
-      if(t==="إلغاء")sv[s2].style.display="none";
+      if(t==="إلغاء"){
+        try{ if(sv[s2].closest && sv[s2].closest('.ed-btns')){continue} }catch(_e){}
+        sv[s2].style.display="none";
+      }
     }
     /* شاشة الأوردر/الشيتات: تحويل أي زراير نص لأيقونات داخل الشريط */
     if(m.id==="md"){
