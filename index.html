@@ -413,7 +413,7 @@ html.dark .skl{background:linear-gradient(90deg,#1b2540 25%,#243052 37%,#1b2540 
 function q(id){return document.getElementById(id)}
 function toast(msg,type){try{var box=q('toastBox');if(!box){box=document.createElement('div');box.id='toastBox';document.body.appendChild(box)}var t=document.createElement('div');t.className='toast '+(type||'');t.textContent=String(msg);box.appendChild(t);requestAnimationFrame(function(){t.classList.add('on')});setTimeout(function(){t.classList.remove('on');setTimeout(function(){try{if(t.parentNode)t.parentNode.removeChild(t)}catch(e){}},260)},2600)}catch(e){}}
 window.toast=toast;window.alert=function(m){toast(m)};
-function setDark(on){try{localStorage.setItem('shehab_dark',on?'1':'0')}catch(e){}document.documentElement.classList.toggle('dark',!!on)}
+function setDark(on){try{localStorage.setItem('shehab_dark',on?'1':'0')}catch(e){}document.documentElement.classList.toggle('dark',!!on);try{thSyncMeta()}catch(_e){}}
 function accentNow(){var cur='#0b2a6f';try{cur=localStorage.getItem('shehab_accent')||'#0b2a6f'}catch(e){}return cur}
 function themeSyncUI(){var d=q('darkToggle');if(d)d.checked=document.documentElement.classList.contains('dark');var cur=accentNow();var l=document.querySelectorAll('.swatch');for(var i=0;i<l.length;i++)l[i].classList.toggle('on',l[i].getAttribute('data-c')===cur)}
 function setAccent(c){try{localStorage.setItem('shehab_accent',c)}catch(e){}document.documentElement.style.setProperty('--b',c);themeSyncUI()}
@@ -427,6 +427,7 @@ function setTheme(th){ th=th||'';
  thSyncMeta(); themeSyncUI();
 }
 window.setTheme=setTheme;window.thSyncMeta=thSyncMeta;
+try{thSyncMeta()}catch(e){}
 window.setDark=setDark;window.setAccent=setAccent;window.themeSyncUI=themeSyncUI;window.accentNow=accentNow;
 /* ---- علاجي الشهري: محفوظ على السيرفر (مع احتياطي محلي) ---- */
 var MON_SERVER=false,MON=[];
