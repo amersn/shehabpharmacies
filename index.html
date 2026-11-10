@@ -124,6 +124,15 @@ async function gstart(b){
   if(b){b.disabled=true;b.textContent='⏳ جاري فتح جوجل…'}
   try{
     const auth=await loadShehabAuth();
+    var isMobile=false;
+    try{isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||navigator.maxTouchPoints>1}catch(_e){}
+    var standalone=false;
+    try{standalone=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(_e2){}
+    if(isMobile||standalone){
+      /* الموبايل: redirect بس — بيشوف القايمة المحفوظة ومايحصلش شاشة بيضاء */
+      try{sessionStorage.setItem('sh_gauth_pend','1')}catch(_e){}
+      await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());return;
+    }
     try{
       const res=await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
       const u=res.user;if(!u)throw new Error('مفيش حساب اترد من جوجل');
@@ -264,6 +273,8 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e;hint()});
 addEventListener('appinstalled',()=>{DP=null;const b=$('ib');if(b)b.hidden=true});
 async function inst(){if(!DP)return;DP.prompt();await DP.userChoice;DP=null;const b=$('ib');if(b)b.hidden=true}
 if(!GS&&'serviceWorker'in navigator&&location.protocol=='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* لو رجعنا من ريدِرَكت جوجل (تسجيل دخول بجوجل) عالج الناتج مهما كانت الشاشة */
+try{if(typeof gHandleRedirect==='function')gHandleRedirect()}catch(_ge){}
 (async()=>{if(!S.t){var _g=(function(){try{var q=location.search||'';var mo=q.match(/[?&]o=([^&]*)/);if(mo)return 'o'+decodeURIComponent(mo[1]);var mi=q.match(/[?&]i=([^&]*)/);if(mi)return 'i'+decodeURIComponent(mi[1]);}catch(e){}return ''})();if(_g){var _go=function(){try{(window.__shGuestView||authV)(_g)}catch(e){authV()}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_go);else setTimeout(_go,0);return}return authV()}const _boot=async()=>{homeV();try{await homeDataOnce()}catch(x){var _sx='';try{_sx=String((x&&x.message)?x.message:x)}catch(e){};if(_sx.indexOf('تسجيل الدخول')>-1){out();return}var _ok3=false;for(var _k=0;_k<2&&!_ok3;_k++){await new Promise(function(z){setTimeout(z,1200*(_k+1))});try{await homeDataOnce();_ok3=true}catch(e){}}if(!_ok3){try{toast('حصلت مشكلة مؤقتة في الاتصال — اعمل سحب للتحديث أو افتح التطبيق تاني','bad')}catch(e){}}}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{_boot()});else _boot()})();
 ;const CART_KEY=()=> 'shehab_cart_'+(S.t||'guest');let CART=(()=>{try{return JSON.parse(localStorage.getItem(CART_KEY())||'[]')}catch(e){return[]}})(),CART_MODE='';
 /* ===== الطلب الحر من زرار + واقف جوه السلة ===== */
