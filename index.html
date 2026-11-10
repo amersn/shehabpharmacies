@@ -105,7 +105,29 @@ async function go(m){try{if(m=='up'&&$('w').value!==$('w2').value)throw 'كلم�
 if(m=='up'){Object.assign(d,{name:$('n').value,role:$('r').value,code:$('cd').value,addr:$('ad').value,email:$('eml').value,confirmPass:$('w2').value});
 const x=await call('signup',d);if(x.status=='pending'){authV('in');$('e').textContent='تم التسجيل ✔ استنى موافقة المدير على حسابك';return}S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV();return}
 const x=await call('login',d);S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV()}catch(x){var elE=$('e');if(elE)elE.textContent=em(x);else{try{if(typeof toast==='function')toast(em(x),'bad')}catch(_e){}}}}async function shareApp(){try{if(navigator.share)await navigator.share({title:'صيدليات شهاب',url:location.href});else{await navigator.clipboard.writeText(location.href);alert('تم نسخ رابط التطبيق')}}catch(e){}}
-function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions ta-r"><button id="searchBtn" class="g person" type="button" onclick="searchV()" aria-label="بحث" title="بحث">🔎</button></div><img class="lg lit" src="${LOGO}"><div class="top-actions ta-l"><button class="g person notification-btn" type="button" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div>${S.r==='manager'?'<button class="g admin-dash-btn" type="button" onclick="adminDashV()">🛠️ الإدارة</button>':''}<div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">🎁 العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint()}
+function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions ta-r"><button id="searchBtn" class="g person" type="button" onclick="searchV()" aria-label="بحث" title="بحث">🔎</button></div><img class="lg lit" src="${LOGO}"><div class="top-actions ta-l"><button class="g person notification-btn" type="button" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div>${S.r==='manager'?'<button class="g admin-dash-btn" type="button" onclick="adminDashV()">🛠️ الإدارة</button>':''}<div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint();try{shPushHint()}catch(e){}}
+function shPushHint(){
+ try{
+  var btn=document.querySelector('.topbar .notification-btn');
+  if(!btn)return;
+  var reg=false;try{reg=localStorage.getItem('shehab_push_enabled')==='1'}catch(e){}
+  var perm='unsupported';try{perm=('Notification' in window)?Notification.permission:'unsupported'}catch(e){}
+  var done=false;try{done=localStorage.getItem('sh_push_hint_done')==='1'}catch(e){}
+  if(reg||perm==='granted'||done)return;
+  try{btn.classList.add('bell-ring')}catch(e){}
+  var h=document.createElement('button');h.type='button';h.className='sh-push-hint';h.setAttribute('aria-label','تفعيل الإشعارات');
+  h.innerHTML='🔔 اضغط على علامة الجرس لتفعيل الإشعارات<span class="h-x" aria-hidden="true">×</span>';
+  h.addEventListener('click',function(e){
+    e.stopPropagation();
+    try{localStorage.setItem('sh_push_hint_done','1')}catch(_e){}
+    try{if(h.parentNode)h.parentNode.removeChild(h)}catch(_e){}
+    try{btn.classList.remove('bell-ring')}catch(_e){}
+    if(e.target&&e.target.classList&&e.target.classList.contains('h-x'))return;
+    setTimeout(function(){try{notificationCenter()}catch(_x){}},40);
+  });
+  document.body.appendChild(h);
+ }catch(e){}
+}
 async function notifV(){V='notify';app(`<h2>🔔 إشعارات الطلبات</h2><small>البريد اختياري. أضفه لو حابب توصلك رسالة عند تسجيل الطلب أو تحديث حالته. يمكنك ربط تيليجرام أيضًا.</small><input id="notifyEmail" type="email" autocomplete="email" placeholder="البريد الإلكتروني (اختياري)"><button onclick="saveNotifyEmail(this)">حفظ البريد</button><div id="ne" class="err"></div><hr><div id="tgstatus">جاري تحميل حالة تيليجرام…</div><button class="g" onclick="makeTelegramLink(this)">ربط حساب Telegram</button><p><a id="tgurl" hidden target="_blank" rel="noopener">افتح رابط الربط في Telegram واضغط Start</a></p><small>لا يمكن للبوت إرسال رسالة قبل أن تبدأه. كل رابط ربط صالح لعشر دقائق ولمرة واحدة.</small>`);try{const s=await call('settings');$('notifyEmail').value=s.email||'';$('tgstatus').textContent=s.telegram?'✅ Telegram مربوط بهذا الحساب':'Telegram غير مربوط'}catch(x){$('tgstatus').textContent=em(x)}}
 async function saveNotifyEmail(b){try{b.disabled=1;await call('setEmail',{email:$('notifyEmail').value});$('ne').textContent='تم حفظ البريد ✔'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}
 async function makeTelegramLink(b){try{b.disabled=1;const x=await call('tgLink');$('tgurl').href=x.url;$('tgurl').hidden=false;$('tgstatus').textContent='اضغط الرابط ثم Start لإتمام الربط'}catch(x){$('ne').textContent=em(x)}finally{b.disabled=0}}async function loadO(){try{const ce=cGet('offers');if(ce){OF=ce.v;if(HI>=featuredOffers().length)HI=0;drawHero()}var _d=null;try{_d=await homeDataOnce()}catch(_e){}OF=(_d&&Array.isArray(_d.offers))?_d.offers:await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero()}catch(x){const e=$('of');if(e&&!OF.length)e.textContent=em(x)}}
@@ -303,8 +325,8 @@ const shehabHomeBeforePush=homeV;homeV=function(m=''){shehabHomeBeforePush(m);re
 </script>
 
 <style>
-:root{--btext:var(--b);--bg:#F8FAFD;--fg:#171A1F;--soft:#F1F5FB;--soft2:#F7FAFD;--line:#DEE7F3;--muted:#7C879B;--card:#FFFFFF;--gold:#B08A4F;--gold2:#D8B87E}
-:root{--bg2:#EEF3FA;--glow:rgba(11,42,111,.06);--glow2:rgba(59,130,246,.05);--hair:rgba(11,42,111,.03)}
+:root{--btext:var(--b);--bg:#FFFFFF;--fg:#171A1F;--soft:#F1F5FB;--soft2:#F7FAFD;--line:#DEE7F3;--muted:#7C879B;--card:#FFFFFF;--gold:#B08A4F;--gold2:#D8B87E}
+:root{--bg2:#FFFFFF;--glow:rgba(11,42,111,.04);--glow2:rgba(59,130,246,.03);--hair:rgba(11,42,111,.02)}
 html.dark{--bg2:#0B101F;--glow:rgba(62,95,166,.14);--glow2:rgba(126,164,255,.06);--hair:rgba(255,255,255,.035)}
 html.dark{--btext:#bcd0ff;--bg:#0e1424;--fg:#e8ecf5;--soft:#1c2744;--soft2:#161f36;--line:#2c3b5f;--muted:#9aa6bf;--card:#151d33;--gold:#D9BB84;--gold2:#EBD9AE}
 html.dark body{color:var(--fg)}
@@ -1595,17 +1617,27 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
   }
   function renderHomeSections(box,list){
     box.innerHTML='';
+    try{
+      var hd=document.createElement('div');hd.className='sh-sec-hdr row';
+      var can=(typeof isStaff==='function')&&isStaff();
+      hd.innerHTML='<h2 class="sh-sec-title" style="margin:8px 0 2px">🗂️ جميع الأقسام</h2>'+(can?'<button type="button" class="g sh-add-sec" title="إضافة قسم جديد">＋ إضافة قسم</button>':'');
+      box.appendChild(hd);
+      if(can){var ab=hd.querySelector('.sh-add-sec');if(ab)ab.addEventListener('click',function(){try{window.secAdminV()}catch(e){}})}
+    }catch(e){}
     (list||[]).forEach(function(sec){
       if(!sec||!sec.items||!sec.items.length)return;
       var wrap=document.createElement('div');wrap.className='sec-wrap';
       var head=document.createElement('div');head.className='sec-head';
       head.innerHTML='<h2>'+(sec.img?('<img class="sec-ico" src="'+E(sec.img)+'" alt="'+E(sec.name||'')+'">'):'🗂️')+' '+E(sec.name||'')+'</h2>';
-      var more=document.createElement('button');more.type='button';more.className='g sec-more';more.textContent='عرض الكل';
+      var more=document.createElement('button');more.type='button';more.className='g sec-more';more.textContent='الكل';
       (function(sid){more.addEventListener('click',function(){secScreenV(sid)})})(sec.id);
       head.appendChild(more);
+      var arr=document.createElement('button');arr.type='button';arr.className='g sec-arrow';arr.setAttribute('title','مشاهدة كل أصناف القسم');arr.setAttribute('aria-label','مشاهدة كل أصناف القسم');arr.textContent='‹';
+      (function(sid){arr.addEventListener('click',function(ev){ev.stopPropagation();try{secScreenV(sid)}catch(e){}})})(sec.id);
+      head.appendChild(arr);
       wrap.appendChild(head);
       var row=document.createElement('div');row.className='sec-home-grid';
-      sec.items.slice(0,3).forEach(function(it){row.appendChild(secItemCard(it,sec.id,true))});
+      sec.items.slice(0,7).forEach(function(it){row.appendChild(secItemCard(it,sec.id,true))});
       wrap.appendChild(row);
       box.appendChild(wrap);
     });
@@ -1662,6 +1694,8 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     if(!SEC_READY){ try{ var _c=cGet('sections'); if(_c&&Array.isArray(_c.v)&&_c.v.length){SEC_CACHE=_c.v;SEC_READY=true} }catch(e){} }
     if(SEC_READY)renderHomeSections(box,SEC_CACHE); else box.innerHTML=secSkeletonHTML();
     var favP=ensureFavs();                       /* المفضلة بتحمّل بالتوازي، مش بتوقف الأقسام */
+    /* الكاش فورًا للمسجل كمان: أيقونات الأقسام تظهر مع الصفحة قبل النداء */
+    try{ var _pre=cGet('sections'); if(_pre&&Array.isArray(_pre.v)&&_pre.v.length&&!SEC_READY){ SEC_CACHE=_pre.v; SEC_READY=true; var _hb=G('homeSections'); if(_hb){renderHomeSections(_hb,SEC_CACHE); try{shSecChips(_hb,SEC_CACHE)}catch(_e){}} } }catch(_pe){}
     var list;
     try{
       var _d=null;
@@ -1688,7 +1722,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       (function(sid){ c.addEventListener('click',function(ev){ ev.stopPropagation(); try{ secScreenV(sid) }catch(e){} }) })(s&&s.id);
       bar.appendChild(c);
     });
-    box.insertBefore(bar,box.firstChild);
+    var _hd=box.querySelector('.sh-sec-hdr'); if(_hd&&_hd.parentNode){if(_hd.nextSibling)box.insertBefore(bar,_hd.nextSibling);else box.appendChild(bar)} else box.insertBefore(bar,box.firstChild);
   }
   /* رس شريط الأقسام فورًا: كاش خفيف + نداء خفيف pubChips قبل بيانات الأقسام الثقيلة */
   function shChipsFast(box){
@@ -4308,6 +4342,31 @@ html.dark #iaList .ia-tag.gift{background:#123b25;color:#7dffb8}
 .topbar .ta-l{justify-self:end}
 .topbar .lg{margin:0 auto}
 html.dark .topbar .top-actions .g{background:#1c2744;border:1px solid #2c3b5f}
+/* ===== تحسين الحجم: أيقونات أصغر تعطي شكل تطبيق احترافي ===== */
+.lg{height:96px}
+.topbar{padding:10px 16px 6px}
+.topbar .lg{height:58px}
+.person{width:38px;height:38px;font-size:17px;padding:3px}
+.theme-btn{width:38px;height:38px;min-width:38px;flex:0 0 38px}
+.home-duo .duo{min-height:72px;padding:8px 6px;font-size:12.5px;border-radius:12px}
+.home-duo .duo .em{font-size:20px}
+/* ===== الأقسام في الرئيسية: عنوان + إضافة + سكرول أفقي ٧ أصناف + سهم دايرة ===== */
+.sh-sec-hdr{align-items:center;gap:8px}
+button.sh-add-sec{flex:0 0 auto;width:auto;margin-inline-start:auto;padding:6px 12px;font-size:12.5px;border-radius:999px}
+.sec-home-grid{display:flex;gap:10px;overflow-x:auto;padding:6px 2px;scroll-snap-type:x proximity;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.sec-home-grid::-webkit-scrollbar{display:none}
+.sec-item.sec-sq{flex:0 0 102px;scroll-snap-align:start}
+button.sec-arrow{width:34px;height:34px;min-width:34px;padding:0;margin:0;border-radius:50% !important;background:var(--b,#0b2a6f) !important;color:#fff;font-size:20px;line-height:1;border:0;display:grid;place-items:center;box-shadow:0 6px 14px -8px rgba(11,42,111,.8)}
+html.dark button.sec-arrow{background:#1D4FA8 !important;color:#fff}
+/* ===== إشعارات: تلميح الجرس + نبض زرار التفعيل ===== */
+@keyframes ucPulse{0%,100%{box-shadow:0 0 0 0 rgba(11,42,111,.5)}50%{box-shadow:0 0 0 12px rgba(11,42,111,0)}}
+#enableNoticesButton{animation:ucPulse 1.5s ease-in-out infinite;background:var(--b,#0b2a6f) !important;color:#fff !important;font-weight:800}
+@keyframes bellWiggle{0%,55%,100%{transform:rotate(0)}65%{transform:rotate(16deg)}75%{transform:rotate(-14deg)}85%{transform:rotate(10deg)}}
+.notification-btn.bell-ring{animation:bellWiggle 2.4s ease-in-out infinite}
+@keyframes hintBob{0%,100%{transform:translateX(50%) translateY(0)}50%{transform:translateX(50%) translateY(-3px)}}
+.sh-push-hint{position:fixed;top:calc(env(safe-area-inset-top,0px) + 74px);right:50%;transform:translateX(50%);z-index:47;width:auto;max-width:90vw;padding:9px 12px;border-radius:14px;background:var(--b,#0b2a6f);color:#fff;font-size:12.5px;font-weight:800;border:0;box-shadow:0 10px 22px -10px rgba(11,42,111,.65);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;animation:hintBob 2.2s ease-in-out infinite}
+.sh-push-hint .h-x{margin-inline-start:4px;background:rgba(255,255,255,.18);border-radius:50%;width:18px;height:18px;display:grid;place-items:center;font-size:13px}
+html.dark .sh-push-hint{background:#1D4FA8}
 </style>
 
 <script>
