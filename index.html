@@ -100,7 +100,89 @@ function whatsapp(){const message='السلام عليكم، أرغب في ال�
 async function fpS(b){try{b.disabled=1;const p=$('p').value;await call('forgot',{phone:p});rsV(p)}catch(x){$('e').textContent=em(x);b.disabled=0}}
 function rsV(p){V='rs';app(`<img class="lg" src="${LOGO}"><h2>كلمة سر جديدة</h2><small>اكتب الكود اللي وصلك (الواتساب أو الإيميل) وكلمة السر الجديدة. لو الكود ما وصلش كلّم الصيدلية.</small><input id="cv" type="tel" inputmode="numeric" placeholder="الكود (6 أرقام)">${PW('w','كلمة السر الجديدة')}<div class="err" id="e"></div><button onclick="rsS('${esc(p)}',this)">تغيير كلمة السر</button>`)}
 async function rsS(p,b){try{b.disabled=1;await call('reset',{phone:p,code:$('cv').value,pass:$('w').value});authV();$('e').textContent='تم تغيير كلمة السر ✔ سجّل دخول'}catch(x){$('e').textContent=em(x);b.disabled=0}}
-function authV(m='in'){V='auth';const u=m=='up';app(`<img class="lg" src="${LOGO}"><div class="row"><button class="${u?'g':''}" onclick="authV('in')">دخول</button><button class="${u?'':'g'}" onclick="authV('up')">حساب جديد</button></div>${u?`<small>نوع الحساب</small><select id="r" onchange="rc()"><option value="customer">عميل</option><option value="pharmacist">صيدلي</option><option value="assistant">مساعد</option><option value="manager">مدير</option></select><input id="n" placeholder="الاسم ثنائي">`:''}<input id="p" type="tel" placeholder="رقم التليفون">${u?`<input id="ad" placeholder="العنوان"><div id="ed"><input id="eml" type="email" autocomplete="email" placeholder="البريد الإلكتروني (اختياري لتحديثات الطلب)"></div><input id="cd" type="password" hidden placeholder="كود المدير السري">`:''}${PW('w','الباسورد')}${u?PW('w2','تأكيد كلمة السر'):''}<div class="err" id="e"></div><button onclick="go('${m}')">${u?'تسجيل':'دخول'}</button><button class="g" onclick="shGuestBrowse()">👀 تصفح كزائر</button>${u?'':'<button class="lk" onclick="fpV()">نسيت كلمة السر؟</button><button class="g" onclick="whatsapp()">💬 تواصل عبر واتساب</button><small>هتفتح المحادثة برسالة جاهزة وتقدر تراجعها قبل الإرسال</small>'}`)}
+/* ---------- دخول بجوجل: Firebase Auth (popup/redirect) + ربط الرقم بـ OTP على إيميل جوجل المتحقق منه ---------- */
+let SHEHAB_GAUTH_LOADING=null;
+function loadShehabAuth(){
+  if(SHEHAB_GAUTH_LOADING)return SHEHAB_GAUTH_LOADING;
+  const task=(async()=>{
+    for(const src of ['https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js'])await new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(new Error('تعذر تحميل مكتبة تسجيل الدخول بجوجل'));document.head.appendChild(s)});
+    if(!window.firebase)throw new Error('مكتبة جوجل لم تُحمّل');
+    if(!firebase.apps.length)firebase.initializeApp(SHEHAB_FIREBASE_CONFIG);
+    return firebase.auth();
+  })();
+  SHEHAB_GAUTH_LOADING=task.catch(e=>{SHEHAB_GAUTH_LOADING=null;throw e});
+  return SHEHAB_GAUTH_LOADING;
+}
+async function gAfter(idToken){
+  const x=await call('gauth',{idToken:idToken});
+  if(x&&x.need==='phone'){S={t:'',n:x.name||'',r:'customer',ge:x.email,gid:idToken};try{LS.gn=x.name||'';LS.ge=x.email;LS.gid=idToken}catch(e){}
+    gphoneV(x.email,x.name);return}
+  if(x&&x.t){S={t:x.t,n:x.name,r:x.role};S.gid='';try{Object.assign(LS,S)}catch(e){};homeV();return}
+  try{var elE=$('e');if(elE)elE.textContent='حصل خطأ غير متوقع'}catch(_e){}
+}
+async function gstart(b){
+  if(b){b.disabled=true;b.textContent='⏳ جاري فتح جوجل…'}
+  try{
+    const auth=await loadShehabAuth();
+    try{
+      const res=await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      const u=res.user;if(!u)throw new Error('مفيش حساب اترد من جوجل');
+      const tk=await u.getIdToken();
+      await gAfter(tk);
+    }catch(e){
+      const c=String(e&&e.code||'');
+      if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment'||c=='auth/timeout'){
+        try{sessionStorage.setItem('sh_gauth_pend','1')}catch(_e){}
+        await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());return;
+      }
+      throw e;
+    }
+  }catch(x){
+    let msg=em(x);
+    if(String(x&&x.code||'').indexOf('unauthorized-domain')>-1)msg='الدومين مش مصرّح بعد — سجّل برقم التليفون، أو كلّمني أظبطه';
+    try{var elE=$('e');if(elE)elE.textContent=msg;else TO(msg,'bad')}catch(_e){}
+  }
+  if(b){b.disabled=false;b.textContent='🟢 دخول بجوجل'}
+}
+async function gHandleRedirect(){
+  try{
+    if(!sessionStorage.getItem('sh_gauth_pend'))return;
+    sessionStorage.removeItem('sh_gauth_pend');
+    const auth=await loadShehabAuth();
+    try{
+      const res=await auth.getRedirectResult();
+      const u=res&&res.user;
+      if(u){const tk=await u.getIdToken();await gAfter(tk);return}
+    }catch(_e){}
+  }catch(_e){}
+}
+function gphoneV(email,name){
+  V='gphone';
+  app(`<img class="lg" src="${LOGO}"><h2>ربط رقمك بجوجل</h2><small>حساب جوجل: <b>${esc(email)}</b><br>اكتب رقم تليفونك عشان نعمل حسابك ونربط بيه.</small><input id="p" type="tel" inputmode="tel" placeholder="رقم التليفون"><div class="err" id="e"></div><button onclick="gphoneS(this)">ابعت كود التأكيد</button><button class="g" onclick="authV()">رجوع لتسجيل الدخول</button>`);
+}
+async function gphoneS(b){
+  try{
+    b.disabled=1;
+    const ph=$('p').value;
+    const x=await call('gphone',{idToken:S.gid,phone:ph});
+    S.gph=ph;
+    gcodeV(x&&x.mail||'');
+  }catch(e){try{$('e').textContent=em(e)}catch(_e){}b.disabled=0}
+}
+function gcodeV(mail){
+  V='gcode';
+  app(`<img class="lg" src="${LOGO}"><h2>كود التأكيد</h2><small>الكود جالك على: <b>الإيميل ${esc(mail||S.ge||'')}</b>${S.gph?'<br>وكمان على واتساب الرقم <b>'+esc(S.gph)+'</b>':''}</small><input id="cv" type="tel" inputmode="numeric" placeholder="الكود (6 أرقام)"><div class="err" id="e"></div><button onclick="gcodeS(this)">تأكيد الرقم</button><button class="g" onclick="gphoneV(S.ge||'',S.gn||'')">مش وصل الكود؟ رجوع وإعادة إرسال</button>`);
+}
+async function gcodeS(b){
+  try{
+    b.disabled=1;
+    const x=await call('gverify',{idToken:S.gid,phone:S.gph,code:$('cv').value});
+    S={t:x.t,n:x.name,r:x.role};S.gid='';S.gph='';
+    try{Object.assign(LS,S)}catch(_e){}
+    homeV();
+  }catch(e){try{$('e').textContent=em(e)}catch(_e){}b.disabled=0}
+}
+function authV(m='in'){V='auth';const u=m=='up';gHandleRedirect();app(`<img class="lg" src="${LOGO}"><div class="row"><button class="${u?'g':''}" onclick="authV('in')">دخول</button><button class="${u?'':'g'}" onclick="authV('up')">حساب جديد</button></div>${u?`<small>نوع الحساب</small><select id="r" onchange="rc()"><option value="customer">عميل</option><option value="pharmacist">صيدلي</option><option value="assistant">مساعد</option><option value="manager">مدير</option></select><input id="n" placeholder="الاسم ثنائي">`:''}<input id="p" type="tel" placeholder="رقم التليفون">${u?`<input id="ad" placeholder="العنوان"><div id="ed"><input id="eml" type="email" autocomplete="email" placeholder="البريد الإلكتروني (اختياري لتحديثات الطلب)"></div><input id="cd" type="password" hidden placeholder="كود المدير السري">`:''}${PW('w','الباسورد')}${u?PW('w2','تأكيد كلمة السر'):''}<div class="err" id="e"></div><button onclick="go('${m}')">${u?'تسجيل':'دخول'}</button>${u?'':'<button class="g" onclick="gstart(this)">🟢 دخول بجوجل</button>'}<button class="g" onclick="shGuestBrowse()">👀 تصفح كزائر</button>${u?'':'<button class="lk" onclick="fpV()">نسيت كلمة السر؟</button><button class="g" onclick="whatsapp()">💬 تواصل عبر واتساب</button><small>هتفتح المحادثة برسالة جاهزة وتقدر تراجعها قبل الإرسال</small>'}`)}
 async function go(m){try{if(m=='up'&&$('w').value!==$('w2').value)throw 'كلمتا السر غير متطابقتين';const d={phone:$('p').value,pass:$('w').value};
 if(m=='up'){Object.assign(d,{name:$('n').value,role:$('r').value,code:$('cd').value,addr:$('ad').value,email:$('eml').value,confirmPass:$('w2').value});
 const x=await call('signup',d);if(x.status=='pending'){authV('in');$('e').textContent='تم التسجيل ✔ استنى موافقة المدير على حسابك';return}S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV();return}
