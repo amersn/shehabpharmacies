@@ -188,7 +188,7 @@ async function gresend(b){
 }
 function gcodeV(mail){
   V='gcode';
-  app(`<img class="lg" src="${LOGO}"><h2>كود التأكيد</h2><small>الكود جالك على: <b>الإيميل ${esc(mail||S.ge||'')}</b>${S.gph?'<br>وكمان على واتساب الرقم <b>'+esc(S.gph)+'</b>':''}</small><input id="cv" type="tel" inputmode="numeric" placeholder="الكود (6 أرقام)"><div class="err" id="e"></div><button onclick="gcodeS(this)">تأكيد الرقم</button><div class="row"><button class="g" onclick="gresend(this)">↻ إعادة إرسال الكود</button><button class="g" onclick="gphoneV(S.ge||'',S.gn||'')">✎ تعديل الرقم</button></div>`);
+  app(`<img class="lg" src="${LOGO}"><h2>كود التأكيد</h2><small>الكود اتبعت على: <b>الإيميل ${esc(mail||S.ge||'')}</b><br>افتح الإيميل (وقبلها شوف البريد غير المرغوب/Spam) وهتلاقي الكود.</small><input id="cv" type="tel" inputmode="numeric" placeholder="الكود (6 أرقام)"><div class="err" id="e"></div><button onclick="gcodeS(this)">تأكيد الرقم</button><div class="row"><button class="g" onclick="gresend(this)">↻ إعادة إرسال الكود</button><button class="g" onclick="gphoneV(S.ge||'',S.gn||'')">✎ تعديل الرقم</button></div>`);
 }
 async function gcodeS(b){
   try{
