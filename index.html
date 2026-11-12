@@ -647,6 +647,7 @@ function ddOrder(i){
   ccSet({item:line,image:cur.image||'',audio:cur.audio||'',notes:cur.notes||'',mode:cur.mode||'',addr:cur.addr||''});
   NAV_REPLACE=true;cartV();
 }
+try{window.ddV=ddV;window.ddSearch=ddSearch;window.ddOrder=ddOrder;window.ddLoad=ddLoad}catch(e){}
 try{var cbBase=cartBadge;cartBadge=function(){cbBase();navCount()}}catch(e){}
 function watchApp(){var ap=q('app');if(!ap||!window.MutationObserver)return;new MutationObserver(function(){navSync()}).observe(ap,{childList:true,subtree:false});var t=0;new MutationObserver(function(){if(t)return;t=setTimeout(function(){t=0;injectRepeat()},90)}).observe(ap,{childList:true,subtree:true})}
 function heroDisc(o){try{var p=Number(String(o.p||'').replace(',','.')),w=Number(String(o.w||'').replace(',','.'));return (o.p&&o.w&&isFinite(p)&&isFinite(w)&&w>p&&p>=0)?Math.round((w-p)/w*100):0}catch(e){return 0}}
