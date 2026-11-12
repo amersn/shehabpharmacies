@@ -120,38 +120,63 @@ async function gAfter(idToken){
   if(x&&x.t){S={t:x.t,n:x.name,r:x.role};S.gid='';try{Object.assign(LS,S)}catch(e){};homeV();return}
   try{var elE=$('e');if(elE)elE.textContent='حصل خطأ غير متوقع'}catch(_e){}
 }
+/* One Tap (FedCM): نافذة جوجل الأصلية بقايمة الحسابات المحفوظة على الجهاز — من غير صفحة sign-in وبدون 400 */
+let GSI_READY=null,SH_GOTAP={done:false};
+function loadGsi(){
+  if(GSI_READY)return GSI_READY;
+  GSI_READY=new Promise((ok,no)=>{
+    if(window.google&&google.accounts&&google.accounts.id)return ok();
+    const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;
+    s.onload=ok;s.onerror=()=>no(new Error('مكتبة جوجل لم تُحمّل'));document.head.appendChild(s);
+  });
+  return GSI_READY;
+}
+async function gOneTapStart(){
+  await loadGsi();
+  SH_GOTAP.done=false;
+  google.accounts.id.initialize({
+    client_id:'152350818232-8vf09fs7rtdkv78peiup2lmfegefkgsh.apps.googleusercontent.com',
+    use_fedcm_for_prompt:true,
+    auto_select:false,
+    callback:(r)=>{
+      try{
+        if(r&&r.credential){SH_GOTAP.done=true;gAfter(r.credential)}
+      }catch(e){}
+    }
+  });
+}
 async function gstart(b){
   if(b){b.disabled=true;b.textContent='⏳ جاري فتح جوجل…'}
-  try{
-    const auth=await loadShehabAuth();
-    var isMobile=false;
-    try{isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||navigator.maxTouchPoints>1}catch(_e){}
-    var standalone=false;
-    try{standalone=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(_e2){}
-    if(isMobile||standalone){
-      /* الموبايل: redirect بس — بيشوف القايمة المحفوظة ومايحصلش شاشة بيضاء */
-      try{sessionStorage.setItem('sh_gauth_pend','1')}catch(_e){}
-      await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());return;
-    }
+  SH_GOTAP.done=false;
+  var wentRedirect=false;
+  const doRedirect=async()=>{
+    if(SH_GOTAP.done||wentRedirect)return;
+    wentRedirect=true;
     try{
-      const res=await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      const u=res.user;if(!u)throw new Error('مفيش حساب اترد من جوجل');
-      const tk=await u.getIdToken();
-      await gAfter(tk);
+      const auth=await loadShehabAuth();
+      try{sessionStorage.setItem('sh_gauth_pend','1')}catch(_e){}
+      await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
     }catch(e){
-      const c=String(e&&e.code||'');
-      if(c=='auth/popup-blocked'||c=='auth/operation-not-supported-in-this-environment'||c=='auth/timeout'){
-        try{sessionStorage.setItem('sh_gauth_pend','1')}catch(_e){}
-        await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());return;
-      }
-      throw e;
+      if(b){b.disabled=false;b.textContent='تسجيل الدخول بجوجل'}
+      try{TO(em(e),'bad')}catch(_e){}
     }
+  };
+  try{
+    await gOneTapStart();
+    google.accounts.id.prompt((n)=>{
+      try{
+        if(n&&(n.isNotDisplayed()||n.isSkippedMoment())){if(!SH_GOTAP.done&&!wentRedirect)setTimeout(doRedirect,300)}
+      }catch(_e){}
+    });
+    /* لو النافذة ما ظهرتش ولا اتحقّق خلال ثواني — نروح المسار العادي (redirect) */
+    setTimeout(()=>{if(!SH_GOTAP.done&&!wentRedirect)doRedirect()},4000);
+    return;
   }catch(x){
-    let msg=em(x);
-    if(String(x&&x.code||'').indexOf('unauthorized-domain')>-1)msg='الدومين مش مصرّح بعد — سجّل برقم التليفون، أو كلّمني أظبطه';
-    try{var elE=$('e');if(elE)elE.textContent=msg;else TO(msg,'bad')}catch(_e){}
+    await doRedirect();
+    if(b&&b.disabled){b.disabled=false;b.textContent='تسجيل الدخول بجوجل'}
+    return;
   }
-  if(b){b.disabled=false;b.textContent='🟢 دخول بجوجل'}
+  /* unreachable */
 }
 async function gHandleRedirect(){
   try{
