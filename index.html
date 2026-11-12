@@ -1867,6 +1867,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     /* نسخة مكرّرة عشان اللف يرجع من الأول من غير قفزة */
     var kids=[].slice.call(bar.children);
     kids.forEach(function(k){var cl=k.cloneNode(true);cl.setAttribute('aria-hidden','true');bar.appendChild(cl)});
+    var rtl=false;try{rtl=getComputedStyle(bar).direction==='rtl'}catch(e){}
     var last=Date.now();
     setInterval(function(){
       if(paused)return;
@@ -1875,8 +1876,16 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       var half=bar.scrollWidth/2;
       if(half>bar.clientWidth){
         var px=dt*0.021; /* ~21 بكسل/ثانية — هادي */
-        try{bar.scrollLeft+=px}catch(e){}
-        if(bar.scrollLeft>=half)try{bar.scrollLeft-=half}catch(e){}
+        try{
+          if(rtl){
+            /* في RTL القيمة بتتسالب: بنطرح عشان نمشي شمال، ولما نوصل للنص بترجع من الأول */
+            bar.scrollLeft-=px;
+            if(bar.scrollLeft<=-half)bar.scrollLeft+=half;
+          }else{
+            bar.scrollLeft+=px;
+            if(bar.scrollLeft>=half)bar.scrollLeft-=half;
+          }
+        }catch(e){}
       }
     },16);
   }
