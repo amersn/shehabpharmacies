@@ -584,13 +584,69 @@ function monthlyAdminV(){if(S&&S.r==='customer'){monthlyV();return}V='monthlyAll
 async function repeatOrder(id,b){if(!confirm('أعمل طلب جديد بنفس أصناف الطلب ده؟'))return;try{b.disabled=true;b.textContent='جاري الإرسال…';await call('repeat',{id:id});toast('تم إنشاء طلب جديد بنفس الأصناف ✔','ok');setTimeout(function(){try{if(V=='list')refreshOrders();else if(V=='mine')mineV()}catch(e){}},600)}catch(x){toast(em(x),'bad');b.disabled=false;b.textContent='🔁 إعادة الطلب'}}
 function injectRepeat(){try{if(V!='list'&&V!='mine')return;var done='تم التسليم للعميل';try{if(typeof ST!=='undefined'&&ST.done&&ST.done[0])done=ST.done[0]}catch(e){}var cards=document.querySelectorAll('#ls .card[data-oid]');for(var i=0;i<cards.length;i++){var c=cards[i];if(c.querySelector('.repeat-btn'))continue;var chip=c.querySelector('.chip');if(!chip||String(chip.textContent||'').trim()!=done)continue;var b=document.createElement('button');b.type='button';b.className='g repeat-btn';b.textContent='🔁 إعادة الطلب';(function(bb,oid){bb.addEventListener('click',function(ev){ev.stopPropagation();repeatOrder(oid,bb)})})(b,c.getAttribute('data-oid'));c.appendChild(b)}}catch(e){}}
 window.monthlyV=monthlyV;window.monthlyAdminV=monthlyAdminV;
-var I={home:`<svg viewBox='0 0 24 24'><path d='M3 10.5 12 3l9 7.5'/><path d='M5 9.5V21h14V9.5'/><path d='M9.5 21v-6h5v6'/></svg>`,pct:`<svg viewBox='0 0 24 24'><line x1='19' y1='5' x2='5' y2='19'/><circle cx='7.5' cy='7.5' r='2.5'/><circle cx='16.5' cy='16.5' r='2.5'/></svg>`,basket:`<svg viewBox='0 0 24 24'><path d='M4 6h16l-1.6 11a2 2 0 0 1-2 1.7H7.6a2 2 0 0 1-2-1.7Z'/><path d='M9 6 12 2.5 15 6'/><path d='M9.5 11.5v4M14.5 11.5v4'/></svg>`,user:`<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3.6'/><path d='M4.8 20a7.2 7.2 0 0 1 14.4 0'/></svg>`};
-function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav.id='nav';function item(t,icon,label){var b=document.createElement('button');b.className='nav-item';b.setAttribute('data-t',t);b.setAttribute('aria-label',label);var ic=document.createElement('span');ic.className='icn';ic.innerHTML=icon;var lb=document.createElement('span');lb.className='lbl';lb.textContent=label;b.appendChild(ic);b.appendChild(lb);b.addEventListener('click',function(){navGo(t)});return b}var mine=item('mine',I.basket,'طلباتي');mine.querySelector('.lbl').id='navMineLbl';var fab=document.createElement('button');fab.className='nav-fab';fab.setAttribute('aria-label','عمل أوردر');fab.innerHTML="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 5.5v13M5.5 12h13'></path></svg>";fab.addEventListener('click',function(){navFab()});nav.appendChild(item('home',I.home,'الرئيسية'));nav.appendChild(item('off',I.pct,'العروض'));nav.appendChild(fab);var gap=document.createElement('span');gap.className='nav-gap';nav.appendChild(gap);nav.appendChild(mine);nav.appendChild(item('profile',I.user,'حسابي'));document.body.appendChild(nav)}
-function navGo(t){try{if(t==='home')homeV();else if(t==='off')offV();else if(t==='mine'){if(S.r==='customer')mineV();else listV()}else if(t==='profile')profileV()}catch(e){}navSync()}
+var I={home:`<svg viewBox='0 0 24 24'><path d='M3 10.5 12 3l9 7.5'/><path d='M5 9.5V21h14V9.5'/><path d='M9.5 21v-6h5v6'/></svg>`,pct:`<svg viewBox='0 0 24 24'><line x1='19' y1='5' x2='5' y2='19'/><circle cx='7.5' cy='7.5' r='2.5'/><circle cx='16.5' cy='16.5' r='2.5'/></svg>`,pill:`<svg viewBox='0 0 24 24'><path d='m10.5 20.5 10-10a5 5 0 0 0-7-7l-10 10a5 5 0 0 0 7 7Z'/><path d='m8.5 8.5 7 7'/></svg>`,basket:`<svg viewBox='0 0 24 24'><path d='M4 6h16l-1.6 11a2 2 0 0 1-2 1.7H7.6a2 2 0 0 1-2-1.7Z'/><path d='M9 6 12 2.5 15 6'/><path d='M9.5 11.5v4M14.5 11.5v4'/></svg>`,user:`<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3.6'/><path d='M4.8 20a7.2 7.2 0 0 1 14.4 0'/></svg>`};
+function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav.id='nav';function item(t,icon,label){var b=document.createElement('button');b.className='nav-item';b.setAttribute('data-t',t);b.setAttribute('aria-label',label);var ic=document.createElement('span');ic.className='icn';ic.innerHTML=icon;var lb=document.createElement('span');lb.className='lbl';lb.textContent=label;b.appendChild(ic);b.appendChild(lb);b.addEventListener('click',function(){navGo(t)});return b}var mine=item('mine',I.basket,'طلباتي');mine.querySelector('.lbl').id='navMineLbl';var fab=document.createElement('button');fab.className='nav-fab';fab.setAttribute('aria-label','عمل أوردر');fab.innerHTML="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 5.5v13M5.5 12h13'></path></svg>";fab.addEventListener('click',function(){navFab()});nav.appendChild(item('home',I.home,'الرئيسية'));nav.appendChild(item('dd',I.pill,'دليل الأدوية'));nav.appendChild(fab);var gap=document.createElement('span');gap.className='nav-gap';nav.appendChild(gap);nav.appendChild(mine);nav.appendChild(item('profile',I.user,'حسابي'));document.body.appendChild(nav)}
+function navGo(t){try{if(t==='home')homeV();else if(t==='dd')ddV();else if(t==='off')offV();else if(t==='mine'){if(S.r==='customer')mineV();else listV()}else if(t==='profile')profileV()}catch(e){}navSync()}
 function navFab(){try{if(S.r==='customer')ordV();else addV()}catch(e){}navSync()}
 function navCount(){}
-function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'off',offer:'off',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'off',sec:'off',secItem:'off',mydata:'profile',notifSettings:'profile',settings:'profile',adminDash:'home',itemsAdmin:'home',search:'home'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
+function navSync(){var n=q('nav');if(!n)return;var logged=false;try{logged=!!(S&&S.t)}catch(e){}n.hidden=!logged;if(!logged)return;var staff=false;try{staff=(S.r!=='customer')}catch(e){}var lbl=q('navMineLbl');if(lbl)lbl.textContent=staff?'الطلبات':'طلباتي';var v='';try{v=V||''}catch(e){}var cur={home:'home',off:'dd',offer:'dd',dd:'dd',mine:'mine',list:'mine',profile:'profile',monthly:'profile',monthlyAll:'profile',cart:'dd',sec:'dd',secItem:'dd',mydata:'profile',notifSettings:'profile',settings:'profile',adminDash:'home',itemsAdmin:'home',search:'home'}[v]||'';var it=n.querySelectorAll('.nav-item');for(var i=0;i<it.length;i++)it[i].classList.toggle('active',it[i].getAttribute('data-t')===cur);navCount()}
 window.navGo=navGo;window.navFab=navFab;window.navSync=navSync;
+/* ===== دليل الأدوية المصري (قاعدة مفتوحة CC0 — 25070 دواء) لكل المستخدمين + طلب مباشر ===== */
+let DD_DATA=null,DD_LOAD=null,DD_T=null;
+const DD_URL='https://raw.githubusercontent.com/karem505/egyptian-drug-database/main/data/egyptian-drugs.json';
+function ddNorm(s){try{return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ').trim()}catch(e){return String(s||'')}}
+async function ddLoad(){
+  if(DD_DATA)return DD_DATA;
+  if(DD_LOAD)return DD_LOAD;
+  DD_LOAD=(async()=>{
+    try{var c=await caches.open('shehab_dd');var m=await c.match('dd_v1');if(m){DD_DATA=JSON.parse(await m.text());return DD_DATA}}catch(e){}
+    var r=await fetch(DD_URL);if(!r.ok)throw new Error('تعذر تحميل قاعدة الأدوية');
+    var arr=JSON.parse(await r.text());
+    DD_DATA=arr.map(function(d){return[d.commercial_name_en||'',d.commercial_name_ar||'',d.scientific_name||'',d.manufacturer||'',d.drug_class||'',d.route||'',(d.price_egp==null||d.price_egp===''?'':String(d.price_egp))]});
+    try{var c2=await caches.open('shehab_dd');c2.put('dd_v1',new Response(JSON.stringify(DD_DATA)))}catch(e){}
+    return DD_DATA;
+  })();
+  DD_LOAD=DD_LOAD.catch(function(e){DD_LOAD=null;throw e});
+  return DD_LOAD;
+}
+async function ddV(){
+  V='dd';
+  app(`<h2>💊 دليل الأدوية المصري</h2><small>كل الأدوية المسجلة في مصر — بالعربي والإنجليزي والمادة الفعالة والسعر الرسمي. ابحث ودوس «＋ اطلب» يتحوّل لطلب في السلة.</small><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء أو المادة الفعالة…"><div class="err" id="ddstat"></div><div id="ddr"></div>`);
+  var stat=$('ddstat'),res=$('ddr'),qi=$('ddq');
+  res.innerHTML='<div class="card">جاري تحميل قاعدة الأدوية… (بتتخزن عندك مرة واحدة وبعدها تفتح فورًا)</div>';
+  try{await ddLoad()}catch(x){stat.textContent=em(x);res.innerHTML='';return}
+  stat.textContent='✅ جاهز — '+DD_DATA.length+' دواء';
+  res.innerHTML='<div class="card">اكتب اسم الدواء فوق — بالعربي (بانادول) أو بالإنجليزي (augmentin) أو بالمادة الفعالة (paracetamol)</div>';
+  qi.addEventListener('input',function(){clearTimeout(DD_T);DD_T=setTimeout(ddSearch,200)});
+  qi.focus();
+}
+function ddSearch(){
+  var q=$('ddq'),res=$('ddr');if(!q||!res||!DD_DATA)return;
+  var t=ddNorm(q.value.trim());
+  if(!t){res.innerHTML='<div class="card">اكتب اسم الدواء فوق</div>';return}
+  var out=[];
+  for(var i=0;i<DD_DATA.length&&out.length<60;i++){
+    var r=DD_DATA[i];
+    if(ddNorm(r[0]).indexOf(t)>-1||ddNorm(r[1]).indexOf(t)>-1||ddNorm(r[2]).indexOf(t)>-1)out.push(r);
+  }
+  if(!out.length){res.innerHTML='<div class="card">مفيش نتيجة للبحث «'+esc(q.value.trim())+'» — جرب تاني بالمادة الفعالة</div>';window.__ddResults=null;return}
+  window.__ddResults=out;
+  res.innerHTML=out.map(function(r,i2){
+    return '<div class="card dd-card"><b>'+esc(r[0])+'</b>'+(r[1]?'<small dir="ltr" style="display:block;color:var(--muted)">'+esc(r[1])+'</small>':'')+
+    '<small style="display:block">المادة الفعالة: <b>'+esc(r[2]||'—')+'</b></small>'+
+    '<small style="display:block">'+esc(r[3]||'')+(r[4]?' · '+esc(r[4]):'')+(r[5]?' · '+esc(r[5]):'')+'</small>'+
+    '<div class="row" style="align-items:center;justify-content:space-between;margin-top:6px"><b style="color:#0b2a6f">'+(r[6]?esc(r[6])+' جنيه':'السعر غير متاح')+'</b><button class="g" style="flex:0 0 auto;width:auto" onclick="ddOrder('+i2+')">＋ اطلب</button></div></div>';
+  }).join('');
+}
+function ddOrder(i){
+  var r=(window.__ddResults||[])[i];if(!r)return;
+  var line=r[0]+(r[1]?' ('+r[1]+')':'')+(r[6]?' — السعر الرسمي '+r[6]+' ج':'');
+  var cur=ccGet()||{};
+  var prev=String(cur.item||'').trim();
+  if(prev&&prev.indexOf(r[0])<0)line=prev+'\n'+line;
+  ccSet({item:line,image:cur.image||'',audio:cur.audio||'',notes:cur.notes||'',mode:cur.mode||'',addr:cur.addr||''});
+  NAV_REPLACE=true;cartV();
+}
 try{var cbBase=cartBadge;cartBadge=function(){cbBase();navCount()}}catch(e){}
 function watchApp(){var ap=q('app');if(!ap||!window.MutationObserver)return;new MutationObserver(function(){navSync()}).observe(ap,{childList:true,subtree:false});var t=0;new MutationObserver(function(){if(t)return;t=setTimeout(function(){t=0;injectRepeat()},90)}).observe(ap,{childList:true,subtree:true})}
 function heroDisc(o){try{var p=Number(String(o.p||'').replace(',','.')),w=Number(String(o.w||'').replace(',','.'));return (o.p&&o.w&&isFinite(p)&&isFinite(w)&&w>p&&p>=0)?Math.round((w-p)/w*100):0}catch(e){return 0}}
