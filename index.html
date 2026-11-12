@@ -1867,15 +1867,18 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     /* نسخة مكرّرة عشان اللف يرجع من الأول من غير قفزة */
     var kids=[].slice.call(bar.children);
     kids.forEach(function(k){var cl=k.cloneNode(true);cl.setAttribute('aria-hidden','true');bar.appendChild(cl)});
-    (function step(){
+    var last=Date.now();
+    setInterval(function(){
       if(paused)return;
+      var now=Date.now(),dt=Math.min(now-last,120);last=now;
+      if(document.hidden)return;
       var half=bar.scrollWidth/2;
       if(half>bar.clientWidth){
-        try{bar.scrollLeft+=0.35}catch(e){}
+        var px=dt*0.021; /* ~21 بكسل/ثانية — هادي */
+        try{bar.scrollLeft+=px}catch(e){}
         if(bar.scrollLeft>=half)try{bar.scrollLeft-=half}catch(e){}
       }
-      requestAnimationFrame(step);
-    })();
+    },16);
   }
   /* رندر فوري من الكاش — بيشتغل مع أول رسم للشاشة الرئيسية من غير انتظار نتورك */
   function secFastRender(){
