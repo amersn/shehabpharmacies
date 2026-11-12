@@ -3220,13 +3220,7 @@ html.dark .pt-log{border-color:#232d49}
     var baseCartV=cartV;
     cartV=function(){
       var r=baseCartV.apply(this,arguments);
-      try{
-        if(G('app')&&!G('shareCartBtn')){
-          var b=document.createElement('button');b.type='button';b.id='shareCartBtn';b.className='g';b.textContent='🖼️ شارك السلة كصورة';
-          b.addEventListener('click',function(ev){ev.stopPropagation();H();window.shareCartImage()});
-          var est=G('cartEstimate'); if(est)est.insertAdjacentElement('afterend',b);
-        }
-      }catch(e){}
+      /* زرار «شارك السلة كصورة» اتشال بمستخدم */
       return r;
     };
   }catch(e){}
@@ -4939,5 +4933,129 @@ html.dark .sh-push-hint{background:#1D4FA8}
     });
     mo.observe(document.body,{childList:true,subtree:false});
   }catch(e){}
+})();
+</script>
+<script>
+/* ===== شاشة البحث: بحث في قاعدة الأدوية بجوجل شيت + كارت طلب (للموظفين والعملاء) ===== */
+(function(){
+  function G2(id){return document.getElementById(id)}
+  function E2(s){try{return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}catch(e){return ''}}
+  var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0;
+  function sdType(s){try{return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ').trim()}catch(e){return String(s||'')}}
+  function sdRenderRows(list){
+    SD_RES=list||[];
+    var box=G2('ddDrop');if(!box)return;
+    if(!SD_RES.length){box.style.display='none';return}
+    box.style.display='block';
+    box.innerHTML=SD_RES.map(function(d,i){
+      return '<div class="sd-row" data-i="'+i+'" style="padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer" onclick="sdPick('+i+')">'
+        +(d.ar?'<b>'+E2(d.ar)+'</b> ':'<b>'+E2(d.en)+'</b> ')
+        +(d.ar&&d.en?'<small dir="ltr" style="color:var(--muted)">'+E2(d.en)+'</small>':'')
+        +(d.pr?'<span style="float:left;color:#0b2a6f;font-weight:700">'+E2(d.pr)+' ج</span>':'<span style="float:left;color:var(--muted)">—</span>')
+        +'</div>';
+    }).join('');
+  }
+  window.sdPick=function(i){
+    var d=SD_RES[i];if(!d)return;
+    SD_SEL=d;SD_QTY=1;
+    sdRenderRows([]);
+    var q=G2('searchQ');if(q)q.value=d.ar||d.en;
+    var box=G2('searchRes');if(!box)return;
+    box.innerHTML=''
+      +'<div class="card" id="sdCard" style="position:relative;margin-top:8px">'
+      +'<button type="button" onclick="sdClose()" aria-label="إزالة" style="position:absolute;top:8px;left:8px;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--soft);color:var(--b);font-weight:700;cursor:pointer">✕</button>'
+      +'<div style="padding-inline-end:44px"><b style="font-size:1.15em">'+E2(d.ar||d.en)+'</b>'
+      +(d.ar&&d.en?'<div dir="ltr" style="color:var(--muted)">'+E2(d.en)+'</div>':'')
+      +(d.sci?'<small style="display:block;margin-top:4px">المادة الفعالة: <b>'+E2(d.sci)+'</b></small>':'')
+      +(d.man?'<small style="display:block">'+E2(d.man)+'</small>':'')
+      +'<div style="margin-top:6px;font-weight:800;color:#0b2a6f">'+(d.pr?E2(d.pr)+' جنيه':'السعر غير متاح')+'</div></div>'
+      +'<div class="row" style="align-items:center;gap:10px;margin-top:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;background:var(--soft);border:1.5px solid var(--line);border-radius:12px;padding:4px 8px">'
+      +'<button type="button" class="g" style="width:38px;height:38px;min-width:38px;font-size:1.3em" onclick="sdQty(-1)">−</button>'
+      +'<b id="sdQtyN" style="min-width:28px;text-align:center">'+SD_QTY+'</b>'
+      +'<button type="button" class="g" style="width:38px;height:38px;min-width:38px;font-size:1.3em" onclick="sdQty(1)">＋</button>'
+      +'</div>'
+      +'<button type="button" class="g" style="flex:1 1 auto;width:auto;background:#2e9e4f;color:#fff" onclick="sdOrder()">🛒 اطلب</button>'
+      +'</div>'
+      +'<textarea id="sdNotes" rows="2" placeholder="ملاحظات (اختياري)…" style="margin-top:10px"></textarea>'
+      +'</div>';
+    try{G2('sdNotes').focus()}catch(e){}
+  };
+  window.sdClose=function(){
+    SD_SEL=null;
+    var box=G2('searchRes');if(box)box.innerHTML='';
+    var q=G2('searchQ');if(q){q.value='';try{q.focus()}catch(e){}}
+  };
+  window.sdQty=function(n){
+    SD_QTY=Math.max(1,(+SD_QTY||1)+n);
+    var el=G2('sdQtyN');if(el)el.textContent=SD_QTY;
+  };
+  window.sdOrder=function(){
+    var d=SD_SEL;if(!d)return;
+    var notes='';
+    try{notes=String((G2('sdNotes')||{}).value||'').trim()}catch(e){}
+    var line=d.ar||d.en;
+    if(d.ar&&d.en)line+=' ('+d.en+')';
+    if(d.pr)line+=' — السعر الرسمي '+d.pr+' ج';
+    if(SD_QTY>1)line+=' × '+SD_QTY;
+    var cur=null;try{cur=window.ccGet?ccGet():null}catch(e){}
+    var prev=cur?String(cur.item||'').trim():'';
+    if(prev&&prev.indexOf(d.ar||d.en)<0)line=prev+'\n'+line;
+    if(window.ccSet)ccSet({item:line,image:(cur&&cur.image)||'',audio:(cur&&cur.audio)||'',notes:notes||(cur&&cur.notes)||'',mode:(cur&&cur.mode)||'',addr:(cur&&cur.addr)||''});
+    try{NAV_REPLACE=true;cartV()}catch(e){}
+  };
+  function sdDoSearch(){
+    var q=G2('searchQ'),box=G2('searchRes');if(!q)return;
+    var t=String(q.value||'').trim();
+    if(t.length<2){sdRenderRows([]);return}
+    var typing=++SD_TYPIST;
+    call('ddFind',{q:t}).then(function(res){
+      if(typing!==SD_TYPIST)return;
+      res=Array.isArray(res)?res:[];
+      res=res.filter(function(d){return d&&(d.en||d.ar)});
+      var needle=sdType(t);
+      res.sort(function(a,b){
+        var xa=sdType(a.ar||a.en).indexOf(needle)===0?0:1;
+        var xb=sdType(b.ar||b.en).indexOf(needle)===0?0:1;
+        return xa-xb;
+      });
+      sdRenderRows(res.slice(0,40));
+      if(!res.length&&box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'»</div>';
+    }).catch(function(x){
+      if(typing!==SD_TYPIST)return;
+      sdRenderRows([]);
+      if(box)box.innerHTML='<div class="card">'+E2(typeof x==='string'?x:'حصل خطأ في البحث')+'</div>';
+    });
+  }
+  window.sdSyncNow=function(){
+    var btn=G2('sdSyncBtn');if(btn){btn.disabled=true;btn.textContent='⏳ بيحدث…'}
+    call('ddSync').then(function(r){
+      if(btn){btn.disabled=false;btn.textContent='↻ تحديث الأسعار من GitHub'}
+      var box=G2('searchRes');
+      if(box)box.innerHTML='<div class="card">✅ اتحديث: '+E2(String((r&&r.updated)||0))+' صنف، اتضاف '+E2(String((r&&r.added)||0))+' جديد</div>';
+    }).catch(function(x){
+      if(btn){btn.disabled=false;btn.textContent='↻ تحديث الأسعار من GitHub'}
+      var box=G2('searchRes');
+      if(box)box.innerHTML='<div class="card">'+E2(typeof x==='string'?x:'فشل التحديث')+'</div>';
+    });
+  };
+  window.searchV=function(){
+    try{V='search'}catch(e){}
+    var isMgr=false;try{isMgr=(S&&S.r==='manager')}catch(e){}
+    app('<h2>🔍 البحث</h2>'
+      +(isMgr?'<button type="button" class="g" id="sdSyncBtn" style="width:100%;margin-bottom:8px" onclick="sdSyncNow()">↻ تحديث الأسعار من GitHub</button>':'')
+      +'<input id="searchQ" type="search" placeholder="ابحث بالعربي أو الإنجليزي…" autocomplete="off">'
+      +'<div id="ddDrop" style="display:none;background:var(--card,#fff);border:1.5px solid var(--line);border-radius:12px;margin-top:6px;max-height:45vh;overflow-y:auto;box-shadow:0 4px 14px rgba(0,0,0,.08)"></div>'
+      +'<div id="searchRes"></div>');
+    var inp=G2('searchQ');
+    if(inp){
+      inp.addEventListener('input',function(){clearTimeout(SD_T);SD_T=setTimeout(sdDoSearch,250)});
+      try{inp.focus()}catch(e){}
+    }
+    document.addEventListener('click',function(ev){
+      var dr=G2('ddDrop');
+      if(dr&&!dr.contains(ev.target)&&ev.target!==inp)dr.style.display='none';
+    });
+  };
 })();
 </script>
