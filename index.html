@@ -229,7 +229,7 @@ async function go(m){try{if(m=='up'&&$('w').value!==$('w2').value)throw 'كلم�
 if(m=='up'){Object.assign(d,{name:$('n').value,role:$('r').value,code:$('cd').value,addr:$('ad').value,email:$('eml').value,confirmPass:$('w2').value});
 const x=await call('signup',d);if(x.status=='pending'){authV('in');$('e').textContent='تم التسجيل ✔ استنى موافقة المدير على حسابك';return}S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV();return}
 const x=await call('login',d);S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV()}catch(x){var elE=$('e');if(elE)elE.textContent=em(x);else{try{if(typeof toast==='function')toast(em(x),'bad')}catch(_e){}}}}async function shareApp(){try{if(navigator.share)await navigator.share({title:'صيدليات شهاب',url:location.href});else{await navigator.clipboard.writeText(location.href);alert('تم نسخ رابط التطبيق')}}catch(e){}}
-function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions ta-r"><button id="searchBtn" class="g person" type="button" onclick="searchV()" aria-label="بحث" title="بحث">🔎</button></div><img class="lg lit" src="${LOGO}"><div class="top-actions ta-l"><button class="g person notification-btn" type="button" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div>${S.r==='manager'?'<button class="g admin-dash-btn" type="button" onclick="adminDashV()">🛠️ الإدارة</button>':''}<div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);loadO();hint();try{shPushHint()}catch(e){}}
+function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions ta-r"><button id="searchBtn" class="g person" type="button" onclick="searchV()" aria-label="بحث" title="بحث">🔎</button></div><img class="lg lit" src="${LOGO}"><div class="top-actions ta-l"><button class="g person notification-btn" type="button" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div>${S.r==='manager'?'<button class="g admin-dash-btn" type="button" onclick="adminDashV()">🛠️ الإدارة</button>':''}<div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);try{secFastRender()}catch(e){}loadO();hint();try{shPushHint()}catch(e){}}
 function shPushHint(){
  try{
   var btn=document.querySelector('.topbar .notification-btn');
@@ -1839,13 +1839,52 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
     secs.forEach(function(s){
       var c=document.createElement('button'); c.type='button'; c.className='g sh-chip';
       c.title=(s&&s.name)||''; c.setAttribute('aria-label','قسم '+(s&&s.name||''));
+      if(s&&s.id!==undefined)c.setAttribute('data-sid',String(s.id));
       var im=document.createElement('img'); im.alt=''; im.loading='lazy'; if(s&&s.img)im.src=s.img; im.onerror=function(){im.style.display='none'};
       var sp=document.createElement('span'); sp.textContent=(s&&s.name)||'';
       c.appendChild(im); c.appendChild(sp);
-      (function(sid){ c.addEventListener('click',function(ev){ ev.stopPropagation(); try{ secScreenV(sid) }catch(e){} }) })(s&&s.id);
       bar.appendChild(c);
     });
+    /* تفويض نقرة واحد يشتغل على الأصلي والمكرر (للّف السلس) */
+    bar.addEventListener('click',function(ev){
+      var t=ev.target&&ev.target.closest?ev.target.closest('.sh-chip'):null;
+      if(!t||!t.getAttribute('data-sid'))return;
+      ev.stopPropagation();
+      try{secScreenV(t.getAttribute('data-sid'))}catch(e){}
+    });
     var _hd=box.querySelector('.sh-sec-hdr'); if(_hd&&_hd.parentNode){if(_hd.nextSibling)box.insertBefore(bar,_hd.nextSibling);else box.appendChild(bar)} else box.insertBefore(bar,box.firstChild);
+    try{shSecAutoScroll(bar)}catch(e){}
+  }
+  /* سكرول أفقي تلقائي هادي — بيقف نهائيًا أول ما المستخدم يلمس/يدوس */
+  function shSecAutoScroll(bar){
+    if(!bar||bar.getAttribute('data-autos'))return; bar.setAttribute('data-autos','1');
+    var paused=false;
+    var stop=function(){paused=true};
+    bar.addEventListener('pointerdown',stop,{passive:true});
+    bar.addEventListener('touchstart',stop,{passive:true});
+    bar.addEventListener('wheel',stop,{passive:true});
+    document.addEventListener('visibilitychange',function(){if(document.hidden)stop()});
+    /* نسخة مكرّرة عشان اللف يرجع من الأول من غير قفزة */
+    var kids=[].slice.call(bar.children);
+    kids.forEach(function(k){var cl=k.cloneNode(true);cl.setAttribute('aria-hidden','true');bar.appendChild(cl)});
+    (function step(){
+      if(paused)return;
+      var half=bar.scrollWidth/2;
+      if(half>bar.clientWidth){
+        try{bar.scrollLeft+=0.35}catch(e){}
+        if(bar.scrollLeft>=half)try{bar.scrollLeft-=half}catch(e){}
+      }
+      requestAnimationFrame(step);
+    })();
+  }
+  /* رندر فوري من الكاش — بيشتغل مع أول رسم للشاشة الرئيسية من غير انتظار نتورك */
+  function secFastRender(){
+    var b=G('homeSections'); if(!b)return;
+    try{ var ce=cGet('secchips'); if(ce&&Array.isArray(ce.v)&&ce.v.length)shSecChips(b,ce.v) }catch(e){}
+    try{
+      var sc=cGet('sections');
+      if(sc&&Array.isArray(sc.v)&&sc.v.length&&!SEC_READY){SEC_CACHE=sc.v;SEC_READY=true;renderHomeSections(b,SEC_CACHE);try{shSecChips(b,SEC_CACHE)}catch(e){}}
+    }catch(e){}
   }
   /* رس شريط الأقسام فورًا: كاش خفيف + نداء خفيف pubChips قبل بيانات الأقسام الثقيلة */
   function shChipsFast(box){
