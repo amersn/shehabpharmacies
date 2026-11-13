@@ -5057,7 +5057,7 @@ html.dark .sh-push-hint{background:#1D4FA8}
 (function(){
   function G2(id){return document.getElementById(id)}
   function E2(s){try{return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}catch(e){return ''}}
-  var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0,SD_DATA=null,SD_DTF=null,SD_PROD=null,SD_PTF=null;
+  var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0,SD_DATA=null,SD_DTF=null,SD_PROD=null,SD_PTF=null,SD_PO=null;
   function sdType(s){try{return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ').trim()}catch(e){return String(s||'')}}
   async function sdData(){
     /* نسخة الأدوية للبحث المحلي: كاش 6 ساعات في المتصفح */
@@ -5188,7 +5188,7 @@ html.dark .sh-push-hint{background:#1D4FA8}
   /* كارت صنف الصيدلية (من الأقسام) — الطلب يروح لسلة المنتجات الحقيقية */
   window.sdPickProd=function(i){
     var r=SD_RES[i];if(!r||!r.o)return;
-    var o=r.o;SD_SEL=null;SD_QTY=1;
+    var o=r.o;SD_SEL=null;SD_QTY=1;SD_PO=o;
     sdRenderRows([]);
     var q=G2('searchQ');if(q)q.value=o.t;
     var box=G2('searchRes');if(!box)return;
@@ -5206,12 +5206,11 @@ html.dark .sh-push-hint{background:#1D4FA8}
       +'<b id="sdQtyN" style="min-width:22px;text-align:center;font-size:.95em"><input id="sdQtyIn" type="number" min="1" step="1" inputmode="numeric" value="'+SD_QTY+'" oninput="sdQtySet(this.value)" style="width:52px;min-width:52px;padding:6px 4px;text-align:center;margin:0;border:none;border-radius:8px;font-weight:700;background:transparent"></b>'
       +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="sdQty(1)">＋</button>'
       +'</div>'
-      +'<button type="button" class="g" style="flex:1 1 auto;width:auto;min-width:0;background:#2e9e4f;color:#fff;padding:8px 12px;font-size:.95em" onclick="sdOrderProd('+i+')">🛒 اطلب</button>'
+      +'<button type="button" class="g" style="flex:1 1 auto;width:auto;min-width:0;background:#2e9e4f;color:#fff;padding:8px 12px;font-size:.95em" onclick="sdOrderProd()">🛒 اطلب</button>'
       +'</div></div>';
   };
-  window.sdOrderProd=function(i){
-    var r=SD_RES[i];if(!r||!r.o)return;
-    var o=r.o;
+  window.sdOrderProd=function(){
+    var o=SD_PO;if(!o)return;
     var inp=G2('sdQtyIn');var qty=inp?Math.max(1,parseInt(inp.value,10)||1):1;
     var x=null;try{x=CART.find(function(v){return String(v.id)==String(o.id)})}catch(e){}
     if(x)x.qty=(+x.qty||0)+qty;
