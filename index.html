@@ -4940,8 +4940,80 @@ html.dark .sh-push-hint{background:#1D4FA8}
 (function(){
   function G2(id){return document.getElementById(id)}
   function E2(s){try{return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}catch(e){return ''}}
-  var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0;
+  var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0,SD_DATA=null,SD_DTF=null;
   function sdType(s){try{return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ').trim()}catch(e){return String(s||'')}}
+  async function sdData(){
+    /* نسخة الأدوية للبحث المحلي: كاش 6 ساعات في المتصفح */
+    if(SD_DATA)return SD_DATA;
+    if(SD_DTF)return SD_DTF;
+    SD_DTF=(async()=>{
+      try{
+        var c=await caches.open('shehab_dd');var m=await c.match('dd_s2');
+        if(m){var j=JSON.parse(await m.text());
+          if(j&&j.ts&&Array.isArray(j.d)&&j.d.length>100&&Date.now()-j.ts<6*3600e3){SD_DATA=j.d;return SD_DATA}}
+      }catch(e){}
+      var d=await call('ddAll');
+      if(!Array.isArray(d)||d.length<100)throw 'بيانات غير صالحة';
+      SD_DATA=d;
+      try{var c2=await caches.open('shehab_dd');c2.put('dd_s2',new Response(JSON.stringify({ts:Date.now(),d:d})))}catch(e){}
+      return SD_DATA;
+    })();
+    SD_DTF.catch(function(){SD_DTF=null});
+    return SD_DTF;
+  }
+  function sdLocal(q){
+    var D=SD_DATA;if(!D)return null;
+    var qq=sdType(q),out=[];
+    var i,d,hay;
+    for(i=0;i<D.length&&out.length<40;i++){
+      d=D[i];
+      hay=sdType((d.en||'')+' '+(d.ar||'')+' '+(d.sci||''));
+      if(hay.indexOf(qq)>-1)out.push(d);
+    }
+    if(out.length)return out;
+    /* تسامح أخطاء إملائية */
+    var qw=qq.split(' ').filter(function(w){return w.length>1});
+    if(!qw.length)return out;
+    function lev(a,b,max){
+      if(Math.abs(a.length-b.length)>max)return max+1;
+      var prev=[],cur=[];
+      for(var j=0;j<=b.length;j++)prev[j]=j;
+      for(var ii=1;ii<=a.length;ii++){
+        cur[0]=ii;var best=cur[0];
+        for(j=1;j<=b.length;j++){
+          cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[ii-1]===b[j-1]?0:1));
+          if(cur[j]<best)best=cur[j];
+        }
+        if(best>max)return max+1;
+        var t=prev;prev=cur;cur=t;
+      }
+      return prev[b.length];
+    }
+    function wscore(w,words){
+      for(var k=0;k<words.length;k++){
+        if(words[k]===w)return 2;
+        var max=(w.length<=4||words[k].length<=4)?1:2;
+        if(words[k][0]!==w[0]&&Math.abs(words[k].length-w.length)>1)continue;
+        if(lev(w,words[k],max)<=max)return 1;
+      }
+      return 0;
+    }
+    var cand=[];
+    for(i=0;i<D.length&&cand.length<40;i++){
+      d=D[i];
+      var words=sdType((d.en||'')+' '+(d.ar||'')+' '+(d.sci||'')).split(' ').filter(function(w){return w.length>1});
+      if(!words.length)continue;
+      var total=0,ok=true;
+      for(var w2=0;w2<qw.length;w2++){
+        var s2=wscore(qw[w2],words);
+        if(!s2){ok=false;break}
+        total+=s2;
+      }
+      if(ok)cand.push({d:d,sc:total});
+    }
+    cand.sort(function(a,b){return b.sc-a.sc});
+    return cand.map(function(c){return c.d}).slice(0,40);
+  }
   function sdRenderRows(list){
     SD_RES=list||[];
     var box=G2('ddDrop');if(!box)return;
@@ -5011,22 +5083,31 @@ html.dark .sh-push-hint{background:#1D4FA8}
     var t=String(q.value||'').trim();
     if(t.length<2){sdRenderRows([]);return}
     var typing=++SD_TYPIST;
-    call('ddFind',{q:t}).then(function(res){
+    /* الأولوية: بحث محلي من النسخة المخزنة (فوري + إملائي) — والسيرفر احتياط */
+    sdData().then(function(){
       if(typing!==SD_TYPIST)return;
-      res=Array.isArray(res)?res:[];
-      res=res.filter(function(d){return d&&(d.en||d.ar)});
-      var needle=sdType(t);
-      res.sort(function(a,b){
-        var xa=sdType(a.ar||a.en).indexOf(needle)===0?0:1;
-        var xb=sdType(b.ar||b.en).indexOf(needle)===0?0:1;
-        return xa-xb;
-      });
-      sdRenderRows(res.slice(0,40));
-      if(!res.length&&box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'»</div>';
-    }).catch(function(x){
-      if(typing!==SD_TYPIST)return;
+      var res=sdLocal(t)||[];
+      if(res.length){sdRenderRows(res);return}
       sdRenderRows([]);
-      if(box)box.innerHTML='<div class="card">'+E2(typeof x==='string'?x:'حصل خطأ في البحث')+'</div>';
+      if(box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'» — جرب تاني بمادة فعالة أو بالإنجليزي</div>';
+    }).catch(function(){
+      call('ddFind',{q:t}).then(function(res){
+        if(typing!==SD_TYPIST)return;
+        res=Array.isArray(res)?res:[];
+        res=res.filter(function(d){return d&&(d.en||d.ar)});
+        var needle=sdType(t);
+        res.sort(function(a,b){
+          var xa=sdType(a.ar||a.en).indexOf(needle)===0?0:1;
+          var xb=sdType(b.ar||b.en).indexOf(needle)===0?0:1;
+          return xa-xb;
+        });
+        sdRenderRows(res.slice(0,40));
+        if(!res.length&&box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'»</div>';
+      }).catch(function(x){
+        if(typing!==SD_TYPIST)return;
+        sdRenderRows([]);
+        if(box)box.innerHTML='<div class="card">'+E2(typeof x==='string'?x:'حصل خطأ في البحث')+'</div>';
+      });
     });
   }
   window.sdSyncNow=function(){
@@ -5051,12 +5132,15 @@ html.dark .sh-push-hint{background:#1D4FA8}
       +(isMgr?'<button type="button" class="g" id="sdSyncBtn" style="width:100%;margin-bottom:8px" onclick="sdSyncNow()">↻ تحديث الأسعار من GitHub</button>':'')
       +'<input id="searchQ" type="search" placeholder="ابحث بالعربي أو الإنجليزي…" autocomplete="off">'
       +'<div id="ddDrop" style="display:none;width:100%;box-sizing:border-box;background:var(--card,#fff);border:1.5px solid var(--line);border-radius:12px;margin-top:6px;max-height:45vh;overflow-y:auto;box-shadow:0 4px 14px rgba(0,0,0,.08)"></div>'
+      +'<small id="sdHint" style="display:block;color:var(--muted)">جاري تحضير قاعدة البحث… ثواني وتبقى فورية</small>'
       +'<div id="searchRes"></div>');
     var inp=G2('searchQ');
     if(inp){
       inp.addEventListener('input',function(){clearTimeout(SD_T);SD_T=setTimeout(sdDoSearch,250)});
       try{inp.focus()}catch(e){}
     }
+    /* تحضير نسخة البحث المحلية في الخلفية أول مرة بس */
+    sdData().then(function(){var h=G2('sdHint');if(h)h.remove()}).catch(function(){var h=G2('sdHint');if(h)h.remove()});
     document.addEventListener('click',function(ev){
       var dr=G2('ddDrop');
       if(dr&&!dr.contains(ev.target)&&ev.target!==inp)dr.style.display='none';
