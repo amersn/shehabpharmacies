@@ -4948,10 +4948,12 @@ html.dark .sh-push-hint{background:#1D4FA8}
     if(!SD_RES.length){box.style.display='none';return}
     box.style.display='block';
     box.innerHTML=SD_RES.map(function(d,i){
-      return '<div class="sd-row" data-i="'+i+'" style="padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer" onclick="sdPick('+i+')">'
-        +(d.ar?'<b>'+E2(d.ar)+'</b> ':'<b>'+E2(d.en)+'</b> ')
-        +(d.ar&&d.en?'<small dir="ltr" style="color:var(--muted)">'+E2(d.en)+'</small>':'')
-        +(d.pr?'<span style="float:left;color:#0b2a6f;font-weight:700">'+E2(d.pr)+' ج</span>':'<span style="float:left;color:var(--muted)">—</span>')
+      return '<div class="sd-row" data-i="'+i+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer" onclick="sdPick('+i+')">'
+        +'<div style="flex:1 1 auto;min-width:0">'
+        +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+E2(d.ar||d.en)+'</b>'
+        +(d.ar&&d.en?'<small dir="ltr" style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+E2(d.en)+'</small>':'')
+        +'</div>'
+        +(d.pr?'<span style="flex:0 0 auto;color:#0b2a6f;font-weight:800;white-space:nowrap">'+E2(d.pr)+' ج</span>':'<span style="flex:0 0 auto;color:var(--muted)">—</span>')
         +'</div>';
     }).join('');
   }
@@ -5048,7 +5050,7 @@ html.dark .sh-push-hint{background:#1D4FA8}
     app('<h2>🔍 البحث</h2>'
       +(isMgr?'<button type="button" class="g" id="sdSyncBtn" style="width:100%;margin-bottom:8px" onclick="sdSyncNow()">↻ تحديث الأسعار من GitHub</button>':'')
       +'<input id="searchQ" type="search" placeholder="ابحث بالعربي أو الإنجليزي…" autocomplete="off">'
-      +'<div id="ddDrop" style="display:none;background:var(--card,#fff);border:1.5px solid var(--line);border-radius:12px;margin-top:6px;max-height:45vh;overflow-y:auto;box-shadow:0 4px 14px rgba(0,0,0,.08)"></div>'
+      +'<div id="ddDrop" style="display:none;width:100%;box-sizing:border-box;background:var(--card,#fff);border:1.5px solid var(--line);border-radius:12px;margin-top:6px;max-height:45vh;overflow-y:auto;box-shadow:0 4px 14px rgba(0,0,0,.08)"></div>'
       +'<div id="searchRes"></div>');
     var inp=G2('searchQ');
     if(inp){
