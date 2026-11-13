@@ -611,36 +611,125 @@ async function ddLoad(){
 }
 async function ddV(){
   V='dd';
-  app(`<h2>💊 دليل الأدوية المصري</h2><small>كل الأدوية المسجلة في مصر — بالعربي والإنجليزي والمادة الفعالة والسعر الرسمي. ابحث ودوس «＋ اطلب» يتحوّل لطلب في السلة.</small><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء أو المادة الفعالة…"><div class="err" id="ddstat"></div><div id="ddr"></div>`);
+  app(`<h2>💊 دليل الأدوية المصري</h2><small>كل الأدوية المسجلة في مصر — بالعربي والإنجليزي والسعر الرسمي. ابحث ودوس «＋ اطلب» يتحوّل لطلب في السلة.</small><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div class="err" id="ddstat"></div><div id="ddr"></div>`);
   var stat=$('ddstat'),res=$('ddr'),qi=$('ddq');
   res.innerHTML='<div class="card">جاري تحميل قاعدة الأدوية… (بتتخزن عندك مرة واحدة وبعدها تفتح فورًا)</div>';
   try{await ddLoad()}catch(x){stat.textContent=em(x);res.innerHTML='';return}
   stat.textContent='✅ جاهز — '+DD_DATA.length+' دواء';
-  res.innerHTML='<div class="card">اكتب اسم الدواء فوق — بالعربي (بانادول) أو بالإنجليزي (augmentin) أو بالمادة الفعالة (paracetamol)</div>';
+  res.innerHTML='<div class="card">اكتب اسم الدواء فوق — بالعربي (بانادول) أو بالإنجليزي (augmentin) — ودوس على الصنف لعرضه</div>';
   qi.addEventListener('input',function(){clearTimeout(DD_T);DD_T=setTimeout(ddSearch,200)});
   qi.focus();
 }
 function ddSearch(){
   var q=$('ddq'),res=$('ddr');if(!q||!res||!DD_DATA)return;
   var t=ddNorm(q.value.trim());
-  if(!t){res.innerHTML='<div class="card">اكتب اسم الدواء فوق</div>';return}
-  var out=[];
-  for(var i=0;i<DD_DATA.length&&out.length<60;i++){
-    var r=DD_DATA[i];
+  if(!t){res.innerHTML='';window.__ddResults=null;return}
+  var out=[],i,r;
+  for(i=0;i<DD_DATA.length&&out.length<40;i++){
+    r=DD_DATA[i];
     if(ddNorm(r[0]).indexOf(t)>-1||ddNorm(r[1]).indexOf(t)>-1||ddNorm(r[2]).indexOf(t)>-1)out.push(r);
   }
-  if(!out.length){res.innerHTML='<div class="card">مفيش نتيجة للبحث «'+esc(q.value.trim())+'» — جرب تاني بالمادة الفعالة</div>';window.__ddResults=null;return}
+  /* تسامح أخطاء إملائية لو مفيش نتيجة مباشرة */
+  if(!out.length){
+    var qw=t.split(' ').filter(function(w){return w.length>1});
+    if(qw.length){
+      function ddLev(a,b,max){
+        if(Math.abs(a.length-b.length)>max)return max+1;
+        var prev=[],cur=[];
+        for(var j=0;j<=b.length;j++)prev[j]=j;
+        for(var ii=1;ii<=a.length;ii++){
+          cur[0]=ii;var best=cur[0];
+          for(j=1;j<=b.length;j++){
+            cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[ii-1]===b[j-1]?0:1));
+            if(cur[j]<best)best=cur[j];
+          }
+          if(best>max)return max+1;
+          var tt=prev;prev=cur;cur=tt;
+        }
+        return prev[b.length];
+      }
+      function wscore(w,words){
+        for(var k=0;k<words.length;k++){
+          if(words[k]===w)return 2;
+          var max=(w.length<=4||words[k].length<=4)?1:2;
+          if(words[k][0]!==w[0]&&Math.abs(words[k].length-w.length)>1)continue;
+          if(ddLev(w,words[k],max)<=max)return 1;
+        }
+        return 0;
+      }
+      var cand=[];
+      for(i=0;i<DD_DATA.length&&cand.length<40;i++){
+        var words=ddNorm(DD_DATA[i][0]+' '+DD_DATA[i][1]+' '+DD_DATA[i][2]).split(' ').filter(function(w){return w.length>1});
+        if(!words.length)continue;
+        var total=0,ok=true;
+        for(var w2=0;w2<qw.length;w2++){
+          var s2=wscore(qw[w2],words);
+          if(!s2){ok=false;break}
+          total+=s2;
+        }
+        if(ok)cand.push({r:DD_DATA[i],sc:total});
+      }
+      cand.sort(function(a,b){return b.sc-a.sc});
+      out=cand.slice(0,40).map(function(c){return c.r});
+    }
+  }
+  if(!out.length){res.innerHTML='<div class="card">مفيش نتيجة لـ «'+esc(q.value.trim())+'» — جرب تاني بالإنجليزي</div>';window.__ddResults=null;return}
   window.__ddResults=out;
+  /* قايمة سطرين: العربي فوق والإنجليزي تحته، السعر على الشمال — من غير المادة */
   res.innerHTML=out.map(function(r,i2){
-    return '<div class="card dd-card"><b>'+esc(r[0])+'</b>'+(r[1]?'<small dir="ltr" style="display:block;color:var(--muted)">'+esc(r[1])+'</small>':'')+
-    '<small style="display:block">المادة الفعالة: <b>'+esc(r[2]||'—')+'</b></small>'+
-    '<small style="display:block">'+esc(r[3]||'')+(r[4]?' · '+esc(r[4]):'')+(r[5]?' · '+esc(r[5]):'')+'</small>'+
-    '<div class="row" style="align-items:center;justify-content:space-between;margin-top:6px"><b style="color:#0b2a6f">'+(r[6]?esc(r[6])+' جنيه':'السعر غير متاح')+'</b><button class="g" style="flex:0 0 auto;width:auto" onclick="ddOrder('+i2+')">＋ اطلب</button></div></div>';
+    return '<div data-i="'+i2+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--line);border-radius:12px;margin:6px 0;background:var(--card,#fff);cursor:pointer" onclick="ddOpenCard('+i2+')">'
+      +'<div style="flex:1 1 auto;min-width:0">'
+      +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r[1]||r[0])+'</b>'
+      +(r[1]?'<small dir="ltr" style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r[0])+'</small>':'')
+      +'</div>'
+      +'<span style="flex:0 0 auto;color:#0b2a6f;font-weight:800;white-space:nowrap">'+(r[6]?esc(r[6])+' ج':'—')+'</span>'
+      +'<button type="button" class="g" style="flex:0 0 auto;width:38px;min-width:38px;font-size:1.1em" onclick="event.stopPropagation();ddOrder('+i2+')">＋</button>'
+      +'</div>';
   }).join('');
 }
-function ddOrder(i){
+/* كارت الدواء لما تدوس على الصنف في القايمة — من غير المادة الفعالة */
+var ddCardQTY=1,ddCardIDX=-1;
+window.ddOpenCard=function(i){
   var r=(window.__ddResults||[])[i];if(!r)return;
-  var line=r[0]+(r[1]?' ('+r[1]+')':'')+(r[6]?' — السعر الرسمي '+r[6]+' ج':'');
+  ddCardIDX=i;ddCardQTY=1;
+  var res=$('ddr');if(!res)return;
+  res.innerHTML=''
+    +'<div class="card" style="position:relative">'
+    +'<button type="button" onclick="ddCloseCard()" aria-label="رجوع" style="position:absolute;top:8px;left:8px;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--soft);color:var(--b);font-weight:700;cursor:pointer">✕</button>'
+    +'<div style="padding-inline-end:44px"><b style="font-size:1.15em">'+esc(r[1]||r[0])+'</b>'
+    +(r[1]?'<div dir="ltr" style="color:var(--muted)">'+esc(r[0])+'</div>':'')
+    +(r[3]?'<small style="display:block">'+esc(r[3])+'</small>':'')
+    +'<div style="margin-top:6px;font-weight:800;color:#0b2a6f">'+(r[6]?esc(r[6])+' جنيه':'السعر غير متاح')+'</div></div>'
+    +'<div class="row" style="align-items:center;gap:10px;margin-top:10px">'
+    +'<div style="display:flex;align-items:center;gap:8px;background:var(--soft);border:1.5px solid var(--line);border-radius:12px;padding:4px 8px">'
+    +'<button type="button" class="g" style="width:38px;height:38px;min-width:38px;font-size:1.3em" onclick="ddQty(-1)">−</button>'
+    +'<b id="ddQtyN" style="min-width:28px;text-align:center">1</b>'
+    +'<button type="button" class="g" style="width:38px;height:38px;min-width:38px;font-size:1.3em" onclick="ddQty(1)">＋</button>'
+    +'</div>'
+    +'<button type="button" class="g" style="flex:1 1 auto;width:auto;background:#2e9e4f;color:#fff" onclick="ddOrderCard()">🛒 اطلب</button>'
+    +'</div></div>';
+  try{res.scrollIntoView({block:'nearest'})}catch(e){}
+};
+window.ddCloseCard=function(){
+  ddCardIDX=-1;
+  var res=$('ddr');if(res)res.innerHTML='';
+  var qi=$('ddq');if(qi){qi.value='';try{qi.focus()}catch(e){}}
+};
+window.ddQty=function(n){
+  ddCardQTY=Math.max(1,(+ddCardQTY||1)+n);
+  var el=$('ddQtyN');if(el)el.textContent=ddCardQTY;
+};
+window.ddOrderCard=function(){
+  if(ddCardIDX<0)return;
+  ddOrder(ddCardIDX,ddCardQTY);
+};
+function ddOrder(i,qty){
+  qty=Math.max(1,parseInt(qty,10)||1);
+  var r=(window.__ddResults||[])[i];if(!r)return;
+  var line=r[0];
+  if(r[1])line+='\n'+r[1];
+  if(r[6])line+=' — السعر الرسمي '+r[6]+' ج';
+  if(qty>1)line+=' × '+qty;
   var cur=ccGet()||{};
   var prev=String(cur.item||'').trim();
   if(prev&&prev.indexOf(r[0])<0)line=prev+'\n'+line;
