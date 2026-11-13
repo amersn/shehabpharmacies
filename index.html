@@ -5,6 +5,7 @@
 :root{--b:#0b2a6f}*{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;font:16px/1.5 Almarai,system-ui,Tahoma,sans-serif;background:repeating-linear-gradient(135deg,var(--hair,transparent) 0,var(--hair,transparent) 1px,transparent 1px,transparent 28px),radial-gradient(560px 380px at 90% -8%,var(--glow,transparent),transparent 62%),radial-gradient(680px 460px at -12% 108%,var(--glow2,transparent),transparent 62%),linear-gradient(165deg,var(--bg) 0%,var(--bg2,var(--bg)) 100%);color:var(--fg);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 #app{max-width:520px;margin:auto;padding:16px}
+html,body{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
 .lg{display:block;margin:0 auto 8px;height:110px}
 h2{color:var(--b);margin:8px 0 12px}
 input,select,button,textarea{font:inherit;width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--line);margin:5px 0;background:#fff;color:inherit}
@@ -324,7 +325,22 @@ const cacheOffersForCart=()=>{if(!OF.length)return;try{localStorage.setItem('she
 
 let APPLIED_COUPON=null,COUPON_TIMER=null;const cartFingerprint=()=>JSON.stringify(CART.map(x=>[String(x.id),Number(x.qty)]).sort((a,b)=>a[0].localeCompare(b[0])));const renderCartBeforeCoupon=cartRender;cartRender=function(){const before=APPLIED_COUPON;renderCartBeforeCoupon();if(before&&before.fingerprint!==cartFingerprint()){APPLIED_COUPON=null;const s=$('couponState');if(s)s.textContent='اتغيرت الكميات؛ اضغط تطبيق الكود مرة ثانية';return}if(APPLIED_COUPON&&$('cartEstimate')){const es=$('cartEstimate');const base=String(es.textContent||'').split(' · خصم ')[0];es.textContent=base+' · خصم '+APPLIED_COUPON.discount.toFixed(2)+' جنيه بكود '+APPLIED_COUPON.code+' · الأصناف المشمولة بعد الخصم '+Math.max(0,APPLIED_COUPON.subtotal-APPLIED_COUPON.discount).toFixed(2)+' جنيه'}};const cartViewBeforeCoupon=cartV;cartV=function(){APPLIED_COUPON=null;cartViewBeforeCoupon();const area=document.createElement('div');area.className='profile-field';area.innerHTML='<label for="couponCode">كود خصم</label><div class="row"><input id="couponCode" autocomplete="off" placeholder="اكتب كود الخصم"><button type="button" class="g" style="flex:0 0 110px" onclick="applyCartCoupon(this)">تطبيق</button></div><small id="couponState">اكتب الكود ثم اضغط تطبيق</small>';const lines=$('cartLines');if(lines)lines.parentNode.insertBefore(area,lines)};async function applyCartCoupon(b){const code=$('couponCode').value.trim();if(!code){$('couponState').textContent='اكتب كود الخصم';return}try{b.disabled=true;const r=await call('couponApply',{code,items:CART.map(x=>({id:String(x.id),qty:Number(x.qty)}))});APPLIED_COUPON={...r,fingerprint:cartFingerprint()};$('couponState').textContent='✅ تم تطبيق '+r.percent+'% · الخصم '+r.discount.toFixed(2)+' جنيه على الأصناف المشمولة';cartRender()}catch(x){APPLIED_COUPON=null;$('couponState').textContent=em(x)}finally{b.disabled=false}}sendCartOrder=async function(b){const e=$('cartError');var _uc=null;try{_uc=((typeof S!=='undefined'&&S&&S.t)?ccGet():null)}catch(_z){}if(!CART.length&&!_uc){e.textContent='السلة فاضية';return}if(!CART_MODE){e.textContent='اختار توصيل أو استلام من الصيدلية';return}try{b.disabled=true;b.textContent='جاري إرسال الطلب…';if(_uc&&!CART.length){var _cb=$('couponCode'),_cc=(_cb?_cb.value.trim():'');if(_cc||APPLIED_COUPON)throw 'خصم الكوبون يتطلب صنفًا واحدًا على الأقل من السلة';await call('cartOrder',{items:[],mode:CART_MODE,addr:(($('cartAddr')&&$('cartAddr').value.trim())||_uc.addr||''),custom:{item:String(_uc.item||''),image:_uc.image||'',audio:_uc.audio||'',notes:String(_uc.notes||'')}});ccClear();CART=[];APPLIED_COUPON=null;cartPersist();CART_MODE='';NAV_REPLACE=true;homeV('تم إرسال طلبك ✔ الصيدلية هتراجعه وتحسب السعر ليك. تابعه من «طلباتي»');return}await call('cartOrder',{items:CART.map(x=>({id:String(x.id),qty:Number(x.qty)})),mode:CART_MODE,addr:($('cartAddr')?$('cartAddr').value.trim():''),coupon:APPLIED_COUPON?APPLIED_COUPON.code:($('couponCode')?.value.trim()||''),custom:_uc?{item:String(_uc.item||''),image:_uc.image||'',audio:_uc.audio||'',notes:String(_uc.notes||'')}:undefined});ccClear();CART=[];APPLIED_COUPON=null;cartPersist();CART_MODE='';NAV_REPLACE=true;homeV('تم إرسال طلب العروض كأوردر واحد ✔ تابعه من «طلباتي»')}catch(x){e.textContent=em(x);b.disabled=false;b.textContent='إرسال الطلب'}};
 var _ucoRenderPrev=cartRender;
-cartRender=function(){_ucoRenderPrev();try{var box=$('cartLines');if(!box)return;var C=null;try{C=((typeof S!=='undefined'&&S&&S.t)?ccGet():null)}catch(_z){}if(!C)return;var card=document.createElement('div');card.className='card';card.style.borderRight='8px solid #B08A4F';card.style.borderRadius='14px';var h=document.createElement('b');h.textContent='🧾 طلب دواء';card.appendChild(h);if(C.item){var l1=document.createElement('div');l1.style.cssText='white-space:pre-wrap;word-break:break-word';l1.textContent=C.item;card.appendChild(l1)}var tags=document.createElement('div');var _tg='';if(C.image)_tg+='🖼️ فيه صورة مرفقة  ';if(C.audio)_tg+='🎙️ فيه تسجيل صوتي  ';if(_tg){tags.textContent=_tg;card.appendChild(tags)}if(C.notes){var n1=document.createElement('small');n1.style.display='block';n1.textContent='ملاحظات: '+C.notes;card.appendChild(n1)}var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);var row=document.createElement('div');row.className='row';var ed=document.createElement('button');ed.type='button';ed.className='g';ed.textContent='تعديل';ed.addEventListener('click',function(e2){e2.stopPropagation();try{ordV()}catch(_x){}});var rm=document.createElement('button');rm.type='button';rm.className='g';rm.textContent='إزالة';rm.addEventListener('click',function(e3){e3.stopPropagation();ccClear();try{cartRender()}catch(_x){}try{cartBadge()}catch(_y){}});row.appendChild(ed);row.appendChild(rm);card.appendChild(row);if(!CART.length){box.textContent='';box.appendChild(card);var _es=$('cartEstimate');if(_es)_es.textContent='طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار'}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
+cartRender=function(){_ucoRenderPrev();try{var box=$('cartLines');if(!box)return;var C=null;try{C=((typeof S!=='undefined'&&S&&S.t)?ccGet():null)}catch(_z){}if(!C)return;var card=document.createElement('div');card.className='card';card.style.borderRight='8px solid #B08A4F';card.style.borderRadius='14px';var h=document.createElement('b');h.textContent='🧾 طلب دواء';card.appendChild(h);if(C.item){
+  var _rows=(C.ddItems&&C.ddItems.length)?C.ddItems:null;
+  if(_rows){
+    _rows.forEach(function(x){
+      var d1=document.createElement('div');
+      d1.style.cssText='padding:7px 0;border-bottom:1px dashed var(--line)';
+      var t1=document.createElement('b');t1.textContent=x.ar||x.en;d1.appendChild(t1);
+      if(x.en){var e1=document.createElement('small');e1.dir='ltr';e1.style.cssText='display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap';e1.textContent=x.en;d1.appendChild(e1)}
+      var m1=document.createElement('small');m1.style.cssText='display:block;color:#0b2a6f;font-weight:700';
+      m1.textContent='الكمية: '+x.qty+(x.pr?' · السعر الرسمي '+x.pr+' ج':'');
+      d1.appendChild(m1);card.appendChild(d1);
+    });
+  }else{
+    var l1=document.createElement('div');l1.style.cssText='white-space:pre-wrap;word-break:break-word';l1.textContent=C.item;card.appendChild(l1)
+  }
+}var tags=document.createElement('div');var _tg='';if(C.image)_tg+='🖼️ فيه صورة مرفقة  ';if(C.audio)_tg+='🎙️ فيه تسجيل صوتي  ';if(_tg){tags.textContent=_tg;card.appendChild(tags)}if(C.notes){var n1=document.createElement('small');n1.style.display='block';n1.textContent='ملاحظات: '+C.notes;card.appendChild(n1)}var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);var row=document.createElement('div');row.className='row';var ed=document.createElement('button');ed.type='button';ed.className='g';ed.textContent='تعديل';ed.addEventListener('click',function(e2){e2.stopPropagation();try{ordV()}catch(_x){}});var rm=document.createElement('button');rm.type='button';rm.className='g';rm.textContent='إزالة';rm.addEventListener('click',function(e3){e3.stopPropagation();ccClear();try{cartRender()}catch(_x){}try{cartBadge()}catch(_y){}});row.appendChild(ed);row.appendChild(rm);card.appendChild(row);if(!CART.length){box.textContent='';box.appendChild(card);var _es=$('cartEstimate');if(_es)_es.textContent='طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار'}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
 </script>
 <script>
 // Notification bell, device inbox, and opt-in prompt.
@@ -649,13 +665,19 @@ function ddSearch(){
         return prev[b.length];
       }
       function wscore(w,words){
+        var best=0;
         for(var k=0;k<words.length;k++){
-          if(words[k]===w)return 2;
+          if(words[k]===w){if(best<2)best=2;continue}
           var max=(w.length<=4||words[k].length<=4)?1:2;
           if(words[k][0]!==w[0]&&Math.abs(words[k].length-w.length)>1)continue;
-          if(ddLev(w,words[k],max)<=max)return 1;
+          var d2=ddLev(w,words[k],max);
+          if(d2<=max){
+            var sc2=1+(1-d2/max)*0.9;
+            if(words[k][0]===w[0])sc2+=0.25;
+            if(sc2>best)best=sc2;
+          }
         }
-        return 0;
+        return best;
       }
       var cand=[];
       for(i=0;i<DD_DATA.length&&cand.length<40;i++){
@@ -683,7 +705,6 @@ function ddSearch(){
       +(r[1]?'<small dir="ltr" style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r[0])+'</small>':'')
       +'</div>'
       +'<span style="flex:0 0 auto;color:#0b2a6f;font-weight:800;white-space:nowrap">'+(r[6]?esc(r[6])+' ج':'—')+'</span>'
-      +'<button type="button" class="g" style="flex:0 0 auto;width:38px;min-width:38px;font-size:1.1em" onclick="event.stopPropagation();ddOrder('+i2+')">＋</button>'
       +'</div>';
   }).join('');
 }
@@ -703,7 +724,7 @@ window.ddOpenCard=function(i){
     +'<div style="display:flex;align-items:center;gap:8px;margin-top:10px;max-width:100%">'
     +'<div style="display:flex;align-items:center;gap:6px;background:var(--soft);border:1.5px solid var(--line);border-radius:10px;padding:3px 6px;flex:0 0 auto">'
     +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="ddQty(-1)">−</button>'
-    +'<b id="ddQtyN" style="min-width:22px;text-align:center;font-size:.95em">1</b>'
+    +'<b id="ddQtyN" style="min-width:22px;text-align:center;font-size:.95em"><input id="ddQtyIn" type="number" min="1" step="1" inputmode="numeric" value="1" oninput="ddQtySet(this.value)" style="width:52px;min-width:52px;padding:6px 4px;text-align:center;margin:0;border:none;border-radius:8px;font-weight:700;background:transparent"></b>'
     +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="ddQty(1)">＋</button>'
     +'</div>'
     +'<button type="button" class="g" style="flex:1 1 auto;width:auto;min-width:0;background:#2e9e4f;color:#fff;padding:8px 12px;font-size:.95em" onclick="ddOrderCard()">🛒 اطلب</button>'
@@ -717,23 +738,31 @@ window.ddCloseCard=function(){
 };
 window.ddQty=function(n){
   ddCardQTY=Math.max(1,(+ddCardQTY||1)+n);
-  var el=$('ddQtyN');if(el)el.textContent=ddCardQTY;
+  var el=$('ddQtyIn');if(el)el.value=ddCardQTY;
+};
+window.ddQtySet=function(v){
+  ddCardQTY=Math.max(1,parseInt(v,10)||1);
+  var el=$('ddQtyIn');if(el&&String(el.value)!==String(ddCardQTY))el.value=ddCardQTY;
 };
 window.ddOrderCard=function(){
   if(ddCardIDX<0)return;
+  var inp=$('ddQtyIn');if(inp)ddCardQTY=Math.max(1,parseInt(inp.value,10)||1);
   ddOrder(ddCardIDX,ddCardQTY);
 };
 function ddOrder(i,qty){
   qty=Math.max(1,parseInt(qty,10)||1);
   var r=(window.__ddResults||[])[i];if(!r)return;
-  var line=r[0];
-  if(r[1])line+='\n'+r[1];
-  if(r[6])line+=' — السعر الرسمي '+r[6]+' ج';
-  if(qty>1)line+=' × '+qty;
   var cur=ccGet()||{};
-  var prev=String(cur.item||'').trim();
-  if(prev&&prev.indexOf(r[0])<0)line=prev+'\n'+line;
-  ccSet({item:line,image:cur.image||'',audio:cur.audio||'',notes:cur.notes||'',mode:cur.mode||'',addr:cur.addr||''});
+  var list=(cur&&Array.isArray(cur.ddItems))?cur.ddItems.slice():[];
+  list.push({ar:r[1]||r[0],en:r[1]?r[0]:'',pr:r[6]||'',qty:qty});
+  var line=list.map(function(x){
+    var l2=x.ar||x.en;
+    if(x.en)l2+='\n'+x.en;
+    if(x.pr)l2+=' - السعر الرسمي '+x.pr+' ج';
+    if(x.qty>1)l2+=' × '+x.qty;
+    return l2;
+  }).join('\n');
+  ccSet({item:line,image:cur.image||'',audio:cur.audio||'',notes:cur.notes||'',mode:cur.mode||'',addr:cur.addr||'',ddItems:list});
   NAV_REPLACE=true;cartV();
 }
 try{window.ddV=ddV;window.ddSearch=ddSearch;window.ddOrder=ddOrder;window.ddLoad=ddLoad}catch(e){}
@@ -5079,13 +5108,20 @@ html.dark .sh-push-hint{background:#1D4FA8}
       return prev[b.length];
     }
     function wscore(w,words){
+      /* كل ما الكلمة أقرب للبحث، السكور أعلى: مطابقة=2، وتقرب تدريجي + بونص لو أول حرف متطابق */
+      var best=0;
       for(var k=0;k<words.length;k++){
-        if(words[k]===w)return 2;
+        if(words[k]===w){if(best<2)best=2;continue}
         var max=(w.length<=4||words[k].length<=4)?1:2;
         if(words[k][0]!==w[0]&&Math.abs(words[k].length-w.length)>1)continue;
-        if(lev(w,words[k],max)<=max)return 1;
+        var d2=lev(w,words[k],max);
+        if(d2<=max){
+          var sc2=1+(1-d2/max)*0.9;
+          if(words[k][0]===w[0])sc2+=0.25;
+          if(sc2>best)best=sc2;
+        }
       }
-      return 0;
+      return best;
     }
     var cand=[];
     for(i=0;i<D.length&&cand.length<40;i++){
@@ -5136,7 +5172,7 @@ html.dark .sh-push-hint{background:#1D4FA8}
       +'<div style="display:flex;align-items:center;gap:8px;margin-top:10px;max-width:100%">'
       +'<div style="display:flex;align-items:center;gap:6px;background:var(--soft);border:1.5px solid var(--line);border-radius:10px;padding:3px 6px;flex:0 0 auto">'
       +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="sdQty(-1)">−</button>'
-      +'<b id="sdQtyN" style="min-width:22px;text-align:center;font-size:.95em">'+SD_QTY+'</b>'
+      +'<b id="sdQtyN" style="min-width:22px;text-align:center;font-size:.95em"><input id="sdQtyIn" type="number" min="1" step="1" inputmode="numeric" value="'+SD_QTY+'" oninput="sdQtySet(this.value)" style="width:52px;min-width:52px;padding:6px 4px;text-align:center;margin:0;border:none;border-radius:8px;font-weight:700;background:transparent"></b>'
       +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="sdQty(1)">＋</button>'
       +'</div>'
       +'<button type="button" class="g" style="flex:1 1 auto;width:auto;min-width:0;background:#2e9e4f;color:#fff;padding:8px 12px;font-size:.95em" onclick="sdOrder()">🛒 اطلب</button>'
@@ -5152,20 +5188,28 @@ html.dark .sh-push-hint{background:#1D4FA8}
   };
   window.sdQty=function(n){
     SD_QTY=Math.max(1,(+SD_QTY||1)+n);
-    var el=G2('sdQtyN');if(el)el.textContent=SD_QTY;
+    var el=G2('sdQtyIn');if(el)el.value=SD_QTY;
+  };
+  window.sdQtySet=function(v){
+    SD_QTY=Math.max(1,parseInt(v,10)||1);
+    var el=G2('sdQtyIn');if(el&&String(el.value)!==String(SD_QTY))el.value=SD_QTY;
   };
   window.sdOrder=function(){
     var d=SD_SEL;if(!d)return;
     var notes='';
     try{notes=String((G2('sdNotes')||{}).value||'').trim()}catch(e){}
-    var line=d.ar||d.en;
-    if(d.ar&&d.en)line+='\n'+d.en;
-    if(d.pr)line+=' - السعر الرسمي '+d.pr+' ج';
-    if(SD_QTY>1)line+=' × '+SD_QTY;
+    var inp=G2('sdQtyIn');if(inp)SD_QTY=Math.max(1,parseInt(inp.value,10)||1);
     var cur=null;try{cur=window.ccGet?ccGet():null}catch(e){}
-    var prev=cur?String(cur.item||'').trim():'';
-    if(prev&&prev.indexOf(d.ar||d.en)<0)line=prev+'\n'+line;
-    if(window.ccSet)ccSet({item:line,image:(cur&&cur.image)||'',audio:(cur&&cur.audio)||'',notes:notes||(cur&&cur.notes)||'',mode:(cur&&cur.mode)||'',addr:(cur&&cur.addr)||''});
+    var list=(cur&&Array.isArray(cur.ddItems))?cur.ddItems.slice():[];
+    list.push({ar:d.ar||d.en,en:(d.ar&&d.en)?d.en:'',pr:d.pr||'',qty:SD_QTY});
+    var line=list.map(function(x){
+      var l2=x.ar||x.en;
+      if(x.en)l2+='\n'+x.en;
+      if(x.pr)l2+=' - السعر الرسمي '+x.pr+' ج';
+      if(x.qty>1)l2+=' × '+x.qty;
+      return l2;
+    }).join('\n');
+    if(window.ccSet)ccSet({item:line,image:(cur&&cur.image)||'',audio:(cur&&cur.audio)||'',notes:notes||(cur&&cur.notes)||'',mode:(cur&&cur.mode)||'',addr:(cur&&cur.addr)||'',ddItems:list});
     try{NAV_REPLACE=true;cartV()}catch(e){}
   };
   function sdDoSearch(){
