@@ -5146,5 +5146,23 @@ html.dark .sh-push-hint{background:#1D4FA8}
       if(dr&&!dr.contains(ev.target)&&ev.target!==inp)dr.style.display='none';
     });
   };
+  /* رقم الإصدار ظاهر تحت الرئيسية — للتأكد إن التحديث وصل */
+  window.appVersion=function(){return 'v2.1'};
+  function sdVersionTag(){
+    try{
+      if((V||'')!=='home')return;
+      var ap=G2('app');
+      if(!ap||G2('appVerTag')||ap.querySelector('#appVerTag'))return;
+      var el=document.createElement('small');
+      el.id='appVerTag';
+      el.style.cssText='display:block;text-align:center;color:var(--muted);margin:10px 0 4px;font-size:11px';
+      el.textContent='الإصدار '+window.appVersion();
+      ap.appendChild(el);
+    }catch(e){}
+  }
+  try{
+    new MutationObserver(function(){sdVersionTag()}).observe(document.body,{childList:true,subtree:true});
+    sdVersionTag();
+  }catch(e){}
 })();
 </script>
