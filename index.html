@@ -601,7 +601,7 @@ async function repeatOrder(id,b){if(!confirm('أعمل طلب جديد بنفس 
 function injectRepeat(){try{if(V!='list'&&V!='mine')return;var done='تم التسليم للعميل';try{if(typeof ST!=='undefined'&&ST.done&&ST.done[0])done=ST.done[0]}catch(e){}var cards=document.querySelectorAll('#ls .card[data-oid]');for(var i=0;i<cards.length;i++){var c=cards[i];if(c.querySelector('.repeat-btn'))continue;var chip=c.querySelector('.chip');if(!chip||String(chip.textContent||'').trim()!=done)continue;var b=document.createElement('button');b.type='button';b.className='g repeat-btn';b.textContent='🔁 إعادة الطلب';(function(bb,oid){bb.addEventListener('click',function(ev){ev.stopPropagation();repeatOrder(oid,bb)})})(b,c.getAttribute('data-oid'));c.appendChild(b)}}catch(e){}}
 window.monthlyV=monthlyV;window.monthlyAdminV=monthlyAdminV;
 var I={home:`<svg viewBox='0 0 24 24'><path d='M3 10.5 12 3l9 7.5'/><path d='M5 9.5V21h14V9.5'/><path d='M9.5 21v-6h5v6'/></svg>`,pct:`<svg viewBox='0 0 24 24'><line x1='19' y1='5' x2='5' y2='19'/><circle cx='7.5' cy='7.5' r='2.5'/><circle cx='16.5' cy='16.5' r='2.5'/></svg>`,pill:`<svg viewBox='0 0 24 24'><path d='m10.5 20.5 10-10a5 5 0 0 0-7-7l-10 10a5 5 0 0 0 7 7Z'/><path d='m8.5 8.5 7 7'/></svg>`,basket:`<svg viewBox='0 0 24 24'><path d='M4 6h16l-1.6 11a2 2 0 0 1-2 1.7H7.6a2 2 0 0 1-2-1.7Z'/><path d='M9 6 12 2.5 15 6'/><path d='M9.5 11.5v4M14.5 11.5v4'/></svg>`,user:`<svg viewBox='0 0 24 24'><circle cx='12' cy='8' r='3.6'/><path d='M4.8 20a7.2 7.2 0 0 1 14.4 0'/></svg>`};
-function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav.id='nav';function item(t,icon,label){var b=document.createElement('button');b.className='nav-item';b.setAttribute('data-t',t);b.setAttribute('aria-label',label);var ic=document.createElement('span');ic.className='icn';ic.innerHTML=icon;var lb=document.createElement('span');lb.className='lbl';lb.textContent=label;b.appendChild(ic);b.appendChild(lb);b.addEventListener('click',function(){navGo(t)});return b}var mine=item('mine',I.basket,'طلباتي');mine.querySelector('.lbl').id='navMineLbl';var fab=document.createElement('button');fab.className='nav-fab';fab.setAttribute('aria-label','عمل أوردر');fab.innerHTML="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 5.5v13M5.5 12h13'></path></svg>";fab.addEventListener('click',function(){navFab()});nav.appendChild(item('home',I.home,'الرئيسية'));nav.appendChild(item('dd',I.pill,'دليل الأدوية'));nav.appendChild(fab);var gap=document.createElement('span');gap.className='nav-gap';nav.appendChild(gap);nav.appendChild(mine);nav.appendChild(item('profile',I.user,'حسابي'));document.body.appendChild(nav)}
+function buildNav(){if(q('nav'))return;var nav=document.createElement('nav');nav.id='nav';function item(t,icon,label){var b=document.createElement('button');b.className='nav-item';b.setAttribute('data-t',t);b.setAttribute('aria-label',label);var ic=document.createElement('span');ic.className='icn';ic.innerHTML=icon;var lb=document.createElement('span');lb.className='lbl';lb.textContent=label;b.appendChild(ic);b.appendChild(lb);b.addEventListener('click',function(){navGo(t)});return b}var mine=item('mine',I.basket,'طلباتي');mine.querySelector('.lbl').id='navMineLbl';var fab=document.createElement('button');fab.className='nav-fab';fab.setAttribute('aria-label','عمل أوردر');fab.innerHTML="<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M12 5.5v13M5.5 12h13'></path></svg>";fab.addEventListener('click',function(){navFab()});nav.appendChild(item('home',I.home,'الرئيسية'));nav.appendChild(item('dd',I.pill,'قسم الأدوية'));nav.appendChild(fab);var gap=document.createElement('span');gap.className='nav-gap';nav.appendChild(gap);nav.appendChild(mine);nav.appendChild(item('profile',I.user,'حسابي'));document.body.appendChild(nav)}
 function navGo(t){try{if(t==='home')homeV();else if(t==='dd')ddV();else if(t==='off')offV();else if(t==='mine'){if(S.r==='customer')mineV();else listV()}else if(t==='profile')profileV()}catch(e){}navSync()}
 function navFab(){try{if(S.r==='customer')ordV();else addV()}catch(e){}navSync()}
 function navCount(){}
@@ -627,12 +627,11 @@ async function ddLoad(){
 }
 async function ddV(){
   V='dd';
-  app(`<h2>💊 دليل الأدوية المصري</h2><small>كل الأدوية المسجلة في مصر — بالعربي والإنجليزي والسعر الرسمي. ابحث ودوس «＋ اطلب» يتحوّل لطلب في السلة.</small><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div class="err" id="ddstat"></div><div id="ddr"></div>`);
+  app(`<h2>💊 قسم الأدوية</h2><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div class="err" id="ddstat"></div><div id="ddr"></div>`);
   var stat=$('ddstat'),res=$('ddr'),qi=$('ddq');
   res.innerHTML='<div class="card">جاري تحميل قاعدة الأدوية… (بتتخزن عندك مرة واحدة وبعدها تفتح فورًا)</div>';
   try{await ddLoad()}catch(x){stat.textContent=em(x);res.innerHTML='';return}
-  stat.textContent='✅ جاهز — '+DD_DATA.length+' دواء';
-  res.innerHTML='<div class="card">اكتب اسم الدواء فوق — بالعربي (بانادول) أو بالإنجليزي (augmentin) — ودوس على الصنف لعرضه</div>';
+  res.innerHTML='';
   qi.addEventListener('input',function(){clearTimeout(DD_T);DD_T=setTimeout(ddSearch,200)});
   qi.focus();
 }
@@ -5058,7 +5057,7 @@ html.dark .sh-push-hint{background:#1D4FA8}
 (function(){
   function G2(id){return document.getElementById(id)}
   function E2(s){try{return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}catch(e){return ''}}
-  var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0,SD_DATA=null,SD_DTF=null;
+  var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0,SD_DATA=null,SD_DTF=null,SD_PROD=null,SD_PTF=null;
   function sdType(s){try{return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ').trim()}catch(e){return String(s||'')}}
   async function sdData(){
     /* نسخة الأدوية للبحث المحلي: كاش 6 ساعات في المتصفح */
@@ -5078,6 +5077,27 @@ html.dark .sh-push-hint{background:#1D4FA8}
     })();
     SD_DTF.catch(function(){SD_DTF=null});
     return SD_DTF;
+  }
+  async function sdProdData(){
+    /* أصناف الصيدلية نفسها (الأقسام) — كاش ساعة */
+    if(SD_PROD)return SD_PROD;
+    if(SD_PTF)return SD_PTF;
+    SD_PTF=(async()=>{
+      try{
+        var c=await caches.open('shehab_dd');var m=await c.match('prod_v1');
+        if(m){var j=JSON.parse(await m.text());
+          if(j&&j.ts&&Array.isArray(j.d)&&Date.now()-j.ts<3600e3){SD_PROD=j.d;return SD_PROD}}
+      }catch(e){}
+      var d=await call('homeData');
+      var list=(d&&Array.isArray(d.offers))?d.offers.filter(function(o){return o&&o.t}):[];
+      if(!list.length)throw 'لا يوجد أصناف';
+      list=list.map(function(o){return{id:String(o.id),t:String(o.t||''),p:o.p,ic:o.ic||''}});
+      SD_PROD=list;
+      try{var c2=await caches.open('shehab_dd');c2.put('prod_v1',new Response(JSON.stringify({ts:Date.now(),d:list})))}catch(e){}
+      return SD_PROD;
+    })();
+    SD_PTF.catch(function(){SD_PTF=null});
+    return SD_PTF;
   }
   function sdLocal(q){
     var D=SD_DATA;if(!D)return null;
@@ -5144,18 +5164,63 @@ html.dark .sh-push-hint{background:#1D4FA8}
     var box=G2('ddDrop');if(!box)return;
     if(!SD_RES.length){box.style.display='none';return}
     box.style.display='block';
-    box.innerHTML=SD_RES.map(function(d,i){
+    box.innerHTML=SD_RES.map(function(r,i){
+      if(r&&r.o){
+        var o=r.o;
+        return '<div class="sd-row" data-i="'+i+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer" onclick="sdPickProd('+i+')">'
+          +'<div style="flex:1 1 auto;min-width:0">'
+          +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+E2(o.t)+'</b>'
+          +'<small style="display:block;color:#2e9e4f;font-weight:700">من الصيدلية</small>'
+          +'</div>'
+          +(o.p?'<span style="flex:0 0 auto;color:#0b2a6f;font-weight:800;white-space:nowrap">'+E2(o.p)+' ج</span>':'<span style="flex:0 0 auto;color:var(--muted)">-</span>')
+          +'</div>';
+      }
+      var d=(r&&r.d)||r;
       return '<div class="sd-row" data-i="'+i+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer" onclick="sdPick('+i+')">'
         +'<div style="flex:1 1 auto;min-width:0">'
         +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+E2(d.ar||d.en)+'</b>'
         +(d.ar&&d.en?'<small dir="ltr" style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+E2(d.en)+'</small>':'')
         +'</div>'
-        +(d.pr?'<span style="flex:0 0 auto;color:#0b2a6f;font-weight:800;white-space:nowrap">'+E2(d.pr)+' ج</span>':'<span style="flex:0 0 auto;color:var(--muted)">—</span>')
+        +(d.pr?'<span style="flex:0 0 auto;color:#0b2a6f;font-weight:800;white-space:nowrap">'+E2(d.pr)+' ج</span>':'<span style="flex:0 0 auto;color:var(--muted)">-</span>')
         +'</div>';
     }).join('');
   }
+  /* كارت صنف الصيدلية (من الأقسام) — الطلب يروح لسلة المنتجات الحقيقية */
+  window.sdPickProd=function(i){
+    var r=SD_RES[i];if(!r||!r.o)return;
+    var o=r.o;SD_SEL=null;SD_QTY=1;
+    sdRenderRows([]);
+    var q=G2('searchQ');if(q)q.value=o.t;
+    var box=G2('searchRes');if(!box)return;
+    box.innerHTML=''
+      +'<div id="sdCard" style="position:relative;background:var(--card,#fff);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0 4px;max-width:100%;box-sizing:border-box">'
+      +'<button type="button" onclick="sdClose()" aria-label="إزالة" style="position:absolute;top:6px;left:6px;width:28px;height:28px;min-width:28px;flex:0 0 auto;border-radius:50%;border:1.5px solid var(--line);background:var(--soft);color:var(--b);font-weight:700;font-size:.95em;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">✕</button>'
+      +'<div style="padding-inline-end:36px">'
+      +'<b style="display:block;font-size:1em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+E2(o.t)+'</b>'
+      +'<small style="display:block;color:#2e9e4f;font-weight:700">من الصيدلية</small>'
+      +(o.p?'<div style="margin-top:4px;font-weight:800;color:#0b2a6f">'+E2(o.p)+' جنيه</div>':'')
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:10px;max-width:100%">'
+      +'<div style="display:flex;align-items:center;gap:6px;background:var(--soft);border:1.5px solid var(--line);border-radius:10px;padding:3px 6px;flex:0 0 auto">'
+      +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="sdQty(-1)">−</button>'
+      +'<b id="sdQtyN" style="min-width:22px;text-align:center;font-size:.95em"><input id="sdQtyIn" type="number" min="1" step="1" inputmode="numeric" value="'+SD_QTY+'" oninput="sdQtySet(this.value)" style="width:52px;min-width:52px;padding:6px 4px;text-align:center;margin:0;border:none;border-radius:8px;font-weight:700;background:transparent"></b>'
+      +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="sdQty(1)">＋</button>'
+      +'</div>'
+      +'<button type="button" class="g" style="flex:1 1 auto;width:auto;min-width:0;background:#2e9e4f;color:#fff;padding:8px 12px;font-size:.95em" onclick="sdOrderProd('+i+')">🛒 اطلب</button>'
+      +'</div></div>';
+  };
+  window.sdOrderProd=function(i){
+    var r=SD_RES[i];if(!r||!r.o)return;
+    var o=r.o;
+    var inp=G2('sdQtyIn');var qty=inp?Math.max(1,parseInt(inp.value,10)||1):1;
+    var x=null;try{x=CART.find(function(v){return String(v.id)==String(o.id)})}catch(e){}
+    if(x)x.qty=(+x.qty||0)+qty;
+    else CART.push({id:String(o.id),qty:qty,t:o.t,p:(o.p==null?'':o.p),ic:o.ic||''});
+    try{cartPersist();cartBadge()}catch(e){}
+    try{NAV_REPLACE=true;cartV()}catch(e){}
+  };
   window.sdPick=function(i){
-    var d=SD_RES[i];if(!d)return;
+    var r=SD_RES[i];var d=(r&&r.d)||r;if(!d)return;
     SD_SEL=d;SD_QTY=1;
     sdRenderRows([]);
     var q=G2('searchQ');if(q)q.value=d.ar||d.en;
@@ -5217,13 +5282,54 @@ html.dark .sh-push-hint{background:#1D4FA8}
     var t=String(q.value||'').trim();
     if(t.length<2){sdRenderRows([]);return}
     var typing=++SD_TYPIST;
+    function sdProdMatch(P,qq){
+      /* أصناف الصيدلية: احتواء أولًا ثم تقرب (قايمة صغيرة — مقبول حسابيًا) */
+      var out=[],i,o;
+      if(!P)return out;
+      for(i=0;i<P.length;i++){o=P[i];if(sdType(o.t).indexOf(qq)>-1)out.push(o)}
+      if(out.length)return out;
+      function lev(a,b,max){
+        if(Math.abs(a.length-b.length)>max)return max+1;
+        var prev=[],cur=[];
+        for(var j=0;j<=b.length;j++)prev[j]=j;
+        for(var ii=1;ii<=a.length;ii++){
+          cur[0]=ii;var best=cur[0];
+          for(j=1;j<=b.length;j++){
+            cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[ii-1]===b[j-1]?0:1));
+            if(cur[j]<best)best=cur[j];
+          }
+          if(best>max)return max+1;
+          var tt=prev;prev=cur;cur=tt;
+        }
+        return prev[b.length];
+      }
+      var cand=[];
+      for(i=0;i<P.length;i++){
+        o=P[i];var wt=sdType(o.t);if(!wt)continue;
+        var max=(qq.length<=4||wt.length<=4)?1:2;
+        if(wt[0]!==qq[0]&&Math.abs(wt.length-qq.length)>1)continue;
+        var d2=lev(qq,wt,max);
+        if(d2<=max)cand.push({o:o,sc:1+(1-d2/max)*0.9+(wt[0]===qq[0]?0.25:0)});
+      }
+      cand.sort(function(a,b){return b.sc-a.sc});
+      return cand.slice(0,10).map(function(c){return c.o});
+    }
+    function merge(prods,ddRes){
+      if(typing!==SD_TYPIST)return;
+      var rows=[];
+      (prods||[]).forEach(function(o){rows.push({o:o})});
+      (ddRes||[]).forEach(function(d){if(rows.length<40)rows.push({d:d})});
+      if(rows.length){sdRenderRows(rows);return}
+      sdRenderRows([]);
+      if(box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'» — جرب تاني بمادة فعالة أو بالإنجليزي</div>';
+    }
     /* الأولوية: بحث محلي من النسخة المخزنة (فوري + إملائي) — والسيرفر احتياط */
     sdData().then(function(){
       if(typing!==SD_TYPIST)return;
-      var res=sdLocal(t)||[];
-      if(res.length){sdRenderRows(res);return}
-      sdRenderRows([]);
-      if(box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'» — جرب تاني بمادة فعالة أو بالإنجليزي</div>';
+      var ddRes=sdLocal(t)||[];
+      var qq=sdType(t),prods=[];
+      try{prods=sdProdMatch(SD_PROD,qq)}catch(e){}
+      merge(prods,ddRes);
     }).catch(function(){
       call('ddFind',{q:t}).then(function(res){
         if(typing!==SD_TYPIST)return;
@@ -5235,8 +5341,10 @@ html.dark .sh-push-hint{background:#1D4FA8}
           var xb=sdType(b.ar||b.en).indexOf(needle)===0?0:1;
           return xa-xb;
         });
-        sdRenderRows(res.slice(0,40));
-        if(!res.length&&box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'»</div>';
+        var prods=[];
+        try{prods=sdProdMatch(SD_PROD,needle)}catch(e){}
+        merge(prods,res.slice(0,40));
+        if(!res.length&&!(prods&&prods.length)&&box)box.innerHTML='<div class="card">مفيش نتيجة لـ «'+E2(t)+'»</div>';
       }).catch(function(x){
         if(typing!==SD_TYPIST)return;
         sdRenderRows([]);
@@ -5273,8 +5381,9 @@ html.dark .sh-push-hint{background:#1D4FA8}
       inp.addEventListener('input',function(){clearTimeout(SD_T);SD_T=setTimeout(sdDoSearch,250)});
       try{inp.focus()}catch(e){}
     }
-    /* تحضير نسخة البحث المحلية في الخلفية أول مرة بس */
+    /* تحضير نسخة البحث المحلية + أصناف الصيدلية في الخلفية أول مرة بس */
     sdData().then(function(){var h=G2('sdHint');if(h)h.remove()}).catch(function(){var h=G2('sdHint');if(h)h.remove()});
+    sdProdData().catch(function(){});
     document.addEventListener('click',function(ev){
       var dr=G2('ddDrop');
       if(dr&&!dr.contains(ev.target)&&ev.target!==inp)dr.style.display='none';
