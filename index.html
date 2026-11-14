@@ -713,6 +713,11 @@ function ddSearch(){
     r=DD_DATA[i];
     if(ddNorm(r[0]).indexOf(t)>-1||ddNorm(r[1]).indexOf(t)>-1||ddNorm(r[2]).indexOf(t)>-1)out.push(r);
   }
+  /* مسافة زيادة أو نسيان شرطة: مقارنة من غير مسافات/شرطات */
+  if(!out.length){
+    var tC=t.replace(/[-\u0640\s]/g,'');
+    if(tC.length>1){for(i=0;i<DD_DATA.length&&out.length<40;i++){r=DD_DATA[i];if(ddNorm(r[0]).replace(/[-\u0640\s]/g,'').indexOf(tC)>-1||ddNorm(r[1]).replace(/[-\u0640\s]/g,'').indexOf(tC)>-1||ddNorm(r[2]).replace(/[-\u0640\s]/g,'').indexOf(tC)>-1)out.push(r)}}
+  }
   /* تسامح أخطاء إملائية لو مفيش نتيجة مباشرة */
   if(!out.length){
     var qw=t.split(' ').filter(function(w){return w.length>1});
@@ -2888,7 +2893,7 @@ html.dark #cartFab{box-shadow:0 6px 18px #00000080}
       WRAP.appendChild(FAB);document.body.appendChild(WRAP);
     }
     function cartCount(){
-      try{var c=(typeof CART!=='undefined'&&CART)?CART:[];var n=0;for(var i=0;i<c.length;i++)n+=(Number(c[i].qty)||0);return n}catch(e){return 0}
+      try{var c=(typeof CART!=='undefined'&&CART)?CART:[];var n=0;for(var i=0;i<c.length;i++)n+=(Number(c[i].qty)||0);try{var _cc=ccGet();(_cc&&_cc.ddItems||[]).forEach(function(y){n+=Math.max(1,Number(y.qty)||1)})}catch(_ce){}return n}catch(e){return 0}
     }
     function sync(){
       if(!WRAP){if(!READY)return;build()}
@@ -5241,6 +5246,9 @@ html.dark .sh-push-hint{background:#1D4FA8}
       if(hay.indexOf(qq)>-1)out.push(d);
     }
     if(out.length)return out;
+    /* مسافة زيادة أو نسيان شرطة: مقارنة من غير مسافات/شرطات */
+    var qc=qq.replace(/[-\u0640\s]/g,'');
+    if(qc.length>1){for(i=0;i<D.length&&out.length<40;i++){d=D[i];hay=sdType((d.en||'')+' '+(d.ar||'')+' '+(d.sci||'')).replace(/[-\u0640\s]/g,'');if(hay.indexOf(qc)>-1)out.push(d)}if(out.length)return out}
     /* تسامح أخطاء إملائية */
     var qw=qq.split(' ').filter(function(w){return w.length>1});
     if(!qw.length)return out;
@@ -5422,6 +5430,8 @@ html.dark .sh-push-hint{background:#1D4FA8}
       if(!P)return out;
       for(i=0;i<P.length;i++){o=P[i];if(sdType(o.t).indexOf(qq)>-1)out.push(o)}
       if(out.length)return out;
+      var qc2=qq.replace(/[-\u0640\s]/g,'');
+      if(qc2.length>1){for(i=0;i<P.length;i++){o=P[i];if(sdType(o.t).replace(/[-\u0640\s]/g,'').indexOf(qc2)>-1)out.push(o)}if(out.length)return out}
       function lev(a,b,max){
         if(Math.abs(a.length-b.length)>max)return max+1;
         var prev=[],cur=[];
