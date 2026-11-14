@@ -477,7 +477,15 @@ else if(v==='loyaltySettings'){try{if(typeof window.loyaltySettingsV==='function
 else if(v==='search'){try{if(typeof window.searchV==='function')window.searchV()}catch(e){}}
 else if(v==='ord'){try{await loadOrderAddr();try{var don=(typeof window.__shDeliveryOn==='function')?!!window.__shDeliveryOn():true;var b1=$('b1');if(b1){if(don)b1.removeAttribute('hidden');else b1.setAttribute('hidden','')}if(!don)mode('pickup')}catch(e){}}catch(e){}}
 else if(v==='mydata'){try{if(typeof window.myDataV==='function')window.myDataV()}catch(e){}}
-else if(v==='settings'){try{var dv=$('setDelivery');if(dv)dv.checked=!!(window.__shDeliveryOn&&window.__shDeliveryOn());if(typeof window.__shNotifWrap==='function')window.__shNotifWrap()}catch(e){}}
+else if(v==='settings'){try{if(typeof settingsV==='function')settingsV();else{var dv=$('setDelivery');if(dv)dv.checked=!!(window.__shDeliveryOn&&window.__shDeliveryOn());if(typeof window.__shNotifWrap==='function')window.__shNotifWrap()}}catch(e){}}
+else if(v==='add'){try{addV()}catch(e){}}
+else if(v==='dd'){try{ddV()}catch(e){}}
+else if(v==='ddImport'){try{window.ddImportV()}catch(e){}}
+else if(v==='secadmin'){try{window.secAdminV()}catch(e){}}
+else if(v==='medAlarm'){try{window.medV&&window.medV()}catch(e){}}
+else if(v==='notifSettings'){try{notifSettingsV()}catch(e){}}
+else if(v==='guest'){try{renderGuest()}catch(e){}}
+else if(v==='tgchan'){try{window.tgChannelV&&window.tgChannelV()}catch(e){}}
 else if(v==='itemsAdmin'){try{if(typeof window.itemsAdminV==='function')window.itemsAdminV()}catch(e){}}else if(v==='adminDash'){try{if(typeof window.adminDashV==='function')window.adminDashV()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
 /* ---- Shehab: share an offer + server-backed notification centre ---- */
 async function loadCartAddr(){try{const u=await call('profile');const a=$('cartAddr');if(a&&u&&u.address&&!a.value)a.value=u.address}catch(e){}}
@@ -4474,7 +4482,7 @@ html.dark button.share-app-btn{box-shadow:0 8px 16px -8px #000}
     }
   }
   function topY(){try{return window.scrollY||document.documentElement.scrollTop||document.body.scrollTop||0}catch(e){return 0}}
-  function inModal(){try{return !!document.querySelector('.m')}catch(e){return false}}
+  function inModal(){try{return !!document.querySelector('.m')||!!document.getElementById('imgZoom')}catch(e){return false}}
   document.addEventListener('touchstart',function(ev){
     if(busy)return;var t=ev.touches&&ev.touches[0];if(!t)return;
     if(inModal()||topY()>2){pulling=false;return}
