@@ -695,7 +695,7 @@ async function ddLoad(){
 }
 async function ddV(){
   V='dd';
-  app(`<h2>💊 قسم الأدوية</h2><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div style="position:relative"><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div id="ddr" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:60;max-height:60vh;overflow:auto;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)"></div></div><div id="ddPending"></div><div class="err" id="ddstat"></div><div id="ddSel"></div>`);
+  app(`<h2>💊 قسم الأدوية</h2><div style="position:relative"><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div id="ddr" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:60;max-height:60vh;overflow:auto;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)"></div></div><div id="ddPending"></div><div class="err" id="ddstat"></div><div id="ddSel"></div>`);
   try{window.sdPendingRender&&window.sdPendingRender()}catch(e){}
   var stat=$('ddstat'),res=$('ddr'),qi=$('ddq');
   res.innerHTML='<div class="card">جاري تحميل قاعدة الأدوية… (بتتخزن عندك مرة واحدة وبعدها تفتح فورًا)</div>';
@@ -3140,7 +3140,7 @@ html.dark .search-card img.ic{background:#141c30}
   function runSearch(q){
     var box=G('searchRes'); if(!box)return;
     q=String(q||'').trim();
-    if(!q){ box.innerHTML=''; return; }
+    if(!q){ box.innerHTML=''; box.style.display='none'; return; }
     var needle=q.toLowerCase();
     var res=allSearchItems().filter(function(x){ return String(x.t||'').toLowerCase().indexOf(needle)>-1; });
     var res2=res.slice(0,10);
@@ -3193,7 +3193,10 @@ html.dark .search-card img.ic{background:#141c30}
       }).join('');
       if(drugs.length)sec2='<div style="color:var(--muted);font-size:.8em;margin:6px 2px 2px">💊 أصناف الدواء</div>'+sec2;
     }
-    if(!sec1&&!sec2){ box.innerHTML='<div class="card">مفيش نتايج لـ «'+esc(q)+'»</div>'; return; }
+    if(!sec1&&!sec2){ box.style.display='block'; box.innerHTML='<div class="card">مفيش نتايج لـ «'+esc(q)+'»</div>'; return; }
+    box.style.display='block';
+    box.style.background='var(--bg,#f5f7fb)';
+    box.style.boxShadow='0 10px 26px rgba(11,42,111,.16)';
     box.innerHTML=sec1+sec2;
     if(typeof window.sdData==='function'&&!window.__sdReady){
       var _ty=(runSearch._ty=(runSearch._ty||0)+1);
@@ -3202,7 +3205,7 @@ html.dark .search-card img.ic{background:#141c30}
   }
   function searchV(q){
     V='search'; try{window.__shLastSearch=String(q||'')}catch(e){}
-    app('<h2>🔎 بحث</h2><input id="searchQ" type="search" placeholder="ابحث عن صنف أو عرض…" autocomplete="off"><div id="sdPending"></div><div id="searchRes"></div>');
+    app('<h2>🔎 بحث</h2><div style="position:relative"><input id="searchQ" type="search" placeholder="ابحث عن صنف أو عرض…" autocomplete="off"><div id="searchRes" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:60;max-height:60vh;overflow:auto;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)"></div></div><div id="sdPending"></div>');
     try{window.sdPendingRender&&window.sdPendingRender()}catch(e){}
     var inp=G('searchQ');
     if(inp){ inp.value=q||''; inp.addEventListener('input',function(){ runSearch(inp.value) }); try{inp.focus()}catch(e){} }
@@ -5728,3 +5731,5 @@ html.dark .sh-push-hint{background:#1D4FA8}
   };
 })();
 </script>
+
+<style>html.dark #ddr,html.dark #searchRes{background:#101a30!important;color:#e8eefc}html.dark #ddr .card,html.dark #searchRes .card{background:#16223f;color:#e8eefc}</style>
