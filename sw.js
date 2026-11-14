@@ -7,7 +7,7 @@ function savePushInbox(payload){return new Promise((resolve,reject)=>{const r=in
    في صندوق إشعارات التطبيق بس (وFirebase يعرض الإشعار الواحد). */
 fcm.onBackgroundMessage(payload=>savePushInbox(payload));
 self.addEventListener('notificationclick',e=>{e.notification.close();const url=e.notification.data&&e.notification.data.url||'https://amersn.github.io/shehabpharmacies/';e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(xs=>{for(const c of xs){if(c.url.startsWith('https://amersn.github.io/shehabpharmacies/'))return c.focus().then(()=>c.navigate(url))}return clients.openWindow(url)}))});
-const C='shehab-v6-fcm',F=['./','index.html','config.js','logo.png','icon-192.png'];
+const C='shehab-v7-fcm',F=['./','index.html','config.js','logo.png','icon-192.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(F)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!=C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{if(e.request.method!='GET')return;e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))});

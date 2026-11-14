@@ -379,7 +379,7 @@ cartRender=function(){_ucoRenderPrev();try{var box=$('cartLines');if(!box)return
       var t1=document.createElement('b');t1.style.cssText='display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';t1.textContent=x.ar||x.en;info.appendChild(t1);
       if(x.en){var e1=document.createElement('small');e1.dir='ltr';e1.style.cssText='display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap';e1.textContent=x.en;info.appendChild(e1)}
       d1.appendChild(info);
-      var row2=document.createElement('div');row2.style.cssText='display:flex;align-items:center;gap:8px;margin-top:6px';
+      var row2=document.createElement('div');row2.style.cssText='display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap';
       var qw=document.createElement('div');qw.style.cssText='display:flex;align-items:center;gap:5px;background:var(--soft);border:1.5px solid var(--line);border-radius:10px;padding:2px 5px;flex:0 0 auto';
       var mb=document.createElement('button');mb.type='button';mb.className='g';mb.style.cssText='width:28px;height:28px;min-width:28px;border-radius:50%;padding:0;font-size:1.05em;line-height:1';mb.textContent='−';mb.onclick=function(){cartItemQty(xi,(+x.qty||1)-1)};qw.appendChild(mb);
       var qi=document.createElement('input');qi.type='number';qi.min='1';qi.step='1';qi.inputMode='numeric';qi.value=String(Math.max(1,+x.qty||1));qi.style.cssText='width:44px;min-width:44px;padding:5px 2px;text-align:center;margin:0;border:none;border-radius:8px;font-weight:700;background:transparent';qi.oninput=function(){cartItemQty(xi,qi.value)};qw.appendChild(qi);
@@ -396,7 +396,7 @@ cartRender=function(){_ucoRenderPrev();try{var box=$('cartLines');if(!box)return
       _units.forEach(function(u){var op=document.createElement('option');op.value=u;op.textContent=u;_usel.appendChild(op)});
       _usel.value=_cur;_usel.onchange=function(){cartItemUnit(xi,_usel.value)};
       row2.appendChild(_usel);
-      if(x.pr){var _q=Math.max(1,+x.qty||1);var _up=parseFloat(String(x.pr).replace(/[^0-9.]/g,''));var m1=document.createElement('span');m1.style.cssText='flex:1 1 auto;text-align:end;color:#0b2a6f;font-weight:800';m1.textContent=Number.isFinite(_up)?(_up*_q).toFixed(2)+' ج':'السعر عند المراجعة';row2.appendChild(m1)}
+      if(x.pr){var _q=Math.max(1,+x.qty||1);var _up=parseFloat(String(x.pr).replace(/[^0-9.]/g,''));var m1=document.createElement('span');m1.style.cssText='flex:1 1 100%;text-align:end;color:#0b2a6f;font-weight:800';m1.textContent=Number.isFinite(_up)?(_up*_q).toFixed(2)+' ج':'السعر عند المراجعة';row2.appendChild(m1)}
       d1.appendChild(row2);
       card.appendChild(d1);
     });
@@ -695,7 +695,7 @@ async function ddLoad(){
 }
 async function ddV(){
   V='dd';
-  app(`<h2>💊 قسم الأدوية</h2><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div id="ddPending"></div><div class="err" id="ddstat"></div><div id="ddWrap" style="position:relative"><div id="ddr" style="position:absolute;top:2px;left:0;right:0;z-index:40;max-height:56vh;overflow:auto;border-radius:14px;padding-bottom:4px"></div></div><div id="ddSel"></div>`);
+  app(`<h2>💊 قسم الأدوية</h2><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div id="ddPending"></div><div class="err" id="ddstat"></div><div id="ddWrap" style="position:relative;min-height:34vh"><div id="ddr" style="position:absolute;top:2px;left:0;right:0;z-index:40;max-height:56vh;overflow:auto;border-radius:14px;padding-bottom:4px"></div></div><div id="ddSel"></div>`);
   try{window.sdPendingRender&&window.sdPendingRender()}catch(e){}
   var stat=$('ddstat'),res=$('ddr'),qi=$('ddq');
   res.innerHTML='<div class="card">جاري تحميل قاعدة الأدوية… (بتتخزن عندك مرة واحدة وبعدها تفتح فورًا)</div>';
