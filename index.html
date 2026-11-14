@@ -380,7 +380,7 @@ cartRender=function(){_ucoRenderPrev();try{var box=$('cartLines');if(!box)return
   }else{
     var l1=document.createElement('div');l1.style.cssText='white-space:pre-wrap;word-break:break-word';l1.textContent=C.item;card.appendChild(l1)
   }
-}var tags=document.createElement('div');var _tg='';if(C.image)_tg+='🖼️ فيه صورة مرفقة  ';if(C.audio)_tg+='🎙️ فيه تسجيل صوتي  ';if(_tg){tags.textContent=_tg;card.appendChild(tags)}if(C.notes){var n1=document.createElement('small');n1.style.display='block';n1.textContent='ملاحظات: '+C.notes;card.appendChild(n1)}var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);var row=document.createElement('div');row.className='row';var rm=document.createElement('button');rm.type='button';rm.className='g';rm.textContent='إلغاء الطلب كله';rm.addEventListener('click',function(e3){e3.stopPropagation();ccClear();try{cartRender()}catch(_x){}try{cartBadge()}catch(_y){}});row.appendChild(rm);card.appendChild(row);if(!CART.length){box.textContent='';box.appendChild(card);var _es=$('cartEstimate');if(_es)_es.textContent='طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار'}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
+}var tags=document.createElement('div');var _tg='';if(C.image)_tg+='🖼️ فيه صورة مرفقة  ';if(C.audio)_tg+='🎙️ فيه تسجيل صوتي  ';if(_tg){tags.textContent=_tg;card.appendChild(tags)}if(C.notes){var n1=document.createElement('small');n1.style.display='block';n1.textContent='ملاحظات: '+C.notes;card.appendChild(n1)}var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);var row=document.createElement('div');row.className='row';var rm=document.createElement('button');rm.type='button';rm.className='g';rm.textContent='إلغاء الطلب كله';rm.addEventListener('click',function(e3){e3.stopPropagation();ccClear();try{cartRender()}catch(_x){}try{cartBadge()}catch(_y){}});row.appendChild(rm);card.appendChild(row);if(!CART.length){box.textContent='';box.appendChild(card);var _es=$('cartEstimate');if(_es)_es.textContent='طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار'}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="ddImportV()">⬆️ رفع ملف أصناف الصيدلية</button><button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
 </script>
 <script>
 // Notification bell, device inbox, and opt-in prompt.
@@ -655,11 +655,14 @@ async function ddLoad(){
   if(DD_DATA)return DD_DATA;
   if(DD_LOAD)return DD_LOAD;
   DD_LOAD=(async()=>{
-    try{var c=await caches.open('shehab_dd');var m=await c.match('dd_v1');if(m){DD_DATA=JSON.parse(await m.text());return DD_DATA}}catch(e){}
-    var r=await fetch(DD_URL);if(!r.ok)throw new Error('تعذر تحميل قاعدة الأدوية');
-    var arr=JSON.parse(await r.text());
-    DD_DATA=arr.map(function(d){return[d.commercial_name_en||'',d.commercial_name_ar||'',d.scientific_name||'',d.manufacturer||'',d.drug_class||'',d.route||'',(d.price_egp==null||d.price_egp===''?'':String(d.price_egp))]});
-    try{var c2=await caches.open('shehab_dd');c2.put('dd_v1',new Response(JSON.stringify(DD_DATA)))}catch(e){}
+    var v=1;try{var rv=await call('ddVer');if(rv&&rv.v)v=+rv.v}catch(e){}
+    var c=await caches.open('shehab_dd');var key='dd_v2_'+v;
+    try{var m=await c.match(key);if(m){DD_DATA=JSON.parse(await m.text());return DD_DATA}}catch(e){}
+    var d=await call('ddAll');
+    if(!Array.isArray(d)||d.length<100)throw new Error('تعذر تحميل قاعدة الأدوية');
+    var arr=d.map(function(x){return[x.en||'',x.ar||'',x.sci||'',x.man||'',x.cls||'',x.rt||'',(x.pr==null?'':String(x.pr))]});
+    DD_DATA=arr;
+    try{c.put(key,new Response(JSON.stringify(arr)))}catch(e){}
     return DD_DATA;
   })();
   DD_LOAD=DD_LOAD.catch(function(e){DD_LOAD=null;throw e});
@@ -5099,20 +5102,26 @@ html.dark .sh-push-hint{background:#1D4FA8}
   function E2(s){try{return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}catch(e){return ''}}
   var SD_RES=[],SD_T=null,SD_QTY=1,SD_SEL=null,SD_TYPIST=0,SD_DATA=null,SD_DTF=null,SD_PROD=null,SD_PTF=null,SD_PO=null;
   function sdType(s){try{return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ').trim()}catch(e){return String(s||'')}}
+  async function sdVer(){
+    var v=1;
+    try{var r=await call('ddVer');if(r&&r.v)v=+r.v}catch(e){}
+    return v;
+  }
   async function sdData(){
-    /* نسخة الأدوية للبحث المحلي: كاش 6 ساعات في المتصفح */
+    /* نسخة الأدوية للبحث المحلي: كاش مرتبط بإصدار القاعدة (يتغير مع كل استيراد) */
     if(SD_DATA)return SD_DATA;
     if(SD_DTF)return SD_DTF;
     SD_DTF=(async()=>{
+      var v=1;try{v=await sdVer()}catch(e){}
       try{
-        var c=await caches.open('shehab_dd');var m=await c.match('dd_s2');
+        var c=await caches.open('shehab_dd');var m=await c.match('dd_s3');
         if(m){var j=JSON.parse(await m.text());
-          if(j&&j.ts&&Array.isArray(j.d)&&j.d.length>100&&Date.now()-j.ts<6*3600e3){SD_DATA=j.d;return SD_DATA}}
+          if(j&&j.ts&&j.v===v&&Array.isArray(j.d)&&j.d.length>100){SD_DATA=j.d;return SD_DATA}}
       }catch(e){}
       var d=await call('ddAll');
       if(!Array.isArray(d)||d.length<100)throw 'بيانات غير صالحة';
       SD_DATA=d;
-      try{var c2=await caches.open('shehab_dd');c2.put('dd_s2',new Response(JSON.stringify({ts:Date.now(),d:d})))}catch(e){}
+      try{var c2=await caches.open('shehab_dd');c2.put('dd_s3',new Response(JSON.stringify({ts:Date.now(),v:v,d:d})))}catch(e){}
       return SD_DATA;
     })();
     SD_DTF.catch(function(){SD_DTF=null});
@@ -5391,43 +5400,130 @@ html.dark .sh-push-hint{background:#1D4FA8}
       });
     });
   }
-  window.sdSyncNow=function(){
-    var btn=G2('sdSyncBtn');if(btn){btn.disabled=true;btn.textContent='⏳ بيحدث… ممكن تاخد دقيقة'}
-    /* المزامنة بتاخد وقت — fetch مباشر من غير مهلة الـ 30 ثانية بتاعة call */
-    var b;try{b=JSON.stringify({a:'ddSync',t:(typeof S!=='undefined'&&S.t)?S.t:''})}catch(e){}
-    fetch((typeof API!=='undefined')?API:'',{method:'POST',body:b}).then(function(r){return r.json()}).then(function(j){
-      if(!j.ok)throw j.err;
-      if(btn){btn.disabled=false;btn.textContent='↻ تحديث الأسعار من GitHub'}
-      var box=G2('searchRes');
-      if(box)box.innerHTML='<div class="card">✅ اتحديث: '+E2(String((j.data&&j.data.updated)||0))+' صنف، اتضاف '+E2(String((j.data&&j.data.added)||0))+' جديد</div>';
-    }).catch(function(x){
-      if(btn){btn.disabled=false;btn.textContent='↻ تحديث الأسعار من GitHub'}
-      var box=G2('searchRes');
-      if(box)box.innerHTML='<div class="card">'+E2(typeof x==='string'?x:'فشل التحديث')+'</div>';
-    });
+  /* ===== استيراد ملف أصناف الصيدلية (Excel/CSV) → استبدال قاعدة جوجل شيت ===== */
+  window.ddImportV=function(){
+    try{V='ddImport'}catch(e){}
+    app('<h2>⬆️ رفع ملف أصناف الصيدلية</h2>'
+      +'<small>اختار ملف الأصناف المصدّر من برنامج الصيدلية (Excel أو CSV). بعد الاستيراد، البيانات هتبقى هي قاعدة البحث وقسم الأدوية بدل اللي موجود.</small>'
+      +'<input id="ddFile" type="file" accept=".xlsx,.xls,.csv,text/csv">' 
+      +'<div id="ddImpPrev"></div>'
+      +'<div class="err" id="ddImpMsg"></div>');
+    var f=G2('ddFile');
+    if(f)f.addEventListener('change',function(){window.__ddImpFile(f.files&&f.files[0])});
   };
-  window.searchV=function(){
-    try{V='search'}catch(e){}
-    var isMgr=false;try{isMgr=(S&&S.r==='manager')}catch(e){}
-    app('<h2>🔍 البحث</h2>'
-      +(isMgr?'<button type="button" class="g" id="sdSyncBtn" style="width:100%;margin-bottom:8px" onclick="sdSyncNow()">↻ تحديث الأسعار من GitHub</button>':'')
-      +'<input id="searchQ" type="search" placeholder="ابحث بالعربي أو الإنجليزي…" autocomplete="off">'
-      +'<div id="ddDrop" style="display:none;width:100%;box-sizing:border-box;background:var(--card,#fff);border:1.5px solid var(--line);border-radius:12px;margin-top:6px;max-height:45vh;overflow-y:auto;box-shadow:0 4px 14px rgba(0,0,0,.08)"></div>'
-      +'<small id="sdHint" style="display:block;color:var(--muted)">جاري تحضير قاعدة البحث… ثواني وتبقى فورية</small>'
-      +'<div id="searchRes"></div>');
-    var inp=G2('searchQ');
-    if(inp){
-      inp.addEventListener('input',function(){clearTimeout(SD_T);SD_T=setTimeout(sdDoSearch,250)});
-      try{inp.focus()}catch(e){}
+  function ddImpCSV(text){
+    var first=text.split(/\r?\n/)[0]||'';
+    var nc=(first.match(/,/g)||[]).length,ns=(first.match(/;/g)||[]).length,nt=(first.match(/\t/g)||[]).length;
+    var dlm=',';if(ns>nc&&ns>=nt)dlm=';';if(nt>nc&&nt>ns)dlm='\t';
+    var rows=[],row=[],cur='',q=false,i,ch;
+    for(i=0;i<text.length;i++){
+      ch=text[i];
+      if(q){
+        if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++}else q=false}
+        else cur+=ch;
+      }else if(ch==='"')q=true;
+      else if(ch===dlm){row.push(cur);cur=''}
+      else if(ch==='\n'){row.push(cur);cur='';if(row.length>1||String(row[0]||'').trim())rows.push(row);row=[]}
+      else if(ch==='\r'){}
+      else cur+=ch;
     }
-    /* تحضير نسخة البحث المحلية + أصناف الصيدلية في الخلفية أول مرة بس */
-    sdData().then(function(){var h=G2('sdHint');if(h)h.remove()}).catch(function(){var h=G2('sdHint');if(h)h.remove()});
-    sdProdData().catch(function(){});
-    document.addEventListener('click',function(ev){
-      var dr=G2('ddDrop');
-      if(dr&&!dr.contains(ev.target)&&ev.target!==inp)dr.style.display='none';
-    });
+    if(cur!==''||row.length){row.push(cur);if(row.length>1||String(row[0]||'').trim())rows.push(row)}
+    return rows;
+  }
+  function ddImpGuess(rows){
+    var g=[null,null,null];
+    var head=(rows[0]||[]).map(function(c){return String(c||'').toLowerCase()});
+    function find(re){for(var i=0;i<head.length;i++){if(re.test(head[i]))return i}return null}
+    g[0]=find(/(^|[^a-z])(en|english|trade|commercial|brand)/);
+    g[1]=find(/ar|عرب|arabic/);
+    g[2]=find(/price|سعر|egp|جنيه/);
+    var n=(rows[0]||[]).length;
+    if(g[0]==null)g[0]=0;
+    if(g[1]==null)g[1]=Math.min(1,n-1);
+    if(g[2]==null)g[2]=Math.min(2,n-1);
+    return g;
+  }
+  window.__ddImpFile=async function(file){
+    var msg=G2('ddImpMsg'),prev=G2('ddImpPrev');
+    if(!file)return;
+    if(msg)msg.textContent='جاري قراءة الملف…';
+    try{
+      var rows=[];
+      if(/\.csv$/i.test(file.name)||(file.type||'')==='text/csv'){
+        var text=await file.text();
+        rows=ddImpCSV(text);
+      }else{
+        if(typeof XLSX==='undefined'){
+          await new Promise(function(res,rej){
+            var sc=document.createElement('script');
+            sc.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+            sc.onload=res;sc.onerror=function(){rej('تعذر تحميل قارئ Excel — جرب ملف CSV')};
+            document.head.appendChild(sc);
+          });
+        }
+        var wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
+      }
+      rows=(rows||[]).filter(function(r){return (r||[]).some(function(cc){return String(cc||'').trim()})});
+      if(rows.length<2)throw 'الملف فاضي أو من غير بيانات';
+      window.__ddImpRows=rows;
+      var cols=Math.max.apply(null,rows.slice(0,30).map(function(r){return r.length}));
+      function opts(){var h='<option value="-1">— بدون —</option>';for(var i2=0;i2<cols;i2++)h+='<option value="'+i2+'">عمود '+(i2+1)+'</option>';return h}
+      var g=ddImpGuess(rows);
+      if(prev)prev.innerHTML='<div class="card">'
+        +'<b>معاينة — '+E2(String(rows.length-1))+' صف</b>'
+        +'<pre style="white-space:pre-wrap;font-size:.78em;margin:6px 0;max-height:120px;overflow:auto">'+E2(rows.slice(0,5).map(function(r){return (r||[]).slice(0,8).map(function(c){return String(c||'').slice(0,28)}).join(' | ')}).join('\n'))+'</pre>'
+        +'<label>عمود الاسم الإنجليزي</label><select id="ddColEn">'+opts()+'</select>'
+        +'<label>عمود الاسم العربي</label><select id="ddColAr">'+opts()+'</select>'
+        +'<label>عمود السعر</label><select id="ddColPr">'+opts()+'</select>'
+        +'<button type="button" class="g" style="width:auto;background:#2e9e4f;color:#fff" onclick="ddImpGo()">⬆️ ابدأ الاستيراد (يستبدل القاعدة)</button>'
+        +'</div>';
+      [['ddColEn',g[0]],['ddColAr',g[1]],['ddColPr',g[2]]].forEach(function(p2){var el=G2(p2[0]);if(el&&p2[1]!=null)el.value=String(p2[1])});
+      if(msg)msg.textContent='';
+    }catch(e){if(msg)msg.textContent=E2(String(e&&e.message||e))}
   };
+  window.ddImpGo=async function(){
+    var msg=G2('ddImpMsg');
+    var rows=window.__ddImpRows;
+    if(!rows||rows.length<2){if(msg)msg.textContent='اختار الملف الأول';return}
+    var sEl=G2('ddColEn'),aEl=G2('ddColAr'),pEl=G2('ddColPr');
+    var iEn=sEl?+sEl.value:-1,iAr=aEl?+aEl.value:-1,iPr=pEl?+pEl.value:-1;
+    if(iEn<0&&iAr<0){if(msg)msg.textContent='اختار عمود الاسم على الأقل';return}
+    if(!(S&&S.t)){if(msg)msg.textContent='لازم تسجل دخول كمدير';return}
+    var list=[];
+    for(var i=1;i<rows.length;i++){
+      var r=rows[i]||[];
+      var en=(iEn>=0)?String(r[iEn]||'').trim():'';
+      var ar=(iAr>=0)?String(r[iAr]||'').trim():'';
+      var pr=(iPr>=0)?String(r[iPr]||'').trim():'';
+      if(!en&&!ar)continue;
+      list.push({en:en,ar:ar,pr:pr});
+    }
+    if(!list.length){if(msg)msg.textContent='مفيش صفوف صالحة في الملف';return}
+    if(msg)msg.textContent='جاري الاستيراد… 0 من '+list.length;
+    var CH=1500,sent=0;
+    try{
+      for(var off=0;off<list.length;off+=CH){
+        var batch=list.slice(off,off+CH);
+        var mode=(off===0)?'replace':'append';
+        var r2=await call('ddImport',{rows:batch,mode:mode});
+        sent+=batch.length;
+        if(msg)msg.textContent='جاري الاستيراد… '+sent+' من '+list.length;
+      }
+    }catch(e){if(msg)msg.textContent=E2(String(e&&e.message||e))+' — الاستيراد وقف عند '+sent;return}
+    /* مسح الكاش المحلي عشان النسخة الجديدة تتحمل فورًا */
+    try{
+      var c=await caches.open('shehab_dd');
+      await c.delete('dd_s2');await c.delete('dd_s3');
+      var ks=await c.keys();
+      await Promise.all(ks.filter(function(k){return k.indexOf('dd_v2_')>-1}).map(function(k){return c.delete(k)}));
+    }catch(e){}
+    try{SD_DATA=null;SD_DTF=null}catch(e){}
+    try{DD_DATA=null;DD_LOAD=null}catch(e){}
+    if(msg)msg.textContent='✅ اكتمل الاستيراد: '+sent+' صنف — قاعدة البحث اتحدثت';
+  };
+
   /* رقم الإصدار ظاهر تحت الرئيسية — للتأكد إن التحديث وصل */
   window.appVersion=function(){return 'v2.1'};
   function sdVersionTag(){
