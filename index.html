@@ -4492,12 +4492,13 @@ html.dark button.share-app-btn{box-shadow:0 8px 16px -8px #000}
     if(!pulling||busy)return;var t=ev.touches&&ev.touches[0];if(!t)return;
     var dy=t.clientY-y0;
     if(dy<=0){if(dist>0){dist=0;paint(0,false)}return}
-    if(topY()>2){pulling=false;paint(0,false);return}
+    if(inModal()||topY()>2){pulling=false;dist=0;paint(0,false);return}
     dist=Math.min(dy*0.55,MAX);paint(dist,false);
     if(ev.cancelable&&dy>10)ev.preventDefault();
   },{passive:false});
   function end(){
     if(!pulling||busy)return;pulling=false;
+    if(inModal()){dist=0;paint(0,false);return}
     if(dist>=THRESH*0.85&&typeof window.softRefresh==='function'){
       busy=true;paint(54,true);
       Promise.resolve().then(function(){return window.softRefresh()}).catch(function(){}).then(function(){
