@@ -5890,8 +5890,11 @@ window.__bnOpen=function(i){
   }catch(e){}
 };
 /* ===== شاشة إدارة البانرات (المدير) ===== */
+function bnMgr(){try{return !!(typeof S!=='undefined'&&S&&S.r==='manager')}catch(e){return false}}
+function bnbnTO(m,k){try{if(typeof toast==='function')toast(m,k)}catch(e){}}
+function bnbnEM(x){try{return (typeof em==='function')?em(x):String(x&&x.message||x)}catch(e){return String(x&&x.message||x)}}
 window.bannersAdminV=function(){
-  if(!isMgr()){TO('الصفحة دي للمدير فقط','bad');return}
+  if(!bnMgr()){bnbnTO('الصفحة دي للمدير فقط','bad');return}
   try{V='bannersAdmin'}catch(e){}
   app('<div class="list-head"><h2>🖼️ بانرات الرئيسية</h2></div><small>اضيفوا في الرئيسية تحت العروض — تدوس على البانر ينفّذ اللينك (رابط خارجي زي فيس بوك، أو قسم، أو عرض).</small><div id="bnList" style="margin-top:8px">جاري التحميل…</div><div class="card" id="bnForm" style="margin-top:10px"></div>');
   window.__bnLoad();
@@ -5899,7 +5902,7 @@ window.bannersAdminV=function(){
 window.__bnLoad=async function(){
   var box=document.getElementById('bnList');if(!box)return;
   var list=[];
-  try{list=await call('banners')}catch(e){box.textContent=EM(e);return}
+  try{list=await call('banners')}catch(e){box.textContent=bnEM(e);return}
   if(!Array.isArray(list))list=[];
   window.__SHB=list;
   box.innerHTML=list.length?list.map(function(b,i){
@@ -5914,7 +5917,7 @@ window.__bnLoad=async function(){
 window.__bnImg=function(inp){
   try{
     var f=inp.files&&inp.files[0];if(!f)return;
-    if(f.size>3*1024*1024){TO('الصورة كبيرة — اختار أصغر من 3 ميجا','bad');inp.value='';return}
+    if(f.size>3*1024*1024){bnTO('الصورة كبيرة — اختار أصغر من 3 ميجا','bad');inp.value='';return}
     var r=new FileReader();
     r.onload=function(){
       window.__bnEditImg=String(r.result||'');
@@ -5922,7 +5925,7 @@ window.__bnImg=function(inp){
       if(pv)pv.innerHTML='<img src="'+esc(window.__bnEditImg)+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:6px">';
     };
     r.readAsDataURL(f);
-  }catch(e){TO(EM(e),'bad')}
+  }catch(e){bnTO(bnEM(e),'bad')}
 };
 window.__bnEdit=function(i){
   var b=window.__SHB[i];if(!b)return;
@@ -5966,16 +5969,16 @@ window.__bnForm=function(b,idx){
       var vv=ve?ve.value.trim():'';
       var lk2=(lt==='none'||!vv)?'':(lt+'|'+vv);
       var sv=await call('bannerSave',{id:b&&b.id,img:window.__bnEditImg||'',t:t2,lk:lk2,sort:Number(document.getElementById('bnSort').value)||0,act:'1'});
-      TO('البانر اتسجل ✔','ok');
+      bnTO('البانر اتسجل ✔','ok');
       try{bustCaches('banners')}catch(_e2){}
       await window.__bnLoad();
-    }catch(e){TO(EM(e),'bad');b3.disabled=false}
+    }catch(e){bnTO(bnEM(e),'bad');b3.disabled=false}
   });
 };
 window.__bnDel=async function(i){
   var b=window.__SHB[i];if(!b)return;
   if(!confirm('تحذف البانر؟'))return;
-  try{await call('bannerDel',{id:b.id});TO('اتمسح ✔','ok');try{bustCaches('banners')}catch(e){};await window.__bnLoad()}catch(e){TO(EM(e),'bad')}
+  try{await call('bannerDel',{id:b.id});bnTO('اتمسح ✔','ok');try{bustCaches('banners')}catch(e){};await window.__bnLoad()}catch(e){bnTO(bnEM(e),'bad')}
 };
 </script>
 
