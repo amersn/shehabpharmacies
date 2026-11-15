@@ -234,7 +234,7 @@ async function go(m){try{if(m=='up'&&$('w').value!==$('w2').value)throw 'كلم�
 if(m=='up'){Object.assign(d,{name:$('n').value,role:$('r').value,code:$('cd').value,addr:$('ad').value,email:$('eml').value,confirmPass:$('w2').value});
 const x=await call('signup',d);if(x.status=='pending'){authV('in');$('e').textContent='تم التسجيل ✔ استنى موافقة المدير على حسابك';return}S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV();return}
 const x=await call('login',d);S={t:x.token,n:x.name,r:x.role};Object.assign(LS,S);homeV()}catch(x){var elE=$('e');if(elE)elE.textContent=em(x);else{try{if(typeof toast==='function')toast(em(x),'bad')}catch(_e){}}}}async function shareApp(){try{if(navigator.share)await navigator.share({title:'صيدليات شهاب',url:location.href});else{await navigator.clipboard.writeText(location.href);alert('تم نسخ رابط التطبيق')}}catch(e){}}
-function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions ta-r"><button id="searchBtn" class="g person" type="button" onclick="searchV()" aria-label="بحث" title="بحث">🔎</button></div><img class="lg lit" src="${LOGO}"><div class="top-actions ta-l"><button class="g person notification-btn" type="button" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div>${S.r==='manager'?'<button class="g admin-dash-btn" type="button" onclick="adminDashV()">🛠️ الإدارة</button>':''}<div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);try{secFastRender()}catch(e){}loadO();hint();try{shPushHint()}catch(e){}}
+function homeV(m=''){V='home';const c=S.r=='customer';app(`<div class="topbar"><div class="top-actions ta-r"><button id="searchBtn" class="g person" type="button" onclick="searchV()" aria-label="بحث" title="بحث">🔎</button></div><img class="lg lit" src="${LOGO}"><div class="top-actions ta-l"><button class="g person notification-btn" type="button" onclick="notificationCenter()" aria-label="الإشعارات" title="الإشعارات">🔔<span id="notificationBadge" class="notification-badge" hidden></span></button></div></div><div class="greet-row"><h2 style="margin:0">أهلاً ${esc(S.n)} <small>(${RL[S.r]})</small></h2><button type="button" class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="الوضع الليلي">${themeBtnHTML()}</button></div>${S.r==='manager'?'<button class="g admin-dash-btn" type="button" onclick="adminDashV()">🛠️ الإدارة</button>':''}<div style="color:#2e9e4f;font-weight:700">${m}</div><div class="home-duo"><button class="duo qc" onclick="quickConsultV()"><span class="em">🩺</span><span>استشارة سريعة</span></button><button class="duo ord" onclick="ordV()"><span class="em">🛒</span><span>عمل أوردر أو تصوير الروشتة</span></button></div><div class="row" style="align-items:center"><h2 style="margin:0">العروض</h2><button class="g" style="flex:0 0 auto;width:auto" onclick="offV()">مشاهدة جميع العروض</button></div><div class="hs" id="of">جاري التحميل…</div><div id="homeBanners"></div><button class="wa-glow" onclick="whatsapp()">💬 استفسار واتساب</button><div class="home-duo2"><button class="rb-month" type="button" onclick="${S.r!=='customer'?'monthlyAdminV()':'monthlyV()'}">${S.r!=='customer'?'🗓️ القوائم الشهرية':'🗓️ علاجي الشهري'}</button><button class="rb-med" type="button" onclick="medV()">⏰ منبّه الدواء</button></div><button id="ib" class="g" hidden onclick="inst()">📲 تثبيت التطبيق</button><small id="ih" hidden>لتثبيت التطبيق على الأيفون: اضغط زرار المشاركة ثم Add to Home Screen</small><button class="g share-app-btn" onclick="shareApp()">📤 مشاركة التطبيق</button><div id="homeSections"></div>`);try{secFastRender()}catch(e){}loadO();hint();try{shPushHint()}catch(e){}}
 function shPushHint(){
  try{
   var btn=document.querySelector('.topbar .notification-btn');
@@ -509,7 +509,7 @@ async function openOfferById(id){id=String(id||'');if(!id)return false;try{if(!A
 async function openOrderById(id){id=String(id||'');try{if(S.r=='customer'){await mineV();setTimeout(()=>{try{window.shOpenMineO&&window.shOpenMineO(id)}catch(e){}},160)}else{await listV();setTimeout(()=>{try{const el=document.querySelector('[data-oid="'+id+'"]');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='3px solid #0b2a6f';el.style.outlineOffset='2px';setTimeout(()=>{el.style.outline=''},2600)}}catch(e){}},220)}}catch(e){}}
 homeV=function(m=''){__shHomeBeforeOffer(m);const oid=PENDING_OFFER;if(oid){PENDING_OFFER='';setTimeout(function(){openOfferById(oid)},60)}const rid=PENDING_ORDER;if(rid){PENDING_ORDER='';setTimeout(function(){openOrderById(rid)},90)}const pv=PENDING_VIEW;if(pv){PENDING_VIEW='';setTimeout(function(){try{if(pv==='offers')offV()}catch(e){}},60)}const iid=PENDING_ITEM;if(iid){PENDING_ITEM='';setTimeout(function(){try{if(typeof window.secItemV==='function')window.secItemV(iid)}catch(e){}},60)}};
 /* Refresh the data of whatever screen is open WITHOUT going back to the home screen. */
-async function softRefresh(){try{const v=V||'home';if(typeof window.secAdminV==='function'&&document.getElementById('secAdminLayoutBtns')){await window.secAdminV()}else if(v==='home'){bustCaches('offers');OF=await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero();refreshNotificationBadge();try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.loadHomeSections==='function')window.loadHomeSections()}catch(e){}}else if(v==='off'){bustCaches('offers');OF=await callC('offers');drawO()}else if(v==='list'){bustCaches('list');O=await callC('list');draw()}else if(v==='mine'){bustCaches('mine');drawMine(await callC('mine'))}else if(v==='offer'){const id=window.__shLastOfferId;if(id){bustCaches('offers');OF=await callC('offers');if(OF.some(o=>String(o.id)==String(id)))offerV(String(id),true)}}else if(v==='cart'){bustCaches('offers');OF=await callC('offers');cartRender()}else if(v==='notifications'){await notificationCenter()}else if(v==='profile'){await profileV()}else if(v==='notify'){await notifV()}else if(v==='broadcast'){await broadcastV()}
+async function softRefresh(){try{const v=V||'home';if(typeof window.secAdminV==='function'&&document.getElementById('secAdminLayoutBtns')){await window.secAdminV()}else if(v==='home'){bustCaches('offers');bustCaches('banners');OF=await callC('offers');if(HI>=featuredOffers().length)HI=0;drawHero();refreshNotificationBadge();try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.loadHomeSections==='function')window.loadHomeSections()}catch(e){}}else if(v==='off'){bustCaches('offers');OF=await callC('offers');drawO()}else if(v==='list'){bustCaches('list');O=await callC('list');draw()}else if(v==='mine'){bustCaches('mine');drawMine(await callC('mine'))}else if(v==='offer'){const id=window.__shLastOfferId;if(id){bustCaches('offers');OF=await callC('offers');if(OF.some(o=>String(o.id)==String(id)))offerV(String(id),true)}}else if(v==='cart'){bustCaches('offers');OF=await callC('offers');cartRender()}else if(v==='notifications'){await notificationCenter()}else if(v==='profile'){await profileV()}else if(v==='notify'){await notifV()}else if(v==='broadcast'){await broadcastV()}
 else if(v==='sec'){try{bustCaches('sections');if(typeof window.__shSecReload==='function')await window.__shSecReload();if(typeof window.secScreenV==='function')window.secScreenV(window.__shLastSecId||'')}catch(e){}}
 else if(v==='secItem'){try{if(typeof window.__shSecReload==='function')await window.__shSecReload();if(window.__shLastSecItemId&&typeof window.secItemV==='function')window.secItemV(window.__shLastSecItemId)}catch(e){}}
 else if(v==='favorites'){try{bustCaches('favorites');await favoritesV()}catch(e){}}
@@ -529,7 +529,8 @@ else if(v==='medAlarm'){try{window.medV&&window.medV()}catch(e){}}
 else if(v==='notifSettings'){try{notifSettingsV()}catch(e){}}
 else if(v==='guest'){try{renderGuest()}catch(e){}}
 else if(v==='tgchan'){try{window.tgChannelV&&window.tgChannelV()}catch(e){}}
-else if(v==='itemsAdmin'){try{if(typeof window.itemsAdminV==='function')window.itemsAdminV()}catch(e){}}else if(v==='adminDash'){try{if(typeof window.adminDashV==='function')window.adminDashV()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
+else if(v==='itemsAdmin'){try{if(typeof window.itemsAdminV==='function')window.itemsAdminV()}catch(e){}}else if(v==='adminDash'){try{if(typeof window.adminDashV==='function')window.adminDashV()}catch(e){}}
+else if(v==='bannersAdmin'){try{window.bannersAdminV()}catch(e){}}}catch(e){}finally{try{if(window.ShehabAndroid&&ShehabAndroid.refreshDone)ShehabAndroid.refreshDone()}catch(e){}}}
 /* ---- Shehab: share an offer + server-backed notification centre ---- */
 async function loadCartAddr(){try{const u=await call('profile');const a=$('cartAddr');if(a&&u&&u.address&&!a.value)a.value=u.address}catch(e){}}
 async function shareOffer(id){id=String(id||'');if(!id)return;const url=BC_LINK_BASE+'?o='+encodeURIComponent(id);if(typeof window.openShareSheet==='function'){try{window.openShareSheet({url:url,text:'شوف العرض ده في صيدليات شهاب',title:'صيدليات شهاب'});return}catch(e){}}try{if(navigator.share){await navigator.share({title:'صيدليات شهاب',text:'شوف العرض ده في صيدليات شهاب',url});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(url);if(typeof showShehabPushToast==='function')showShehabPushToast('تم نسخ رابط العرض ✔');else alert('تم نسخ رابط العرض ✔')}catch(e){try{prompt('انسخ رابط العرض:',url)}catch(e2){}}}
@@ -917,7 +918,7 @@ function heroPaint(dir){var sl=document.getElementById('heroSlide');if(!sl)retur
 function heroAdvance(dir){dir=(dir&&dir<0)?-1:1;var list=window.__heroList||[];if(list.length<2)return;var n=list.length;HSL.i=(HSL.i+dir+n)%n;heroPaint(dir);heroMarkDots()}
 function heroAuto(){if(HSL.timer)return;HSL.timer=setInterval(function(){try{if(V!=='home'||document.hidden||HSL.paused)return;var list=window.__heroList||[];if(list.length<2)return;var sl=document.getElementById('heroSlide');if(!sl||!sl.isConnected)return;heroAdvance(1)}catch(e){}},4200)}
 function heroWire(){var sl=document.getElementById('heroSlide');if(!sl||sl.getAttribute('data-hooked'))return;sl.setAttribute('data-hooked','1');var sx=0,down=false;sl.addEventListener('click',function(ev){if(heroMoved>6){heroMoved=0;return}var card=ev.target&&ev.target.closest?ev.target.closest('.hero-card'):null;if(card&&card.getAttribute('data-oid'))offerV(card.getAttribute('data-oid'))});sl.addEventListener('pointerdown',function(ev){down=true;heroMoved=0;sx=ev.clientX;HSL.paused=true;clearTimeout(HSL.pt);try{sl.setPointerCapture(ev.pointerId)}catch(e){}});sl.addEventListener('pointermove',function(ev){if(!down)return;var dx=ev.clientX-sx;var ad=Math.abs(dx);if(ad>heroMoved)heroMoved=ad;var tr=sl.firstElementChild;if(tr){var W=sl.offsetWidth||1,G=10,base=-(W+G);tr.style.transition='none';tr.style.transform='translateX('+(base+dx)+'px)'}});var end=function(ev){if(!down)return;down=false;var dx=(ev.clientX||0)-sx;var tr=sl.firstElementChild;if(!tr){HSL.paused=false;return}var W=sl.offsetWidth||1,G=10,base=-(W+G);if(Math.abs(dx)>44){heroMoved=99;var dir2=dx<0?1:-1;var n=(window.__heroList||[]).length;if(n>1)HSL.i=(HSL.i+dir2+n)%n;var target=base+(dir2>0?-(W+G):(W+G));tr.style.transition='transform .22s ease';tr.style.transform='translateX('+target+'px)';setTimeout(function(){heroPaint(dir2);heroMarkDots()},230);HSL.paused=false;clearTimeout(HSL.pt);HSL.pt=setTimeout(function(){HSL.paused=false},900)}else{tr.style.transition='transform .25s ease';tr.style.transform='translateX('+base+'px)';HSL.paused=false;clearTimeout(HSL.pt);HSL.pt=setTimeout(function(){HSL.paused=false},900)}};sl.addEventListener('pointerup',end);sl.addEventListener('pointercancel',function(){down=false;var tr=sl.firstElementChild;if(tr){var W=sl.offsetWidth||1,G=10;tr.style.transition='transform .25s ease';tr.style.transform='translateX('+(-(W+G))+'px)'}HSL.paused=false});sl.addEventListener('pointerleave',function(){if(down)return;HSL.paused=false})}
-try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(a.length<2)a=(typeof OF!=='undefined'&&OF&&OF.length)?OF.slice(0,10):a;if(!a.length){e.innerHTML='<div class="card">مفيش عروض حاليًا</div>';return}HI=(HI+a.length)%a.length;var list=a.slice(0,10);try{window.__heroList=list}catch(x){}if(!(HSL.i>=0&&HSL.i<list.length))HSL.i=0;HI=HSL.i;e.innerHTML='<div class="hero-slide" id="heroSlide">'+heroCardHTML(list[HSL.i])+'</div>';heroWire();heroAuto();setTimeout(heroMarkDots,0)};stepHero=function(){};window.heroGoto=function(i){try{var list=window.__heroList||[];if(list.length<2)return;i=Number(i);if(!isFinite(i)||i===HSL.i)return;var dir=i>HSL.i?1:-1;HSL.i=i;heroPaint(dir);heroMarkDots();HSL.paused=true;clearTimeout(HSL.pt);HSL.pt=setTimeout(function(){HSL.paused=false},3500)}catch(e){}}}catch(e){}
+try{drawHero=function(){var e=q('of');if(!e)return;var a=featuredOffers();if(a.length<2)a=(typeof OF!=='undefined'&&OF&&OF.length)?OF.slice(0,10):a;if(!a.length){e.innerHTML='<div class="card">مفيش عروض حاليًا</div>';return}HI=(HI+a.length)%a.length;var list=a.slice(0,10);try{window.__heroList=list}catch(x){}if(!(HSL.i>=0&&HSL.i<list.length))HSL.i=0;HI=HSL.i;e.innerHTML='<div class="hero-slide" id="heroSlide">'+heroCardHTML(list[HSL.i])+'</div>';heroWire();heroAuto();setTimeout(heroMarkDots,0);try{window.__shDrawBanners&&window.__shDrawBanners()}catch(_be){}};stepHero=function(){};window.heroGoto=function(i){try{var list=window.__heroList||[];if(list.length<2)return;i=Number(i);if(!isFinite(i)||i===HSL.i)return;var dir=i>HSL.i?1:-1;HSL.i=i;heroPaint(dir);heroMarkDots();HSL.paused=true;clearTimeout(HSL.pt);HSL.pt=setTimeout(function(){HSL.paused=false},3500)}catch(e){}}}catch(e){}
 
 var OFF_Q='';
 try{var drawOBase=drawO;drawO=function(){if(!OFF_Q){drawOBase();return}var all=OF;try{OF=all.filter(function(o){return String(o.t||'').toLowerCase().indexOf(OFF_Q)>-1||String(o.x||'').toLowerCase().indexOf(OFF_Q)>-1})}catch(e){}drawOBase();OF=all};var offVBase=offV;offV=async function(){var _p=offVBase.apply(this,arguments),_ins=function(){var ap=q('app');var hd=ap?ap.querySelector('h2'):null;if(!hd||q('offSearch'))return;OFF_Q='';var box=document.createElement('div');box.innerHTML=`<input id='offSearch' placeholder='🔍 دوّر على عرض بالاسم' autocomplete='off'>`;hd.insertAdjacentElement('afterend',box.firstChild);var inp=q('offSearch');inp.value='';inp.addEventListener('input',function(){OFF_Q=String(inp.value||'').trim().toLowerCase();try{drawO()}catch(e){}})};_ins();await _p;_ins()}}catch(e){}
@@ -4591,6 +4592,7 @@ html.dark .cp-welcome{background:linear-gradient(135deg,#241f12,#1c1810);border-
       +'<h3 class="adm-h">🗂️ الإدارة العامة</h3>'
       +it('🗂️','الأصناف','كل الأصناف اللي اتعملت — بحث وتعديل ونقل لأكتر من قسم','itemsAdminV')
       +it('🗂️','إدارة الأقسام','أقسام العروض وأصنافها — قائمة أو كانبان','secAdminV')
+      +it('🖼️','بانرات الرئيسية','صور وكتابات ولينك مخفي — العميل يكرب عليه يروح للينك','bannersAdminV')
       +it('🗓️','القوائم الشهرية','قوائم علاج العملاء','monthlyAdminV')
       +it('📊','لوحة الإحصائيات','المبيعات والطلبات والأصناف الناقصة','statsV')
       +'<h3 class="adm-h">🎟️ الخصومات والعملاء</h3>'
@@ -5851,3 +5853,129 @@ html.dark .sh-push-hint{background:#1D4FA8}
 </script>
 
 <style>html.dark #ddr,html.dark #searchRes{background:#101a30!important;color:#e8eefc}html.dark #ddr .card,html.dark #searchRes .card{background:#16223f;color:#e8eefc}</style>
+
+
+<script>
+/* ===== بانرات الرئيسية: صور وكتابات ولينك مخفي ===== */
+window.__SHB=[];
+window.__shDrawBanners=async function(){
+  var box=document.getElementById('homeBanners');if(!box)return;
+  if(V!=='home'){return}
+  try{
+    var list=await callC('banners');
+    if(!Array.isArray(list))list=[];
+    window.__SHB=list;
+    if(!list.length){box.innerHTML='';return}
+    var h='<div class="row" style="align-items:center"><h2 style="margin:0">✨ جديد عندنا</h2></div>';
+    h+='<div style="display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 0 8px">';
+    list.forEach(function(b,i){
+      h+='<div class="card" data-bn="'+i+'" style="flex:0 0 86%;scroll-snap-align:center;overflow:hidden;padding:0;cursor:pointer;margin:0;border-radius:14px" onclick="__bnOpen('+i+')">'
+        +(b.img?'<img src="'+esc(b.img)+'" alt="" style="width:100%;display:block;object-fit:cover;max-height:200px;border-radius:0">':'')
+        +(b.t?'<div style="padding:10px 12px;font-weight:700;white-space:pre-line">'+esc(b.t)+'</div>':'')
+        +'</div>';
+    });
+    h+='</div>';
+    box.innerHTML=h;
+  }catch(e){try{box.innerHTML=''}catch(_e){}}
+};
+window.__bnOpen=function(i){
+  var b=window.__SHB[i];if(!b)return;
+  var lk=String(b.lk||''),p=lk.indexOf('|');
+  var k=p>-1?lk.slice(0,p):'none',v=p>-1?lk.slice(p+1):'';
+  try{
+    if(k==='url'){if(v)window.open(v,'_blank','noopener')}
+    else if(k==='sec'){if(typeof secScreenV==='function')secScreenV(v)}
+    else if(k==='offer'){if(typeof offerV==='function')offerV(v)}
+    else if(k==='secItem'){if(typeof window.secItemV==='function')window.secItemV(v)}
+  }catch(e){}
+};
+/* ===== شاشة إدارة البانرات (المدير) ===== */
+window.bannersAdminV=function(){
+  if(!isMgr()){TO('الصفحة دي للمدير فقط','bad');return}
+  try{V='bannersAdmin'}catch(e){}
+  app('<div class="list-head"><h2>🖼️ بانرات الرئيسية</h2></div><small>اضيفوا في الرئيسية تحت العروض — تدوس على البانر ينفّذ اللينك (رابط خارجي زي فيس بوك، أو قسم، أو عرض).</small><div id="bnList" style="margin-top:8px">جاري التحميل…</div><div class="card" id="bnForm" style="margin-top:10px"></div>');
+  window.__bnLoad();
+};
+window.__bnLoad=async function(){
+  var box=document.getElementById('bnList');if(!box)return;
+  var list=[];
+  try{list=await call('banners')}catch(e){box.textContent=EM(e);return}
+  if(!Array.isArray(list))list=[];
+  window.__SHB=list;
+  box.innerHTML=list.length?list.map(function(b,i){
+    return '<div class="card" style="display:flex;align-items:center;gap:10px;margin:6px 0">'
+      +(b.img?'<img src="'+esc(b.img)+'" style="width:64px;height:48px;object-fit:cover;border-radius:8px;flex:0 0 auto">':'<div style="width:64px;height:48px;background:var(--soft);border-radius:8px;display:grid;place-items:center;flex:0 0 auto">🖼️</div>')
+      +'<div style="flex:1;min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(b.t||'(بدون كتابة)')+'</b><small style="display:block;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(String(b.lk||''))+'</small></div>'
+      +'<button type="button" class="g" style="width:auto;padding:6px 10px" onclick="__bnEdit('+i+')">✏️</button>'
+      +'<button type="button" class="g" style="width:auto;padding:6px 10px" onclick="__bnDel('+i+')">🗑️</button></div>';
+  }).join(''):'<div class="card">مفيش بانرات — ضيف أول واحد من الفورم اللي تحت.</div>';
+  window.__bnForm(null,-1);
+};
+window.__bnImg=function(inp){
+  try{
+    var f=inp.files&&inp.files[0];if(!f)return;
+    if(f.size>3*1024*1024){TO('الصورة كبيرة — اختار أصغر من 3 ميجا','bad');inp.value='';return}
+    var r=new FileReader();
+    r.onload=function(){
+      window.__bnEditImg=String(r.result||'');
+      var pv=document.getElementById('bnPrev');
+      if(pv)pv.innerHTML='<img src="'+esc(window.__bnEditImg)+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:6px">';
+    };
+    r.readAsDataURL(f);
+  }catch(e){TO(EM(e),'bad')}
+};
+window.__bnEdit=function(i){
+  var b=window.__SHB[i];if(!b)return;
+  window.__bnForm(b,i);
+};
+window.__bnForm=function(b,idx){
+  var f=document.getElementById('bnForm');if(!f)return;
+  window.__bnEditImg=(b&&b.img)||'';
+  var lk=String((b&&b.lk)||''),pi=lk.indexOf('|');
+  var lkt=pi>-1?lk.slice(0,pi):'none',lkv=pi>-1?lk.slice(pi+1):'';
+  var secs=[];try{secs=(typeof SEC_CACHE!=='undefined'&&SEC_CACHE)?SEC_CACHE:[]}catch(e){}
+  var offers=[];try{offers=(typeof OF!=='undefined'&&OF)?OF.slice(0,30):[]}catch(e){}
+  var opts=[];
+  opts.push('<option value="none"'+(lkt==='none'?' selected':'')+'>بدون لينك (صورة وكتابة بس)</option>');
+  opts.push('<option value="url"'+(lkt==='url'?' selected':'')+'>🔗 رابط خارجي (فيس بوك/واتساب/موقع…)</option>');
+  opts.push('<option value="sec"'+(lkt==='sec'?' selected':'')+'>🗂️ قسم من التطبيق</option>');
+  opts.push('<option value="offer"'+(lkt==='offer'?' selected':'')+'>🎁 عرض</option>');
+  var valHtml='<div id="bnValWrap"></div>';
+  f.innerHTML='<b>'+(b?'✏️ تعديل البانر':'➕ بانر جديد')+'</b>'
+    +'<label>الصورة (اختياري)</label><input type="file" accept="image/*" onchange="__bnImg(this)"><div id="bnPrev">'+(window.__bnEditImg?'<img src="'+esc(window.__bnEditImg)+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:6px">':'')+'</div>'
+    +'<label>الكتابة (اختياري)</label><textarea id="bnT" rows="2" maxlength="120">'+esc(b&&b.t||'')+'</textarea>'
+    +'<label>اللينك المخفي</label><select id="bnLK">'+opts.join('')+'</select>'+valHtml
+    +'<label>الترتيب (رقم — الأصغر يظهر الأول)</label><input id="bnSort" type="number" step="1" value="'+esc(b?String(b.sort||'0'):'0')+'">'
+    +'<div style="display:flex;gap:8px;margin-top:8px"><button type="button" id="bnSave" class="g" style="flex:1">💾 حفظ</button>'+(b?'<button type="button" class="g" style="width:auto" onclick="__bnForm(null,-1)">إلغاء</button>':'')+'</div>';
+  var renderVal=function(){
+    var w=document.getElementById('bnValWrap');if(!w)return;
+    var t2=document.getElementById('bnLK').value;
+    if(t2==='url'){w.innerHTML='<input id="bnVal" placeholder="https://facebook.com/..." dir="ltr" value="'+esc(lkt==='url'?lkv:'')+'">'}
+    else if(t2==='sec'){w.innerHTML='<select id="bnVal">'+secs.map(function(x){return '<option value="'+esc(String(x.id))+'"'+(lkt==='sec'&&String(x.id)===String(lkv)?' selected':'')+'>'+esc(x.name||x.id)+'</option>'}).join('')+'</select>'+(secs.length?'':'<small>جاري تحميل الأقسام…</small>')}
+    else if(t2==='offer'){w.innerHTML='<select id="bnVal">'+offers.map(function(x){return '<option value="'+esc(String(x.id))+'"'+(lkt==='offer'&&String(x.id)===String(lkv)?' selected':'')+'>'+esc(x.t||x.id)+'</option>'}).join('')+'</select>'+(offers.length?'':'<small>جاري تحميل العروض…</small>')}
+    else{w.innerHTML=''}
+  };
+  document.getElementById('bnLK').addEventListener('change',renderVal);
+  renderVal();
+  document.getElementById('bnSave').addEventListener('click',async function(btn){
+    var b3=btn.target||btn;b3.disabled=true;
+    try{
+      var t2=document.getElementById('bnT').value.trim();
+      var lt=document.getElementById('bnLK').value;
+      var ve=document.getElementById('bnVal');
+      var vv=ve?ve.value.trim():'';
+      var lk2=(lt==='none'||!vv)?'':(lt+'|'+vv);
+      var sv=await call('bannerSave',{id:b&&b.id,img:window.__bnEditImg||'',t:t2,lk:lk2,sort:Number(document.getElementById('bnSort').value)||0,act:'1'});
+      TO('البانر اتسجل ✔','ok');
+      try{bustCaches('banners')}catch(_e2){}
+      await window.__bnLoad();
+    }catch(e){TO(EM(e),'bad');b3.disabled=false}
+  });
+};
+window.__bnDel=async function(i){
+  var b=window.__SHB[i];if(!b)return;
+  if(!confirm('تحذف البانر؟'))return;
+  try{await call('bannerDel',{id:b.id});TO('اتمسح ✔','ok');try{bustCaches('banners')}catch(e){};await window.__bnLoad()}catch(e){TO(EM(e),'bad')}
+};
+</script>
+
