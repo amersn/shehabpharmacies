@@ -5968,7 +5968,7 @@ window.__bnForm=function(b,idx){
       var ve=document.getElementById('bnVal');
       var vv=ve?ve.value.trim():'';
       var lk2=(lt==='none'||!vv)?'':(lt+'|'+vv);
-      var sv=await call('bannerSave',{id:b&&b.id,img:window.__bnEditImg||'',t:t2,lk:lk2,sort:Number(document.getElementById('bnSort').value)||0,act:'1'});
+      var sv=await call('bannerSave',{id:b&&b.id,img:window.__bnEditImg||'',tx:t2,lk:lk2,sort:Number(document.getElementById('bnSort').value)||0,act:'1'});
       bnTO('البانر اتسجل ✔','ok');
       try{bustCaches('banners')}catch(_e2){}
       await window.__bnLoad();
