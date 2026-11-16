@@ -3237,8 +3237,7 @@ html.dark .search-card img.ic{background:#141c30}
     box.style.boxShadow='0 10px 26px rgba(11,42,111,.16)';
     box.innerHTML=sec1+sec2;
     if(typeof window.sdData==='function'&&!window.__sdReady){
-      var _ty=(runSearch._ty=(runSearch._ty||0)+1);
-      window.sdData().then(function(){ if(runSearch._ty!==_ty)return; window.__sdReady=true; var _q=G('searchQ'); if(_q&&G('searchRes'))runSearch(_q.value) }).catch(function(){});
+      window.sdData().then(function(){ window.__sdReady=true; try{var _q=G('searchQ');if(_q&&G('searchRes'))runSearch(_q.value)}catch(_e){} }).catch(function(){});
     }
   }
   function searchV(q){
