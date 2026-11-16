@@ -6317,6 +6317,39 @@ window.__bnDel=async function(i){
     if(!items.length){zone.remove();return}
     zone.appendChild(window.shAttStrip(items));
   };
+  /* زرار «قيّم التوصيل» بعد رسم قايمة الطلبات — مستقل عن أي overrides */
+  var _shDMprev=(typeof drawMine!=='undefined')?drawMine:null;
+  window.drawMine=function(L){
+    var r=_shDMprev?_shDMprev.apply(this,arguments):undefined;
+    setTimeout(function(){
+      try{
+        if(typeof V==='undefined'||V!=='mine')return;
+        var ls=document.getElementById('ls');if(!ls)return;
+        if(window.__shDrating)return;window.__shDrating=true;
+        (async function(){
+          try{ if(!(window.__DRATED instanceof Set))window.__DRATED=new Set(await call('dRateMine')) }
+          catch(e){ window.__DRATED=new Set() }
+          finally{ window.__shDrating=false }
+          try{
+            ls.querySelectorAll('[data-oid]').forEach(function(c){
+              var oid=c.getAttribute('data-oid');
+              if(!oid||window.__DRATED.has(String(oid)))return;
+              if(!/تم التسليم/.test(c.innerText))return;
+              if(c.querySelector('button[data-drate]'))return;
+              var b=document.createElement('button');
+              b.type='button';b.className='g';
+              b.style.cssText='width:100%;margin-top:8px';
+              b.setAttribute('data-drate','1');
+              b.textContent='⭐ قيّم التوصيل';
+              b.onclick=function(ev){ev.stopPropagation();window.dRateV(String(oid))};
+              c.appendChild(b);
+            });
+          }catch(e){}
+        })();
+      }catch(_e){}
+    },600);
+    return r;
+  };
 })();
 </script>
 <style>
