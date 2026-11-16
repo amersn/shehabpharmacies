@@ -6410,11 +6410,34 @@ window.__bnDel=async function(i){
   };
   window.ddOpenCard=function(i){
     var r=(window.__ddResults||[])[i];if(!r)return;
-    try{ddCardIDX=i;ddCardQTY=1}catch(_e){window.ddCardIDX=i;window.ddCardQTY=1}
+    window.ddCardIDX=i;
     var sel=document.getElementById('ddSel')||document.getElementById('ddr');if(!sel)return;
     hideList(['ddr']);
     sel.innerHTML=window.shDDCard({t:r[1]||r[0],en:r[1]?r[0]:'',sub:r[3]||'',price:r[6]||'',close:'ddCloseCard',inId:'ddQtyIn',qty:1,minus:'ddQty(-1)',inFn:'ddQtySet(this.value)',plus:'ddQty(1)',order:'ddOrderCard()'});
     try{sel.scrollIntoView({block:'nearest'})}catch(e){}
+  };
+  /* نسخة مستقلة من «اطلب» — مش معتمدة على متغيرات closure في سكربت الدليل */
+  window.ddOrderCard=function(){
+    var i=window.ddCardIDX;
+    var r=(window.__ddResults||[])[i];if(!r)return;
+    var inp=document.getElementById('ddQtyIn');
+    var q=inp?Math.max(1,parseInt(inp.value,10)||1):1;
+    try{
+      var cur=(typeof ccGet==='function')?ccGet():{};
+      var list=(cur&&Array.isArray(cur.ddItems))?cur.ddItems.slice():[];
+      var ar=r[1]||r[0],en=r[1]?r[0]:'',fi=-1;
+      for(var si=0;si<list.length;si++){if((list[si].ar||'')===ar&&(list[si].en||'')===en){fi=si;break}}
+      if(fi>-1){var it=list.splice(fi,1)[0];it.qty=q;it.t=Date.now();list.unshift(it)}
+      else list.unshift({ar:ar,en:en,pr:r[6]||'',qty:q,t:Date.now()});
+      var line=list.map(function(x){var l2=x.ar||x.en;if(x.en)l2+='\n'+x.en;if(x.pr)l2+=' - '+x.pr+' ج';if(x.qty>1)l2+=' × '+x.qty;return l2}).join('\n');
+      if(typeof ccSet==='function')ccSet({item:line,image:(cur&&cur.image)||'',audio:(cur&&cur.audio)||'',notes:(cur&&cur.notes)||'',mode:(cur&&cur.mode)||'',addr:(cur&&cur.addr)||'',ddItems:list});
+      try{cartBadge()}catch(e){}
+      try{if(typeof cartPersist==='function')cartPersist()}catch(e){}
+    }catch(e){}
+    hideList(['ddr']);
+    var sel=document.getElementById('ddSel');if(sel)sel.innerHTML='';
+    try{window.sdPendingRender&&window.sdPendingRender()}catch(e){}
+    try{cartToast(ar||en,'اتضاف للسلة ✔ — عدّل الكمية من الكارت أو ابحث على صنف تاني')}catch(e){}
   };
 })();
 </script>
