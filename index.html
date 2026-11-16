@@ -6410,6 +6410,7 @@ window.__bnDel=async function(i){
   };
   window.ddOpenCard=function(i){
     var r=(window.__ddResults||[])[i];if(!r)return;
+    try{ddCardIDX=i;ddCardQTY=1}catch(_e){window.ddCardIDX=i;window.ddCardQTY=1}
     var sel=document.getElementById('ddSel')||document.getElementById('ddr');if(!sel)return;
     hideList(['ddr']);
     sel.innerHTML=window.shDDCard({t:r[1]||r[0],en:r[1]?r[0]:'',sub:r[3]||'',price:r[6]||'',close:'ddCloseCard',inId:'ddQtyIn',qty:1,minus:'ddQty(-1)',inFn:'ddQtySet(this.value)',plus:'ddQty(1)',order:'ddOrderCard()'});
