@@ -3231,14 +3231,15 @@ html.dark .search-card img.ic{background:#141c30}
       }).join('');
       if(drugs.length)sec2='<div style="color:var(--muted);font-size:.8em;margin:6px 2px 2px">💊 أصناف الدواء</div>'+sec2;
     }
+    if(typeof window.sdData==='function'&&!window.__sdReady){
+      window.sdData().then(function(){ window.__sdReady=true; try{var _q=G('searchQ');if(_q&&G('searchRes'))runSearch(_q.value)}catch(_e){} }).catch(function(){});
+    }
     if(!sec1&&!sec2){ box.style.display='block'; box.innerHTML='<div class="card">مفيش نتايج لـ «'+esc(q)+'»</div>'; return; }
     box.style.display='block';
     box.style.background='var(--bg,#f5f7fb)';
     box.style.boxShadow='0 10px 26px rgba(11,42,111,.16)';
     box.innerHTML=sec1+sec2;
-    if(typeof window.sdData==='function'&&!window.__sdReady){
-      window.sdData().then(function(){ window.__sdReady=true; try{var _q=G('searchQ');if(_q&&G('searchRes'))runSearch(_q.value)}catch(_e){} }).catch(function(){});
-    }
+
   }
   function searchV(q){
     V='search'; try{window.__shLastSearch=String(q||'')}catch(e){}
