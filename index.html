@@ -464,7 +464,7 @@ cartRender=function(){_ucoRenderPrev();try{var box=$('cartLines');if(!box)return
   var card=document.createElement('div');card.className='card';card.style.cssText='padding:10px 12px;border:1.5px solid var(--line);border-right:8px solid #B08A4F;border-radius:12px;background:var(--card,#fff)';
   var _ds2=0,_dk2=false;try{(C.ddItems||[]).forEach(function(y){var _p2=parseFloat(String(y.pr).replace(/[^0-9.]/g,''));if(Number.isFinite(_p2)&&_p2>0){_ds2+=_p2*Math.max(1,+y.qty||1);_dk2=true}})}catch(_e4){}
 var _dt=document.createElement('small');_dt.style.cssText='display:block;text-align:end;font-weight:800;color:#0b2a6f;margin-top:4px;font-size:1.05em';_dt.textContent=_dk2?('الإجمالي: '+_ds2.toFixed(2)+' ج'):'الإجمالي: بيتحدد من الصيدلية';card.appendChild(_dt);
-var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);var row=document.createElement('div');row.className='row';var rm=document.createElement('button');rm.type='button';rm.className='g';rm.textContent='إلغاء الطلب كله';rm.addEventListener('click',function(e3){e3.stopPropagation();ccClear();try{cartRender()}catch(_x){}try{cartBadge()}catch(_y){}});row.appendChild(rm);card.appendChild(row);if(!CART.length){box.textContent='';box.appendChild(card);var _ds3=0,_dk3=false;try{(C.ddItems||[]).forEach(function(y){var _p3=parseFloat(String(y.pr).replace(/[^0-9.]/g,''));if(Number.isFinite(_p3)&&_p3>0){_ds3+=_p3*Math.max(1,+y.qty||1);_dk3=true}})}catch(_e3){}_es.style.fontWeight='800';_es.textContent=_dk3?('إجمالي مبدئي للأسعار: '+_ds3.toFixed(2)+' جنيه (تقريبي — بيتأكد من الصيدلية)'):'طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار'}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="ddImportV()">⬆️ رفع ملف أصناف الصيدلية</button><button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
+var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);var row=document.createElement('div');row.className='row';var rm=document.createElement('button');rm.type='button';rm.className='g';rm.textContent='إلغاء الطلب كله';rm.addEventListener('click',function(e3){e3.stopPropagation();ccClear();try{cartRender()}catch(_x){}try{cartBadge()}catch(_y){}});row.appendChild(rm);card.appendChild(row);if(!CART.length){box.appendChild(card);var _ds3=0,_dk3=false;try{(C.ddItems||[]).forEach(function(y){var _p3=parseFloat(String(y.pr).replace(/[^0-9.]/g,''));if(Number.isFinite(_p3)&&_p3>0){_ds3+=_p3*Math.max(1,+y.qty||1);_dk3=true}})}catch(_e3){}_es.style.fontWeight='800';_es.textContent=_dk3?('إجمالي مبدئي للأسعار: '+_ds3.toFixed(2)+' جنيه (تقريبي — بيتأكد من الصيدلية)'):'طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار'}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="ddImportV()">⬆️ رفع ملف أصناف الصيدلية</button><button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?'الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%':'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
 </script>
 <script>
 // Notification bell, device inbox, and opt-in prompt.
@@ -767,7 +767,7 @@ async function ddLoad(){
 }
 async function ddV(){
   V='dd';
-  app(`<h2>💊 قسم الأدوية</h2><div style="position:relative"><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div id="ddr" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:60;max-height:60vh;overflow:auto;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)"></div></div><div id="ddPending"></div><div class="err" id="ddstat"></div><div id="ddSel"></div>`);
+  app(`<h2>💊 قسم الأدوية</h2><div style="position:relative"><input id="ddq" autocomplete="off" inputmode="search" placeholder="ابحث: اسم الدواء بالعربي أو الإنجليزي…"><div id="ddr" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:400;max-height:60vh;overflow:auto;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);background:var(--bg,#f5f7fb)"></div></div><div id="ddSel"></div><div id="ddPending"></div><div class="err" id="ddstat"></div>`);
   try{window.sdPendingRender&&window.sdPendingRender()}catch(e){}
   var stat=$('ddstat'),res=$('ddr'),qi=$('ddq');
   res.innerHTML='<div class="card">جاري تحميل قاعدة الأدوية… (بتتخزن عندك مرة واحدة وبعدها تفتح فورًا)</div>';
@@ -847,13 +847,7 @@ function ddSearch(){
   window.__ddResults=out;
   /* قايمة سطرين: العربي فوق والإنجليزي تحته، السعر على الشمال — من غير المادة */
   res.innerHTML=out.map(function(r,i2){
-    return '<div data-i="'+i2+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--line);border-radius:12px;margin:6px 0;background:var(--card,#fff);cursor:pointer" onclick="ddOpenCard('+i2+')">'
-      +'<div style="flex:1 1 auto;min-width:0">'
-      +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r[1]||r[0])+'</b>'
-      +(r[1]?'<small dir="ltr" style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r[0])+'</small>':'')
-      +'</div>'
-      +'<span style="flex:0 0 auto;color:#0b2a6f;font-weight:800;white-space:nowrap">'+(r[6]?esc(r[6])+' ج':'—')+'</span>'
-      +'</div>';
+    return (window.shDDRow||function(){}).call(null,{i:i2,fn:'ddOpenCard',t:r[1]||r[0],en:r[1]?r[0]:'',p:r[6]||''});
   }).join('');
 }
 /* كارت الدواء لما تدوس على الصنف في القايمة — من غير المادة الفعالة */
@@ -3223,16 +3217,7 @@ html.dark .search-card img.ic{background:#141c30}
     var res2=res.slice(0,10);
     window.__sdPRes=res2;
     function prow(x,i){
-      var iq=esc(String(x.ic||''));
-      return '<div data-i="'+i+'" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--line);border-radius:12px;margin:5px 0;background:var(--card,#fff);cursor:pointer" onclick="sdSearchPick('+i+')">'
-        +'<div style="flex:1 1 auto;min-width:0">'
-        +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(x.t)+'</b>'
-        +'<div style="display:flex;align-items:center;gap:6px;margin-top:2px">'
-        +(x.p?'<span style="font-weight:800;color:#0b2a6f">'+esc(x.p)+' ج</span>':'')
-        +(x.w?'<span style="color:var(--muted);text-decoration:line-through;font-size:.85em">'+esc(x.w)+' ج</span>':'')
-        +'</div></div>'
-        +(x.ic?'<img src="'+iq+'" alt="" style="flex:0 0 auto;width:44px;height:44px;border-radius:10px;object-fit:cover">':'')
-        +'</div>';
+      return (window.shDDRow||function(){}).call(null,{i:i,fn:'sdSearchPick',t:x.t,p:x.p,w:x.w,ic:x.ic});
     }
     var sec1=res2.length?'<div style="color:var(--muted);font-size:.8em;margin:6px 2px 2px">🛒 أصناف الصيدلية</div>'+res2.map(function(x,i){return prow(x,i)}).join(''):'';
     var sec2='';
@@ -3242,13 +3227,7 @@ html.dark .search-card img.ic{background:#141c30}
       var C=null;try{C=(typeof ccGet==='function')?ccGet():null}catch(e){}
       var dlist=(C&&Array.isArray(C.ddItems))?C.ddItems:[];
       sec2=drugs.slice(0,10).map(function(d,di){
-        var ar=d.ar||d.en,en=(d.ar&&d.en)?d.en:'',pr=d.pr||'';
-        return '<div data-i="'+di+'" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--line);border-radius:12px;margin:5px 0;background:var(--card,#fff);cursor:pointer" onclick="sdSearchPickD('+di+')">'
-          +'<div style="flex:1 1 auto;min-width:0">'
-          +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(ar)+'</b>'
-          +(en?'<small dir="ltr" style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(en)+'</small>':'')
-          +(pr?'<span style="display:block;font-weight:800;color:#0b2a6f">'+esc(pr)+' ج</span>':'')
-          +'</div></div>';
+        return (window.shDDRow||function(){}).call(null,{i:di,fn:'sdSearchPickD',t:d.ar||d.en,en:(d.ar&&d.en)?d.en:'',p:d.pr||''});
       }).join('');
       if(drugs.length)sec2='<div style="color:var(--muted);font-size:.8em;margin:6px 2px 2px">💊 أصناف الدواء</div>'+sec2;
     }
@@ -3264,7 +3243,7 @@ html.dark .search-card img.ic{background:#141c30}
   }
   function searchV(q){
     V='search'; try{window.__shLastSearch=String(q||'')}catch(e){}
-    app('<h2>🔎 بحث</h2><div style="position:relative"><input id="searchQ" type="search" placeholder="ابحث عن صنف أو عرض…" autocomplete="off"><div id="searchRes" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:60;max-height:60vh;overflow:auto;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)"></div></div><div id="sdPending"></div><div id="sdSel"></div>');
+    app('<h2>🔎 بحث</h2><div style="position:relative"><input id="searchQ" type="search" placeholder="ابحث عن صنف أو عرض…" autocomplete="off"><div id="searchRes" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:400;max-height:60vh;overflow:auto;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);background:var(--bg,#f5f7fb)"></div></div><div id="sdSel"></div><div id="sdPending"></div>');
     try{window.sdPendingRender&&window.sdPendingRender()}catch(e){}
     var inp=G('searchQ');
     if(inp){ inp.value=q||''; inp.addEventListener('input',function(){ runSearch(inp.value) }); try{inp.focus()}catch(e){} }
@@ -6356,3 +6335,85 @@ window.__bnDel=async function(i){
 #imgZoomDL{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border:0;border-radius:24px;background:#ffffff26;color:#fff;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none}
 #imgZoomDL[hidden]{display:none}
 </style>
+
+
+<script>
+/* ===== كود موحد لشاشتي البحث (البحث العام + دليل الأدوية): صف القايمة + كارت الصنف المختار ===== */
+(function(){
+  'use strict';
+  function E2(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  /* صف واحد في القايمة المنسدلة — نفس الشكل في الشاشتين */
+  window.shDDRow=function(o){
+    o=o||{};
+    var h='<div data-i="'+o.i+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--line);border-radius:12px;margin:6px 0;background:var(--card,#fff);cursor:pointer" onclick="'+o.fn+'('+o.i+')">'
+      +'<div style="flex:1 1 auto;min-width:0">'
+      +'<b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+E2(o.t)+'</b>'
+      +(o.en?'<small dir="ltr" style="display:block;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+E2(o.en)+'</small>':'')
+      +'<div style="display:flex;align-items:center;gap:6px;margin-top:2px">'
+      +(o.p?'<span style="font-weight:800;color:#0b2a6f;white-space:nowrap">'+E2(o.p)+' ج</span>':'')
+      +(o.w?'<span style="color:var(--muted);text-decoration:line-through;font-size:.85em;white-space:nowrap">'+E2(o.w)+' ج</span>':'')
+      +'</div></div>'
+      +(o.ic?'<img src="'+E2(o.ic)+'" alt="" style="flex:0 0 auto;width:44px;height:44px;border-radius:10px;object-fit:cover">':'')
+      +'</div>';
+    return h;
+  };
+  /* كارت الصنف المختار — تحت خانة البحث مباشرة، نفس الشكل والسلوك في الشاشتين */
+  window.shDDCard=function(o){
+    o=o||{};
+    return '<div class="card" style="position:relative">'
+      +'<button type="button" onclick="'+o.close+'()" aria-label="رجوع" style="position:absolute;top:6px;left:6px;width:28px;height:28px;min-width:28px;flex:0 0 auto;border-radius:50%;border:1.5px solid var(--line);background:var(--soft);font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;padding:0">✕</button>'
+      +'<div style="padding-inline-end:36px">'
+      +'<b style="font-size:1em">'+E2(o.t)+'</b>'
+      +(o.en?'<small dir="ltr" style="display:block;color:var(--muted)">'+E2(o.en)+'</small>':'')
+      +(o.sub?'<small style="display:block;color:var(--muted)">'+E2(o.sub)+'</small>':'')
+      +'<div style="margin-top:4px;font-weight:800;color:#0b2a6f">'+(o.price?(E2(o.price)+' جنيه'):'السعر غير متاح')+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:10px;max-width:100%">'
+      +'<div style="display:flex;align-items:center;gap:6px;background:var(--soft);border:1.5px solid var(--line);border-radius:10px;padding:3px 6px;flex:0 0 auto">'
+      +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="'+o.minus+'">−</button>'
+      +'<input id="'+o.inId+'" type="number" min="1" step="1" inputmode="numeric" value="'+(o.qty||1)+'" oninput="'+o.inFn+'" style="width:52px;min-width:52px;padding:6px 4px;text-align:center;margin:0;border:none;border-radius:8px;font-weight:700;background:transparent">'
+      +'<button type="button" class="g" style="width:30px;height:30px;min-width:30px;flex:0 0 auto;border-radius:50%;padding:0;font-size:1.15em;line-height:1" onclick="'+o.plus+'">＋</button></div>'
+      +'<button type="button" class="g" style="flex:1 1 auto;width:auto;min-width:0;background:#2e9e4f;color:#fff;padding:8px 12px;font-size:.95em" onclick="'+o.order+'">🛒 اطلب</button>'
+      +'</div></div>';
+  };
+  function hideList(ids){ids.forEach(function(id){var b=document.getElementById(id);if(b){b.innerHTML='';b.style.display='none'}})}
+  /* كارت عرض من البحث العام */
+  window.sdOfferOrder=function(){
+    var x=(window.__sdSel&&window.__sdSel.x)||null;if(!x)return;
+    var inp=document.getElementById('sdCardQtyIn');var q=inp?Math.max(1,parseInt(inp.value,10)||1):1;
+    try{
+      var cur=null;for(var i=0;i<CART.length;i++){if(String(CART[i].id)===String(x.id)){cur=CART[i];break}}
+      if(cur)cur.qty=q;else CART.push({id:String(x.id),qty:q,t:x.t||'',p:x.p??'',ic:x.ic||''});
+      try{cartPersist()}catch(e){}
+      try{cartBadge()}catch(e){}
+      try{cartToast(x.t||'الصنف','اتضاف للسلة ✔')}catch(e){}
+    }catch(e){}
+    hideList(['searchRes']);
+    var sel=document.getElementById('sdSel');if(sel)sel.innerHTML='';
+  };
+  window.sdSearchPick=function(i){
+    var x=(window.__sdPRes||[])[i];if(!x)return;
+    var sel=document.getElementById('sdSel');if(!sel)return;
+    window.__sdSel={kind:'p',x:x};
+    hideList(['searchRes']);
+    window.__sdCardQTY=1;
+    sel.innerHTML=window.shDDCard({t:x.t,price:x.p,close:'sdCloseCard',inId:'sdCardQtyIn',qty:1,minus:'sdCardQty(-1)',inFn:'sdCardQtySet(this.value)',plus:'sdCardQty(1)',order:'sdOfferOrder()'});
+    try{sel.scrollIntoView({block:'nearest'})}catch(e){}
+  };
+  window.sdSearchPickD=function(di){
+    var d=(window.__sdDrugRes||[])[di];if(!d)return;
+    var sel=document.getElementById('sdSel');if(!sel)return;
+    window.__sdSel={kind:'d',d:d};
+    hideList(['searchRes']);
+    window.__sdCardQTY=1;
+    sel.innerHTML=window.shDDCard({t:d.ar||d.en,en:(d.ar&&d.en)?d.en:'',price:d.pr||'',close:'sdCloseCard',inId:'sdCardQtyIn',qty:1,minus:'sdCardQty(-1)',inFn:'sdCardQtySet(this.value)',plus:'sdCardQty(1)',order:'sdDrugOrderCard()'});
+    try{sel.scrollIntoView({block:'nearest'})}catch(e){}
+  };
+  window.ddOpenCard=function(i){
+    var r=(window.__ddResults||[])[i];if(!r)return;
+    var sel=document.getElementById('ddSel')||document.getElementById('ddr');if(!sel)return;
+    hideList(['ddr']);
+    sel.innerHTML=window.shDDCard({t:r[1]||r[0],en:r[1]?r[0]:'',sub:r[3]||'',price:r[6]||'',close:'ddCloseCard',inId:'ddQtyIn',qty:1,minus:'ddQty(-1)',inFn:'ddQtySet(this.value)',plus:'ddQty(1)',order:'ddOrderCard()'});
+    try{sel.scrollIntoView({block:'nearest'})}catch(e){}
+  };
+})();
+</script>
