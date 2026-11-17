@@ -1094,6 +1094,18 @@ try{
         else if(v==='broadcast')broadcastV();
         else if(v==='offer'){ if(window.__shLastOfferId)offerV(window.__shLastOfferId,true); else offV() }
         else if(v==='auth')authV();
+        else if(v==='adminDash'){ try{ if(typeof adminDashV==='function')adminDashV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='couponAdmin'){ try{ if(typeof couponAdminV==='function')couponAdminV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='ddprice'){ try{ if(typeof window.ddPriceV==='function')window.ddPriceV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='shipCpn'){ try{ if(typeof window.shipCouponV==='function')window.shipCouponV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='ddImport'){ try{ if(typeof window.ddImportV==='function')window.ddImportV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='itemsAdmin'){ try{ if(typeof window.itemsAdminV==='function')window.itemsAdminV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='secadmin'){ try{ if(typeof window.secAdminV==='function')window.secAdminV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='zonesAdmin'){ try{ if(typeof window.zonesAdminV==='function')window.zonesAdminV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='auditAdmin'){ try{ if(typeof window.auditAdminV==='function')window.auditAdminV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='expAdmin'){ try{ if(typeof window.expAdminV==='function')window.expAdminV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='bannersAdmin'){ try{ if(typeof window.bannersAdminV==='function')window.bannersAdminV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='stats'||v==='profile'&&document.getElementById('stBody')){ try{ if(typeof window.statsV==='function'&&v==='stats')window.statsV(); else homeV() }catch(_e){ homeV() } }
         else homeV();
       }catch(_e){}
       try{ navSync() }catch(_e){}
