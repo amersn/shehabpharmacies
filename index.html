@@ -48,7 +48,7 @@ let S={t:LS.t||'',n:LS.n||'',r:LS.r||''},O=[],V='';
 let DELIVERY_ON=false;try{DELIVERY_ON=localStorage.getItem('shehab_delivery')==='1'}catch(e){}
 window.__shDeliveryOn=function(){return !!DELIVERY_ON};
 window.__shDeliverySet=function(v){DELIVERY_ON=!!v;try{localStorage.setItem('shehab_delivery',DELIVERY_ON?'1':'0')}catch(e){}try{if(window.__shBustHome)window.__shBustHome()}catch(e){}return DELIVERY_ON};
-const $=i=>document.getElementById(i),app=h=>{const root=$('app'),view=V||'view';const shChanged=(LASTV!==view);LASTV=view;if(NAV_REPLACE){history.replaceState({appScreen:h,appView:view},'','#'+view);NAV_REPLACE=false;NAV_READY=true}else if(NAV_READY){const cur=location.hash.slice(1)||'';if(cur===view){history.replaceState({appScreen:h,appView:view},'','#'+view)}else{history.replaceState({appScreen:root.innerHTML,appView:cur},'',location.href);history.pushState({appScreen:h,appView:view},'','#'+view)}}else{history.replaceState({appScreen:h,appView:view},'','#'+view);NAV_READY=true}root.innerHTML=h;if(shChanged)shTop()};let NAV_READY=false,NAV_REPLACE=false,LASTV='';
+const $=i=>document.getElementById(i),app=h=>{const root=$('app'),view=V||'view';const shChanged=(LASTV!==view);LASTV=view;if(NAV_REPLACE){history.replaceState({appScreen:h,appView:view},'','#'+view);NAV_REPLACE=false;NAV_READY=true}else if(NAV_READY){const cur=location.hash.slice(1)||'';if(cur===view){history.replaceState({appScreen:h,appView:view},'','#'+view)}else{history.replaceState({appScreen:root.innerHTML,appView:cur},'',location.href);history.pushState({appScreen:h,appView:view},'','#'+view)}}else{history.replaceState({appScreen:h,appView:view,root:1},'','#'+view);try{history.pushState({appScreen:h,appView:view},'','#'+view)}catch(_e){}NAV_READY=true}root.innerHTML=h;if(shChanged)shTop()};let NAV_READY=false,NAV_REPLACE=false,LASTV='';
 function shTop(){try{window.scrollTo(0,0);var ds=document.scrollingElement||document.documentElement;if(ds)ds.scrollTop=0;if(document.body)document.body.scrollTop=0}catch(e){}}
 try{window.__shTop=shTop}catch(e){}onpopstate=e=>{if(e.state&&e.state.appScreen!==undefined){V=e.state.appView||'auth';$('app').innerHTML=e.state.appScreen}};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
@@ -1106,7 +1106,7 @@ try{
         else if(v==='expAdmin'){ try{ if(typeof window.expAdminV==='function')window.expAdminV(); else homeV() }catch(_e){ homeV() } }
         else if(v==='bannersAdmin'){ try{ if(typeof window.bannersAdminV==='function')window.bannersAdminV(); else homeV() }catch(_e){ homeV() } }
         else if(v==='stats'||v==='profile'&&document.getElementById('stBody')){ try{ if(typeof window.statsV==='function'&&v==='stats')window.statsV(); else homeV() }catch(_e){ homeV() } }
-        else if(v==='home'&&!e.state){ try{ window.__shExitAsk() }catch(_e2){} }
+        else if(v==='home'&&(!e.state||(e.state&&e.state.root))){ try{ window.__shExitAsk() }catch(_e2){} }
         else homeV();
       }catch(_e){}
       try{ navSync() }catch(_e){}
@@ -6655,8 +6655,6 @@ html.dark [style*="color:#0b2a6f;"]{color:#cdd9ff!important}
   var shown=false;
   window.__shExitAsk=function(){
     if(shown)return;shown=true;
-    /* حماية: نتأكد إن فيه entry تانية قدام عشان الرجوع ماتبقاش خروج مباشر */
-    try{history.pushState({appScreen:'exit',appView:'exitGuard'},'','#home')}catch(e){}
     var ov=document.createElement('div');
     ov.id='shExitAsk';
     ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;direction:rtl';
@@ -6667,7 +6665,7 @@ html.dark [style*="color:#0b2a6f;"]{color:#cdd9ff!important}
       +'<button id="shExitNo" style="flex:1;padding:10px 0;border-radius:12px;border:none;background:#1565d8;color:#fff;font-weight:800;font-size:15px;cursor:pointer">إلغاء</button>'
       +'</div></div>';
     document.body.appendChild(ov);
-    document.getElementById('shExitNo').onclick=function(){try{ov.remove()}catch(e){}shown=false};
+    document.getElementById('shExitNo').onclick=function(){try{ov.remove()}catch(e){}shown=false;try{var vv=(typeof V!=='undefined'&&V)?V:'home';history.pushState({appScreen:document.getElementById('app').innerHTML,appView:vv},'','#'+vv)}catch(e){}};
     document.getElementById('shExitYes').onclick=function(){
       try{ov.remove()}catch(e){}shown=false;
       try{if(window.ShehabAndroid&&ShehabAndroid.exitApp){ShehabAndroid.exitApp();return}}catch(e){}
