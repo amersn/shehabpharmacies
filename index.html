@@ -463,7 +463,7 @@ cartRender=function(){_ucoRenderPrev();try{var box=$('cartLines');if(!box)return
   /* كارت الإجمالي (يليه الإلغاء في الكود اللي بعده) */
   var card=document.createElement('div');card.className='card';card.style.cssText='padding:10px 12px;border:1.5px solid var(--line);border-right:8px solid #B08A4F;border-radius:12px;background:var(--card,#fff)';
   var _ds2=0,_dk2=false;try{(C.ddItems||[]).forEach(function(y){var _p2=parseFloat(String(y.pr).replace(/[^0-9.]/g,''));if(Number.isFinite(_p2)&&_p2>0){_ds2+=_p2*Math.max(1,+y.qty||1);_dk2=true}})}catch(_e4){}
-var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);if(!CART.length){box.appendChild(card);var _ds3=0,_dk3=false;try{(C.ddItems||[]).forEach(function(y){var _p3=parseFloat(String(y.pr).replace(/[^0-9.]/g,''));if(Number.isFinite(_p3)&&_p3>0){_ds3+=_p3*Math.max(1,+y.qty||1);_dk3=true}})}catch(_e3){}var _es2=$('cartEstimate');_es2.style.fontWeight='800';_es2.textContent=_dk3?('إجمالي مبدئي للأسعار: '+_ds3.toFixed(2)+' جنيه (تقريبي — بيتأكد من الصيدلية)'):'طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار';try{window.__shCouponLines(_es2,_ds3)}catch(_e6){}try{window.__cartPay&&window.__cartPay()}catch(_e8){}}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon();if(S.r==='manager')$('profile').insertAdjacentHTML('beforeend','<button class="g" onclick="ddImportV()">⬆️ رفع ملف أصناف الصيدلية</button><button class="g" onclick="ddPriceV()">💊 تعديل سعر صنف</button><button class="g" onclick="couponAdminV()">🎟️ تحديد كود خصم</button>')};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>خصم التوصيل % (اختياري — يخصم من رسوم التوصيل في أي منطقة)</label><input id="couponAdminShip" type="number" min="0" max="90" value="'+esc(c.shipOff||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?('الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%'+(c.shipOff?' · خصم توصيل '+esc(c.shipOff)+'%':'')):'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,shipOff:(document.getElementById('couponAdminShip')?Number(document.getElementById('couponAdminShip').value)||0:0),ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
+var pr=document.createElement('small');pr.style.display='block';pr.textContent='السعر بيتحدد من الصيدلية بعد المراجعة ويتضاف على إجمالي السلة عند التأكيد';card.appendChild(pr);if(!CART.length){box.appendChild(card);var _ds3=0,_dk3=false;try{(C.ddItems||[]).forEach(function(y){var _p3=parseFloat(String(y.pr).replace(/[^0-9.]/g,''));if(Number.isFinite(_p3)&&_p3>0){_ds3+=_p3*Math.max(1,+y.qty||1);_dk3=true}})}catch(_e3){}var _es2=$('cartEstimate');_es2.style.fontWeight='800';_es2.textContent=_dk3?('إجمالي مبدئي للأسعار: '+_ds3.toFixed(2)+' جنيه (تقريبي — بيتأكد من الصيدلية)'):'طلبك هيتم مراجعته من الصيدلية بعد التأكد من التوافر والأسعار';try{window.__shCouponLines(_es2,_ds3)}catch(_e6){}try{window.__cartPay&&window.__cartPay()}catch(_e8){}}else{if(box.firstChild)box.insertBefore(card,box.firstChild);else box.appendChild(card)}}catch(_e){}};const profileBeforeCoupon=profileV;profileV=async()=>{await profileBeforeCoupon()};const localDT=n=>{const d=new Date(+n);return isNaN(+d)?'':new Date(+n-d.getTimezoneOffset()*60000).toISOString().slice(0,16)};async function couponAdminV(){V='couponAdmin';app('<h2>🎟️ تحديد كود خصم</h2><div id="couponAdmin">تحميل…</div>');try{const[c,o]=await Promise.all([call('couponGet'),callC('offers')]);$('couponAdmin').innerHTML='<label>الكود</label><input id="couponAdminCode" value="'+esc(c.code||'')+'" placeholder="مثال: SHEHAB10"><label>نسبة الخصم %</label><input id="couponAdminPercent" type="number" min="1" max="90" value="'+esc(c.percent||'')+'"><label>خصم التوصيل % (اختياري — يخصم من رسوم التوصيل في أي منطقة)</label><input id="couponAdminShip" type="number" min="0" max="90" value="'+esc(c.shipOff||'')+'"><label>بداية المدة</label><input id="couponStart" type="datetime-local" value="'+localDT(c.start)+'"><label>نهاية المدة</label><input id="couponEnd" type="datetime-local" value="'+localDT(c.end)+'"><label class="featured-toggle"><input id="couponAll" type="checkbox" '+(c.all?'checked':'')+' onchange="document.querySelectorAll(\'.couponOffer\').forEach(x=>x.disabled=this.checked)"> كل العروض</label><b>أو اختار عروضًا محددة</b>'+o.map(x=>'<label class="featured-toggle"><input class="couponOffer" type="checkbox" value="'+esc(x.id)+'" '+(c.ids&&c.ids.includes(String(x.id))?'checked':'')+'> '+esc(x.t)+'</label>').join('')+'<div id="couponAdminState" class="err">'+(c.active?('الكود الحالي '+esc(c.code)+' · '+esc(c.percent)+'%'+(c.shipOff?' · خصم توصيل '+esc(c.shipOff)+'%':'')):'لا يوجد كود نشط')+'</div><button onclick="saveCoupon(this)">حفظ/تجديد</button><button class="g" onclick="cancelCoupon(this)">إلغاء الكود</button><button class="g" onclick="profileV()">رجوع</button>';}catch(x){$('couponAdmin').textContent=em(x)}}async function saveCoupon(b){try{b.disabled=true;const s=new Date($('couponStart').value),e=new Date($('couponEnd').value);if(isNaN(+s)||isNaN(+e))throw 'حدد بداية ونهاية صحيحتين';const c=await call('couponSave',{code:$('couponAdminCode').value,percent:$('couponAdminPercent').value,start:s.toISOString(),end:e.toISOString(),all:$('couponAll').checked,shipOff:(document.getElementById('couponAdminShip')?Number(document.getElementById('couponAdminShip').value)||0:0),ids:[...document.querySelectorAll('.couponOffer:checked')].map(x=>x.value)});$('couponAdminState').textContent='تم حفظ '+c.code+' بخصم '+c.percent+'%'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}async function cancelCoupon(b){try{b.disabled=true;await call('couponSave',{cancel:true});$('couponAdminState').textContent='تم إلغاء الكود'}catch(x){$('couponAdminState').textContent=em(x)}finally{b.disabled=false}}const homeBeforeCoupon=homeV;homeV=function(m){homeBeforeCoupon(m);clearInterval(COUPON_TIMER);call('couponPublic').then(c=>{if(V!=='home')return;let e=$('homeCoupon');if(!c){if(e)e.remove();return}if(!e){e=document.createElement('div');e.id='homeCoupon';e.className='card coupon-banner';$('of').before(e)}e.className='card coupon-banner';e.innerHTML='<span class="coupon-title"></span><span class="coupon-time" dir="ltr"></span>';const f=()=>{const n=Math.max(0,c.end-Date.now()),hh=String(Math.floor(n/3600000)).padStart(2,'0'),mm=String(Math.floor(n%3600000/60000)).padStart(2,'0'),ss=String(Math.floor(n%60000/1000)).padStart(2,'0');e.querySelector('.coupon-title').textContent='🎟️ '+c.percent+'% خصم بكود '+c.code;e.querySelector('.coupon-time').textContent=hh+':'+mm+':'+ss};f();COUPON_TIMER=setInterval(f,1000)}).catch(()=>{})};
 </script>
 <script>
 // Notification bell, device inbox, and opt-in prompt.
@@ -4586,6 +4586,8 @@ html.dark .cp-welcome{background:linear-gradient(135deg,#241f12,#1c1810);border-
     var html='<div class="list-head"><h2>🛠️ الإدارة</h2></div>'
       +'<small>لوحة تحكم المدير — كل إعدادات الإدارة من مكان واحد.</small>'
       +'<h3 class="adm-h">🗂️ الإدارة العامة</h3>'
+      +it('💊','تعديل سعر صنف','بحث في أصناف الصيدلية وتعديل الاسم والسعر — يتعدل في الشيت','ddPriceV')
+      +it('⬆️','رفع ملف أصناف الصيدلية','استيراد ملف Excel/CSV لأصناف الصيدلية','ddImportV')
       +it('🗂️','الأصناف','كل الأصناف اللي اتعملت — بحث وتعديل ونقل لأكتر من قسم','itemsAdminV')
       +it('🗂️','إدارة الأقسام','أقسام العروض وأصنافها — قائمة أو كانبان','secAdminV')
       +it('🖼️','بانرات الرئيسية','صور وكتابات ولينك مخفي — العميل يكرب عليه يروح للينك','bannersAdminV')
@@ -4596,6 +4598,7 @@ html.dark .cp-welcome{background:linear-gradient(135deg,#241f12,#1c1810);border-
       +it('💰','مصاريف وإيرادات','تسجيل المصاريف اليومية وصافي الربح','expAdminV')
       +'<h3 class="adm-h">🎟️ الخصومات والعملاء</h3>'
       +it('🎟️','أكواد الخصم','إنشاء وإيقاف الأكواد + الكود الترحيبي','couponAdminV')
+      +it('🛵','كوبون التوصيل','خصم من رسوم التوصيل في أي منطقة — من 0 لـ 100%','shipCouponV')
       +it('⭐','إعدادات نقاط الولاء','نقاط لكل أوردر وطريقة تحويلها لخصم','loyaltySettingsV')
       +it('📣','إرسال إشعار للعملاء','إشعار بعرض لكل عملاء التطبيق','broadcastV')
       +'<h3 class="adm-h">⚙️ النظام</h3>'
@@ -4630,6 +4633,9 @@ html.dark .cp-welcome{background:linear-gradient(135deg,#241f12,#1c1810);border-
               else if(typeof profileV==='function'){Promise.resolve(profileV()).then(function(){try{window.notifSettingsV()}catch(e){}})}
               else{window.notifSettingsV()}
             }
+            else if(f==='ddPriceV'&&window.ddPriceV)window.ddPriceV();
+            else if(f==='ddImportV'&&window.ddImportV)window.ddImportV();
+            else if(f==='shipCouponV'&&window.shipCouponV)window.shipCouponV();
             else if(f==='imgCfg'&&window.__shImgCfg)window.__shImgCfg();
             else if(f==='settingsV'&&window.settingsV)window.settingsV();
           }catch(e){TO(EM(e),'bad')}
@@ -6321,13 +6327,15 @@ window.__bnDel=async function(i){
           if(z){fee=Number(z.fee)||0;zone=z.name}
         }
       }catch(e){}
-      var _ship=0;try{if(cp&&Number(cp.shipOff)>0&&fee>0)_ship=Math.min(fee,Number((fee*Number(cp.shipOff)/100).toFixed(2)))}catch(_es0){}
+      var _ship=0,_shipLbl='';
+      try{if(cp&&Number(cp.shipOff)>0&&fee>0){_ship=Math.min(fee,Number((fee*Number(cp.shipOff)/100).toFixed(2)));_shipLbl='🛵 خصم توصيل '+String(cp.shipOff)+'%'}}catch(_es0){}
+      try{var _sp=await window.__shShipPctGet();if(_sp>0&&fee>0){var _s2=Math.min(fee,Number((fee*_sp/100).toFixed(2)));if(_s2>=_ship){_ship=_s2;_shipLbl='🛵 كوبون التوصيل — خصم '+_sp+'%'}}}catch(_es9){}
       if(!sum&&!fee){el.style.display='none';return}
       var net=Math.max(0,sum-disc-_ship+fee);
       var h='<div class="card" style="padding:10px 12px"><b>💵 السعر اللي هيندفع</b>'
         +'<div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px"><span>إجمالي الأصناف'+(any?'':' (تقريبي)')+'</span><b style="white-space:nowrap">'+sum.toFixed(2)+' ج</b></div>'
         +(disc?'<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px"><span>🎟️ كود خصم '+String(cp.code||'')+' ('+String(cp.percent||'')+'%)</span><b style="white-space:nowrap;color:#2e9e4f">-'+disc.toFixed(2)+' ج</b></div>':'')
-        +(_ship?'<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px"><span>🛵 خصم توصيل '+String(cp.shipOff||'')+'%</span><b style="white-space:nowrap;color:#2e9e4f">-'+_ship.toFixed(2)+' ج</b></div>':'')
+        +(_ship?'<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px"><span>'+_shipLbl+'</span><b style="white-space:nowrap;color:#2e9e4f">-'+_ship.toFixed(2)+' ج</b></div>':'')
         +(zone?'<div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px"><span>🛵 توصيل — '+zone+'</span><b style="white-space:nowrap">'+fee.toFixed(2)+' ج</b></div>':'')
         +'<div style="border-top:1px dashed var(--line);margin:7px 0"></div>'
         +'<div style="display:flex;justify-content:space-between;gap:8px"><span style="font-weight:800">المطلوب</span><b style="white-space:nowrap;font-size:1.12em">'+net.toFixed(2)+' ج</b></div></div>';
@@ -6578,6 +6586,51 @@ html.dark [style*="color:#0b2a6f;"]{color:#cdd9ff!important}
     }catch(x){
       if(st)st.textContent=em(x);
     }finally{b.disabled=false}
+  };
+})();
+</script>
+
+<script>
+/* ===== الإدارة ← «كوبون التوصيل»: خصم من رسوم التوصيل في أي منطقة (0-100%) ===== */
+(function(){
+  'use strict';
+  function EH(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  /* نسبة خصم التوصيل للعميل — كاش بسيط */
+  window.__shShipPctCache=null;
+  window.__shShipPctGet=async function(){
+    if(window.__shShipPctCache!=null)return window.__shShipPctCache;
+    try{
+      var r=await call('couponPublic');
+      window.__shShipPctCache=(r&&Number(r.shipPct)>0)?Number(r.shipPct):0;
+    }catch(e){window.__shShipPctCache=0}
+    return window.__shShipPctCache;
+  };
+  window.shipCouponV=async function(){
+    V='shipCpn';
+    app('<h2>🛵 كوبون التوصيل</h2><div id="shipCpnBox">تحميل…</div>');
+    var box=document.getElementById('shipCpnBox');
+    try{
+      var r=await call('shipGet');
+      box.innerHTML='<div class="card">'
+        +'<label class="featured-toggle"><input id="shipOn" type="checkbox" '+(r.on?'checked':'')+'> مفعّل</label>'
+        +'<label style="display:block;margin-top:10px">نسبة الخصم من رسوم التوصيل % (من 0 لـ 100)</label>'
+        +'<input id="shipPct" type="number" min="0" max="100" value="'+(r.pct||0)+'">'
+        +'<small style="display:block;margin-top:6px;color:var(--muted)">بيخصم من رسوم التوصيل في أي منطقة لما العميل يختار «توصيل». لو النسبة 100% التوصيل بيبقى مجانًا.</small>'
+        +'<div id="shipState" class="err">'+(r.on?('مفعّل حاليًا بخصم '+EH(r.pct||0)+'%'):'غير مفعّل')+'</div>'
+        +'<button style="margin-top:10px" onclick="shipCouponDo(this)">💾 حفظ</button>'
+        +'<button type="button" class="g" style="margin-top:8px" onclick="adminDashV()">رجوع للإدارة</button>'
+        +'</div>';
+    }catch(x){box.textContent=em(x)}
+  };
+  window.shipCouponDo=async function(b){
+    var st=document.getElementById('shipState');
+    try{
+      b.disabled=true;if(st)st.textContent='⏳ جاري الحفظ…';
+      var r=await call('shipSave',{on:document.getElementById('shipOn').checked,pct:Number(document.getElementById('shipPct').value)||0});
+      window.__shShipPctCache=(r.on&&r.pct>0)?r.pct:0;
+      if(st)st.textContent=(r.on?('✔ مفعّل بخصم '+r.pct+'% — التطبيق هيطبقه فورًا'):'✔ اتقفل');
+      try{if(typeof cartRender==='function')cartRender()}catch(_e){}
+    }catch(x){if(st)st.textContent=em(x)}finally{b.disabled=false}
   };
 })();
 </script>
