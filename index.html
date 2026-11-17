@@ -1106,6 +1106,7 @@ try{
         else if(v==='expAdmin'){ try{ if(typeof window.expAdminV==='function')window.expAdminV(); else homeV() }catch(_e){ homeV() } }
         else if(v==='bannersAdmin'){ try{ if(typeof window.bannersAdminV==='function')window.bannersAdminV(); else homeV() }catch(_e){ homeV() } }
         else if(v==='stats'||v==='profile'&&document.getElementById('stBody')){ try{ if(typeof window.statsV==='function'&&v==='stats')window.statsV(); else homeV() }catch(_e){ homeV() } }
+        else if(v==='home'&&!e.state){ try{ window.__shExitAsk() }catch(_e2){} }
         else homeV();
       }catch(_e){}
       try{ navSync() }catch(_e){}
@@ -6643,6 +6644,36 @@ html.dark [style*="color:#0b2a6f;"]{color:#cdd9ff!important}
       if(st)st.textContent=(r.on?('✔ مفعّل بخصم '+r.pct+'% — التطبيق هيطبقه فورًا'):'✔ اتقفل');
       try{if(typeof cartRender==='function')cartRender()}catch(_e){}
     }catch(x){if(st)st.textContent=em(x)}finally{b.disabled=false}
+  };
+})();
+</script>
+
+<script>
+/* ===== رسالة تأكيد الخروج عند الرجوع من الرئيسية ===== */
+(function(){
+  'use strict';
+  var shown=false;
+  window.__shExitAsk=function(){
+    if(shown)return;shown=true;
+    /* حماية: نتأكد إن فيه entry تانية قدام عشان الرجوع ماتبقاش خروج مباشر */
+    try{history.pushState({appScreen:'exit',appView:'exitGuard'},'','#home')}catch(e){}
+    var ov=document.createElement('div');
+    ov.id='shExitAsk';
+    ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;direction:rtl';
+    ov.innerHTML='<div style="background:var(--card,#fff);color:var(--b,#111);border-radius:16px;padding:20px 18px;max-width:300px;width:calc(100% - 60px);box-shadow:0 16px 40px rgba(0,0,0,.3);text-align:center;font-family:inherit">'
+      +'<div style="font-weight:800;font-size:16px;margin-bottom:16px">هل انت متاكد من الخروج من التطبيق ؟</div>'
+      +'<div style="display:flex;gap:10px;justify-content:center">'
+      +'<button id="shExitYes" style="flex:1;padding:10px 0;border-radius:12px;border:1.5px solid var(--line);background:#ffffff;color:#111;font-weight:800;font-size:15px;cursor:pointer">خروج</button>'
+      +'<button id="shExitNo" style="flex:1;padding:10px 0;border-radius:12px;border:none;background:#1565d8;color:#fff;font-weight:800;font-size:15px;cursor:pointer">إلغاء</button>'
+      +'</div></div>';
+    document.body.appendChild(ov);
+    document.getElementById('shExitNo').onclick=function(){try{ov.remove()}catch(e){}shown=false};
+    document.getElementById('shExitYes').onclick=function(){
+      try{ov.remove()}catch(e){}shown=false;
+      try{if(window.ShehabAndroid&&ShehabAndroid.exitApp){ShehabAndroid.exitApp();return}}catch(e){}
+      try{history.back()}catch(e){}
+      setTimeout(function(){try{window.close()}catch(e){}},250);
+    };
   };
 })();
 </script>
