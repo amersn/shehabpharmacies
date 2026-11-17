@@ -1071,6 +1071,7 @@ try{
   try{
     var prevPop=onpopstate;
     onpopstate=function(e){
+      try{ if(e.state&&e.state.root){ try{ window.__shExitAsk() }catch(_e2){} return } }catch(_e){}/* الرجوع لlanding على الجذر = نقطة الخروج */
       try{ if(typeof prevPop==='function') prevPop(e) }catch(_e){}
       var v='home';
       try{ v=(e&&e.state&&e.state.appView)||(location.hash||'').slice(1)||'home' }catch(_e){ v='home' }
